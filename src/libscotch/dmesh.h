@@ -119,3 +119,6 @@ typedef struct Dmesh_ {
 int                         dmeshInit           (Dmesh * const, MPI_Comm);
 void                        dmeshExit           (Dmesh * const);
 void                        dmeshFree           (Dmesh * const);
+#ifdef SCOTCH_GRAPH_H
+int                         dmeshLoad           (Dmesh * const, FILE * const, const Gnum, const GraphLoadFlag);
+#endif /* SCOTCH_GRAPH_H */

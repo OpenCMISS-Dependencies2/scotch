@@ -694,6 +694,8 @@ set(PTSCOTCH_C_SOURCES
   dmapping_io.c
   dmesh.c
   dmesh.h
+  dmesh_io_load.c
+  dmesh_io_load.h
   dorder.c
   dorder.h
   dorder_gather.c
@@ -784,6 +786,8 @@ set(PTSCOTCH_C_SOURCES
   library_dmapping.h
   library_dmesh.c
   library_dmesh_f.c
+  library_dmesh_io_load.c
+  library_dmesh_io_load_f.c
   library_dorder.c
   ${GENERATED_INCLUDE_DIR}/scotch.h
   ${GENERATED_INCLUDE_DIR}/ptscotch.h

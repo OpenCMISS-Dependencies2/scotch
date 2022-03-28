@@ -801,6 +801,7 @@
 #define dmeshExit                   SCOTCH_NAME_INTERN (dmeshExit)
 #define dmeshFree                   SCOTCH_NAME_INTERN (dmeshFree)
 #define dmeshInit                   SCOTCH_NAME_INTERN (dmeshInit)
+#define dmeshLoad                   SCOTCH_NAME_INTERN (dmeshLoad)
 
 #define dorderDispose               SCOTCH_NAME_INTERN (dorderDispose)
 #define dorderExit                  SCOTCH_NAME_INTERN (dorderExit)

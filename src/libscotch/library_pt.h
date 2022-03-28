@@ -204,6 +204,7 @@ void                        SCOTCH_dmeshExit    (SCOTCH_Dmesh * const);
 void                        SCOTCH_dmeshFree    (SCOTCH_Dmesh * const);
 void                        SCOTCH_dmeshSize    (const SCOTCH_Dmesh * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const);
 void                        SCOTCH_dmeshData    (const SCOTCH_Dmesh * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num ** const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num ** const, SCOTCH_Num * const, MPI_Comm * const);
+int                         SCOTCH_dmeshLoad    (SCOTCH_Dmesh * const, FILE * const, const SCOTCH_Num, const SCOTCH_Num);
 
 SCOTCH_Dordering *          SCOTCH_dorderAlloc  (void);
 int                         SCOTCH_dorderSizeof (void);
