@@ -74,7 +74,8 @@ ptscotch			:
 					SCOTCH_METIS_VERSION=3				\
 					SCOTCH_PARMETIS_VERSION=3			\
 					parmetis.h					\
-					libptscotchparmetisv3$(LIB)
+					libptscotchparmetisv3$(LIB) \
+					adm2dgr$(EXE)
 
 install				:	scotch
 					-$(CP) metis.h metisf.h $(includedir)
@@ -83,9 +84,10 @@ install				:	scotch
 ptinstall			:	ptscotch
 					-$(CP) parmetis.h $(includedir)
 					-$(CP) libptscotchparmetisv3$(LIB) $(libdir)
+					-$(CP) adm2dgr$(EXE) $(bindir)
 
 clean				:
-					-$(RM) *~ *$(OBJ) lib*$(LIB) metis.h metisf.h parmetis.h
+					-$(RM) *~ *$(OBJ) lib*$(LIB) metis.h metisf.h parmetis.h adm2dgr$(EXE)
 
 realclean			:	clean
 
@@ -192,8 +194,21 @@ parmetis_dgraph_part_f_$(V)$(OBJ):	parmetis_dgraph_part_f.c		\
 					../libscotch/common.h			\
 					$(includedir)/ptscotch.h		\
 					parmetis.h
+parmetis_dgraph_dual_$(V)$(OBJ):  parmetis_dgraph_dual.c			\
+					../libscotch/module.h			\
+					../libscotch/common.h			\
+					$(includedir)/ptscotch.h			\
+					parmetis.h
+parmetis_dgraph_dual_f_$(V)$(OBJ)	:	parmetis_dgraph_dual_f.c			\
+					../libscotch/module.h			\
+					../libscotch/common.h			\
+					$(includedir)/ptscotch.h
+
+
 
 libptscotchparmetis$(V)$(LIB)	:	parmetis_dgraph_order_$(V)$(OBJ)	\
+					parmetis_dgraph_dual_$(V)$(OBJ)	\
+					parmetis_dgraph_dual_f_$(V)$(OBJ)	\
 					parmetis_dgraph_order_f_$(V)$(OBJ)	\
 					parmetis_dgraph_part_$(V)$(OBJ)		\
 					parmetis_dgraph_part_f_$(V)$(OBJ)
@@ -212,3 +227,14 @@ libscotchmetis$(V)$(LIB)	:	metis_graph_dual_$(V)$(OBJ)		\
 					metis_options_f_$(V)$(OBJ)
 					$(AR) $(ARFLAGS) $(@) $(^)
 					-$(RANLIB) $(@)
+
+adm2dgr$(EXE)			:	adm2dgr.c		            	\
+					../libscotch/module.h			\
+					../libscotch/common.h			\
+					$(includedir)/scotch.h		    	\
+					parmetis.h		                \
+					$(libdir)/libscotch$(LIB)		\
+					libptscotchparmetis$(V)$(LIB)		\
+					$(libdir)/libptscotcherrexit$(LIB)	\
+					adm2dgr.h
+					$(CC) $(CFLAGS) -I$(includedir) -I../libscotch $(<) -o $(@) -L. -lptscotchparmetis$(V) -L$(libdir) -lptscotch -lscotch -lscotcherrexit $(LDFLAGS)

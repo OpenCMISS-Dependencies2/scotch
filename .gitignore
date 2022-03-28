@@ -44,6 +44,8 @@ src/libscotch/ptscotchf.h
 src/libscotch/y.output
 src/libscotchmetis/*[.][ao]
 src/libscotchmetis/*[.]so
+src/libscotchmetis/adm2dgr*
+!src/libscotchmetis/adm2dgr.[ch]
 src/libscotchmetis/metis.h
 src/libscotchmetis/metisf.h
 src/libscotchmetis/parmetis.h

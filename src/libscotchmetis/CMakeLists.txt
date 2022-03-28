@@ -41,7 +41,7 @@
 ##   DATES      : # Version 6.0  : from : 01 sep 2014     ##
 ##                                 to     01 sep 2021     ##
 ##                # Version 7.0  : from : 01 sep 2021     ##
-##                                 to     01 nov 2023     ##
+##                                 to     28 jul 2025     ##
 ##                                                        ##
 ############################################################
 
@@ -159,6 +159,8 @@ if(BUILD_PTSCOTCH)
   # libPTScotchParMeTiS
   foreach(version 3)
     add_library(ptscotchparmetisv${version}
+      parmetis_dgraph_dual.c
+      parmetis_dgraph_dual_f.c
       parmetis_dgraph_order.c
       parmetis_dgraph_order_f.c
       parmetis_dgraph_part.c
@@ -219,5 +221,10 @@ if(BUILD_PTSCOTCH)
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
     endif()
+    # adm2dgr
+    add_executable(adm2dgr adm2dgr.c adm2dgr.h)
+    add_dependencies(adm2dgr parmetis_h)
+    target_link_libraries(adm2dgr PRIVATE ptscotchparmetisv${version} ptscotch scotch ptscotcherr)
+    install(TARGETS adm2dgr COMPONENT ptscotch RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
   endforeach(version 3)
 endif()
