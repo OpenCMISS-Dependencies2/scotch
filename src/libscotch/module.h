@@ -923,6 +923,7 @@
 #define hgraphOrderSi               SCOTCH_NAME_INTERN (hgraphOrderSi)
 #define hgraphOrderSt               SCOTCH_NAME_INTERN (hgraphOrderSt)
 #define hgraphUnhalo                SCOTCH_NAME_INTERN (hgraphUnhalo)
+#define hgraphUnhalo2               SCOTCH_NAME_INTERN (hgraphUnhalo2)
 
 #define hmeshorderststratab         SCOTCH_NAME_INTERN (hmeshorderststratab)
 #define hmeshExit                   SCOTCH_NAME_INTERN (hmeshExit)
