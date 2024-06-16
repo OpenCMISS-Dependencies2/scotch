@@ -523,6 +523,8 @@ endif(APPLE)
 
 # Add (de)compression libraries
 if(ZLIB_FOUND)
+  message(STATUS "ZLIB_INCLUDE_DIRS = '${ZLIB_INCLUDE_DIRS}'.")
+  message(STATUS "ZLIB_LIBRARIES = '${ZLIB_LIBRARIES}'.")
   target_compile_definitions(scotch PRIVATE COMMON_FILE_COMPRESS_GZ)
   target_include_directories(scotch PUBLIC ${ZLIB_INCLUDE_DIRS})
   target_link_libraries(scotch PUBLIC ${ZLIB_LIBRARIES})
