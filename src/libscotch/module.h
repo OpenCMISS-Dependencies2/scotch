@@ -723,6 +723,7 @@
 #define bgraphBipartDfJoin          SCOTCH_NAME_INTERN (bgraphBipartDfJoin)
 #define bgraphBipartEx              SCOTCH_NAME_INTERN (bgraphBipartEx)
 #define bgraphBipartFm              SCOTCH_NAME_INTERN (bgraphBipartFm)
+#define bgraphBipartGa              SCOTCH_NAME_INTERN (bgraphBipartGa)
 #define bgraphBipartGg              SCOTCH_NAME_INTERN (bgraphBipartGg)
 #define bgraphBipartGp              SCOTCH_NAME_INTERN (bgraphBipartGp)
 #define bgraphBipartMl              SCOTCH_NAME_INTERN (bgraphBipartMl)

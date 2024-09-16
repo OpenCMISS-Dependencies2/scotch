@@ -324,6 +324,7 @@ LIBSCOTCHDEPS	=	arch$(OBJ)				\
 			bgraph_bipart_df$(OBJ)			\
 			bgraph_bipart_ex$(OBJ)			\
 			bgraph_bipart_fm$(OBJ)			\
+			bgraph_bipart_ga$(OBJ)			\
 			bgraph_bipart_gg$(OBJ)			\
 			bgraph_bipart_gp$(OBJ)			\
 			bgraph_bipart_ml$(OBJ)			\
@@ -977,6 +978,14 @@ bgraph_bipart_fm$(OBJ)		:	bgraph_bipart_fm.c			\
 					arch.h					\
 					bgraph.h				\
 					bgraph_bipart_fm.h
+
+bgraph_bipart_ga$(OBJ)		:	bgraph_bipart_ga.c			\
+					module.h				\
+					common.h				\
+					graph.h					\
+					arch.h					\
+					bgraph.h				\
+					bgraph_bipart_ga.h
 
 bgraph_bipart_gg$(OBJ)		:	bgraph_bipart_gg.c			\
 					gain.h					\

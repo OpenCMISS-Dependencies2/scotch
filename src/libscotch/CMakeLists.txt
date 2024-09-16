@@ -189,6 +189,8 @@ set(SCOTCH_C_SOURCES
   bgraph_bipart_ex.h
   bgraph_bipart_fm.c
   bgraph_bipart_fm.h
+  bgraph_bipart_ga.c
+  bgraph_bipart_ga.h
   bgraph_bipart_gg.c
   bgraph_bipart_gg.h
   bgraph_bipart_gp.c

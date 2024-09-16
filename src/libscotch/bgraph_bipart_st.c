@@ -77,6 +77,7 @@
 #include "bgraph_bipart_df.h"
 #include "bgraph_bipart_ex.h"
 #include "bgraph_bipart_fm.h"
+#include "bgraph_bipart_ga.h"
 #include "bgraph_bipart_gg.h"
 #include "bgraph_bipart_gp.h"
 #include "bgraph_bipart_ml.h"
@@ -105,6 +106,11 @@ static union {                                /* Default parameters for bipartit
 } bgraphbipartstdefaultfm = { { 80, ~0, 0.01L, BGRAPHBIPARTFMTYPEBOUNDARY } };
 
 static union {
+  BgraphBipartGaParam       param;
+  StratNodeMethodData       padding;
+} bgraphbipartstdefaultga = { { 40, 100 } };
+
+static union {
   BgraphBipartGgParam       param;
   StratNodeMethodData       padding;
 } bgraphbipartstdefaultgg = { { 5 } };
@@ -124,6 +130,7 @@ static StratMethodTab       bgraphbipartstmethtab[] = { /* Bipartitioning method
                               { BGRAPHBIPARTSTMETHDF, "d",  (StratMethodFunc) bgraphBipartDf, &bgraphbipartstdefaultdf },
                               { BGRAPHBIPARTSTMETHEX, "x",  (StratMethodFunc) bgraphBipartEx, NULL },
                               { BGRAPHBIPARTSTMETHFM, "f",  (StratMethodFunc) bgraphBipartFm, &bgraphbipartstdefaultfm },
+                              { BGRAPHBIPARTSTMETHGA, "a",  (StratMethodFunc) bgraphBipartGa, &bgraphbipartstdefaultga },
                               { BGRAPHBIPARTSTMETHGG, "h",  (StratMethodFunc) bgraphBipartGg, &bgraphbipartstdefaultgg },
                               { BGRAPHBIPARTSTMETHGP, "g",  (StratMethodFunc) bgraphBipartGp, &bgraphbipartstdefaultgp },
                               { BGRAPHBIPARTSTMETHML, "m",  (StratMethodFunc) bgraphBipartMl, &bgraphbipartstdefaultml },
@@ -167,6 +174,14 @@ static StratParamTab        bgraphbipartstparatab[] = { /* Method parameter list
                                 (byte *) &bgraphbipartstdefaultfm.param,
                                 (byte *) &bgraphbipartstdefaultfm.param.typeval,
                                 (void *) "ab" },
+                              { BGRAPHBIPARTSTMETHGA,  STRATPARAMINT,    "pass",
+                                (byte *) &bgraphbipartstdefaultga.param,
+                                (byte *) &bgraphbipartstdefaultga.param.passnbr,
+                                NULL },
+                              { BGRAPHBIPARTSTMETHGA,  STRATPARAMINT,    "pop",
+                                (byte *) &bgraphbipartstdefaultga.param,
+                                (byte *) &bgraphbipartstdefaultga.param.popunbr,
+                                NULL },
                               { BGRAPHBIPARTSTMETHGG,  STRATPARAMINT,    "pass",
                                 (byte *) &bgraphbipartstdefaultgg.param,
                                 (byte *) &bgraphbipartstdefaultgg.param.passnbr,
