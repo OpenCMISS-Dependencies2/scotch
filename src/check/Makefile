@@ -1,4 +1,4 @@
-## Copyright 2011,2012,2014-2016,2018-2021,2025 IPB, Universite de Bordeaux, INRIA & CNRS
+## Copyright 2011,2012,2014-2016,2018-2021,2024,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,
 ## graph partitioning and sparse matrix ordering.
@@ -30,12 +30,12 @@
 ## knowledge of the CeCILL-C license and that you accept its terms.
 ##
 
-TMPDIR			= /tmp
+TMPDIR			?= /tmp
 
-SCOTCHBINDIR		= ../../bin
-SCOTCHINCDIR		= ../../include
-SCOTCHLIBDIR		= ../../lib
-SCOTCHTGTDIR		= ../../tgt
+SCOTCHBINDIR		?= ../../bin
+SCOTCHINCLUDEDIR	?= ../../include
+SCOTCHLIBDIR		?= ../../lib
+SCOTCHTGTDIR		?= ../../tgt
 
 LIBESMUMPS		= -lesmumps -lscotch -lscotcherr
 LIBPTSCOTCH		= -lptscotch -lscotch -lptscotcherr
@@ -98,26 +98,26 @@ PROGSED			?= sed
 ##
 
 %$(OBJ)	:	%.c
-				$(CC) $(CFLAGS) $(CLIBFLAGS) -I$(SCOTCHINCDIR) -c $(<) -o $(@)
+				$(CC) $(CFLAGS) $(CLIBFLAGS) -I$(SCOTCHINCLUDEDIR) -c $(<) -o $(@)
 
 %_v3$(EXE) :	%.c
-				$(CC) $(CFLAGS) -I$(SCOTCHINCDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv3 $(SCOTCHLIBS) $(LDFLAGS)
+				$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv3 $(SCOTCHLIBS) $(LDFLAGS)
 
 %_v5$(EXE) :	%.c
-				$(CC) $(CFLAGS) -I$(SCOTCHINCDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv5 $(SCOTCHLIBS) $(LDFLAGS)
+				$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv5 $(SCOTCHLIBS) $(LDFLAGS)
 
 %$(EXE)	:	%.c
-				$(CC) $(CFLAGS) -I$(SCOTCHINCDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) $(SCOTCHLIBS) $(LDFLAGS)
+				$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) $(SCOTCHLIBS) $(LDFLAGS)
 
 %.f90	:	%.f90.in
 				../libscotch/dummysizes$(EXE) -s$(SCOTCH_NAME_SUFFIX) $(<) $(@).tmp
 				$(PROGSED) -e 's/SCOTCHMETISNAMEFU\s*(\([A-Za-z0-9_]*\))/'"$(SCOTCH_METIS_PREFIXFU)"'\1/g' $(@).tmp > $(@)
 
 %_v3$(EXE):	%.f90
-				$(FC) $(FFLAGS) -I$(SCOTCHINCDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv3 $(SCOTCHLIBS) $(LDFLAGS)
+				$(FC) $(FFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv3 $(SCOTCHLIBS) $(LDFLAGS)
 
 %_v5$(EXE):	%.f90
-				$(FC) $(FFLAGS) -I$(SCOTCHINCDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv5 $(SCOTCHLIBS) $(LDFLAGS)
+				$(FC) $(FFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv5 $(SCOTCHLIBS) $(LDFLAGS)
 
 ##
 ##  Project rules.

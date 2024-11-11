@@ -30,8 +30,8 @@
 ## knowledge of the CeCILL-C license and that you accept its terms.
 ##
 
-includedir	= ../../include
-libdir		= ../../lib
+SCOTCHINCLUDEDIR	?= ../../include
+SCOTCHLIBDIR		?= ../../lib
 
 include ../Makefile.inc
 
@@ -83,10 +83,10 @@ endif
 ##
 
 %$(OBJ)	:	%.c
-				$(CC) $(CFLAGS) $(CLIBFLAGS) -c $(<) -o $(@) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL)
+					$(CC) $(CFLAGS) $(CLIBFLAGS) -c $(<) -o $(@) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL)
 
 %$(EXE)	:	%.c
-				$(CC) $(CFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
+					$(CC) $(CFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
 
 ##
 ##  Project rules.
@@ -115,14 +115,14 @@ ptscotch			:	scotch
 					libptscotcherr$(LIB)				\
 					libptscotcherrexit$(LIB)
 
-install				:	$(includedir)/scotch.h				\
-					$(includedir)/scotchf.h				\
-					$(libdir)/libscotch$(LIB)
+install				:	$(SCOTCHINCLUDEDIR)/scotch.h			\
+					$(SCOTCHINCLUDEDIR)/scotchf.h			\
+					$(SCOTCHLIBDIR)/libscotch$(LIB)
 
 ptinstall			:	install						\
-					$(includedir)/ptscotch.h			\
-					$(includedir)/ptscotchf.h			\
-					$(libdir)/libptscotch$(LIB)
+					$(SCOTCHINCLUDEDIR)/ptscotch.h			\
+					$(SCOTCHINCLUDEDIR)/ptscotchf.h			\
+					$(SCOTCHLIBDIR)/libptscotch$(LIB)
 
 clean				:
 					-$(RM) *~ *$(OBJ) lib*$(LIB) parser_yy.c parser_lh.h parser_ly.h parser_ll.c parser_yy.c *scotch.h *scotchf.h y.output *dummysizes$(EXE)
@@ -134,23 +134,23 @@ realclean			:	clean
 ##  Installation dependencies
 ##
 
-$(includedir)/scotch.h		:	scotch.h
-					-$(CP) scotch.h $(includedir)
+$(SCOTCHINCLUDEDIR)/scotch.h		:	scotch.h
+						-$(CP) scotch.h $(SCOTCHINCLUDEDIR)
 
-$(includedir)/scotchf.h		:	scotchf.h
-					-$(CP) scotchf.h $(includedir)
+$(SCOTCHINCLUDEDIR)/scotchf.h		:	scotchf.h
+						-$(CP) scotchf.h $(SCOTCHINCLUDEDIR)
 
-$(includedir)/ptscotch.h	:	ptscotch.h
-					-$(CP) ptscotch.h $(includedir)
+$(SCOTCHINCLUDEDIR)/ptscotch.h		:	ptscotch.h
+						-$(CP) ptscotch.h $(SCOTCHINCLUDEDIR)
 
-$(includedir)/ptscotchf.h	:	ptscotchf.h
-					-$(CP) ptscotchf.h $(includedir)
+$(SCOTCHINCLUDEDIR)/ptscotchf.h		:	ptscotchf.h
+						-$(CP) ptscotchf.h $(SCOTCHINCLUDEDIR)
 
-$(libdir)/libscotch$(LIB)	:	libscotch$(LIB)
-					-$(CP) libscotch$(LIB) libscotcherr*$(LIB) $(libdir)
+$(SCOTCHLIBDIR)/libscotch$(LIB)		:	libscotch$(LIB)
+						-$(CP) libscotch$(LIB) libscotcherr*$(LIB) $(SCOTCHLIBDIR)
 
-$(libdir)/libptscotch$(LIB)	:	libptscotch$(LIB)
-					-$(CP) libptscotch$(LIB) libptscotcherr*$(LIB) $(libdir)
+$(SCOTCHLIBDIR)/libptscotch$(LIB)	:	libptscotch$(LIB)
+						-$(CP) libptscotch$(LIB) libptscotcherr*$(LIB) $(SCOTCHLIBDIR)
 
 ##
 ##  Library dependencies.

@@ -30,10 +30,9 @@
 ## knowledge of the CeCILL-C license and that you accept its terms.
 ##
 
-bindir		= ../../bin
-includedir	= ../../include
-libdir		= ../../lib
-srclibscotchdir	= ../libscotch
+SCOTCHINCLUDEDIR	?= ../../include
+SCOTCHLIBDIR		?= ../../lib
+SCOTCHSRCLIBSCOTCHDIR	?= ../libscotch
 
 ##
 ##  General inference rules.
@@ -42,10 +41,10 @@ srclibscotchdir	= ../libscotch
 include ../Makefile.inc
 
 %$(OBJ)	:	%.c
-				$(CC) $(CFLAGS) $(CLIBFLAGS) -I$(srclibscotchdir) -I$(includedir) -c $(<) -o $(@)
+				$(CC) $(CFLAGS) $(CLIBFLAGS) -I$(SCOTCHSRCLIBSCOTCHDIR) -I$(SCOTCHINCLUDEDIR) -c $(<) -o $(@)
 
 %$(EXE)	:	%.c
-				$(CC) $(CFLAGS) -I$(srclibscotchdir) -I$(includedir) $(<) -o $(@) -L. -lesmumps -L$(libdir) -lscotch -lscotcherrexit $(LDFLAGS)
+				$(CC) $(CFLAGS) -I$(SCOTCHSRCLIBSCOTCHDIR) -I$(SCOTCHINCLUDEDIR) $(<) -o $(@) -L. -lesmumps -L$(SCOTCHLIBDIR) -lscotch -lscotcherrexit $(LDFLAGS)
 
 ##
 ##  Project rules.
@@ -63,13 +62,13 @@ ptscotch			:	scotch
 
 install				:	scotch					\
 					library.h
-					-$(CP) library.h $(includedir)/esmumps.h
-					-$(CP) libesmumps$(LIB) $(libdir)
+					-$(CP) library.h $(SCOTCHINCLUDEDIR)/esmumps.h
+					-$(CP) libesmumps$(LIB) $(SCOTCHLIBDIR)
 
 ptinstall			:	scotch					\
 					library.h
-					-$(CP) library.h $(includedir)/esmumps.h
-					-$(CP) libesmumps$(LIB) $(libdir)/libptesmumps$(LIB)
+					-$(CP) library.h $(SCOTCHINCLUDEDIR)/esmumps.h
+					-$(CP) libesmumps$(LIB) $(SCOTCHLIBDIR)/libptesmumps$(LIB)
 
 clean				:
 					-$(RM) *~ common.h *$(OBJ) lib*$(LIB) test_esmumps$(EXE) test_fax$(EXE)
@@ -99,19 +98,19 @@ LIBESMUMPSDEPS =			dof$(OBJ)				\
 ##  Todo list.
 ##
 
-module.h			:	$(srclibscotchdir)/module.h
+module.h			:	$(SCOTCHSRCLIBSCOTCHDIR)/module.h
 
 dof$(OBJ)			:	dof.c					\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
-					$(includedir)/scotch.h			\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
+					$(SCOTCHINCLUDEDIR)/scotch.h		\
 					graph.h					\
 					dof.h
 
 esmumps$(OBJ)			:	esmumps.c				\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
-					$(includedir)/scotch.h			\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
+					$(SCOTCHINCLUDEDIR)/scotch.h		\
 					graph.h					\
 					dof.h					\
 					symbol.h				\
@@ -121,73 +120,73 @@ esmumps$(OBJ)			:	esmumps.c				\
 
 graph_graph$(OBJ)		:	graph_graph.c				\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
-					$(includedir)/scotch.h			\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
+					$(SCOTCHINCLUDEDIR)/scotch.h		\
 					graph.h					\
 
 library_esmumps$(OBJ)		:	library_esmumps.c			\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
-					$(srclibscotchdir)/scotch.h		\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
+					$(SCOTCHINCLUDEDIR)/scotch.h		\
 					esmumps.h				\
 					library.h
 
 library_esmumps_f$(OBJ)		:	library_esmumps_f.c			\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
-					$(includedir)/scotch.h			\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
+					$(SCOTCHINCLUDEDIR)/scotch.h		\
 					library.h
 
 library_esmumps_strats$(OBJ)	:	library_esmumps_strats.c		\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
-					$(includedir)/scotch.h			\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
+					$(SCOTCHINCLUDEDIR)/scotch.h		\
 					library.h
 
 order$(OBJ)			:	order.c					\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
 					graph.h					\
 					order.h
 
 order_check$(OBJ)		:	order_check.c				\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
 					graph.h					\
 					order.h
 
 order_scotch_graph$(OBJ)	:	order_scotch_graph.c			\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
-					$(includedir)/scotch.h			\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
+					$(SCOTCHINCLUDEDIR)/scotch.h		\
 					graph.h					\
 					order.h
 
 order_io$(OBJ)			:	order_io.c				\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
 					graph.h					\
 					order.h
 
 symbol$(OBJ)			:	symbol.c				\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
 					symbol.h
 
 symbol_check$(OBJ)		:	symbol_check.c				\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
 					symbol.h
 
 symbol_cost$(OBJ)		:	symbol_cost.c				\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
 					symbol.h				\
 					symbol_cost.h
 
 symbol_fax$(OBJ)		:	symbol_fax.c				\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
 					graph.h					\
 					symbol.h				\
 					order.h					\
@@ -196,8 +195,8 @@ symbol_fax$(OBJ)		:	symbol_fax.c				\
 symbol_fax_graph$(OBJ)		:	symbol_fax_graph.c			\
 					symbol_fax.c				\
 					module.h				\
-					$(srclibscotchdir)/common.h		\
-					$(includedir)/scotch.h			\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
+					$(SCOTCHINCLUDEDIR)/scotch.h		\
 					graph.h					\
 					symbol.h				\
 					order.h					\
@@ -208,18 +207,18 @@ libesmumps$(LIB)		:	$(LIBESMUMPSDEPS)
 					-$(RANLIB) $(@)
 
 test_esmumps$(EXE)		:	test_esmumps.c				\
-					$(srclibscotchdir)/common.h		\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
 					module.h				\
 					graph.h					\
 					order.h					\
 					symbol.h				\
 					esmumps.h				\
 					libesmumps$(LIB)			\
-					$(libdir)/libscotch$(LIB)		\
-					$(libdir)/libscotcherrexit$(LIB)
+					$(SCOTCHLIBDIR)/libscotch$(LIB)		\
+					$(SCOTCHLIBDIR)/libscotcherrexit$(LIB)
 
 test_fax$(EXE)			:	test_fax.c				\
-					$(srclibscotchdir)/common.h		\
+					$(SCOTCHSRCLIBSCOTCHDIR)/common.h	\
 					module.h				\
 					graph.h					\
 					order.h					\
@@ -228,5 +227,5 @@ test_fax$(EXE)			:	test_fax.c				\
 					fax.h					\
 					esmumps.h				\
 					libesmumps$(LIB)			\
-					$(libdir)/libscotch$(LIB)		\
-					$(libdir)/libscotcherrexit$(LIB)
+					$(SCOTCHLIBDIR)/libscotch$(LIB)		\
+					$(SCOTCHLIBDIR)/libscotcherrexit$(LIB)
