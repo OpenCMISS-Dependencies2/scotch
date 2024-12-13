@@ -514,6 +514,7 @@ set(SCOTCH_C_SOURCES
 
 add_library(scotch
   ${SCOTCH_C_SOURCES})
+add_library(SCOTCH::scotch ALIAS scotch)
 set_target_properties(scotch PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
   SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
 add_dependencies(scotch parser_yy_c parser_ll_c)
@@ -589,6 +590,7 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
 endif()
 
 add_library(scotcherr library_error.c)
+add_library(SCOTCH::scotcherr ALIAS scotcherr)
 set_target_properties(scotcherr PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
   SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
 target_include_directories(scotcherr PUBLIC
@@ -599,6 +601,7 @@ target_include_directories(scotcherr PUBLIC
 add_dependencies(scotcherr scotch_h)
 
 add_library(scotcherrexit library_error_exit.c)
+add_library(SCOTCH::scotcherrexit ALIAS scotcherrexit)
 set_target_properties(scotcherrexit PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
   SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
 target_include_directories(scotcherrexit PUBLIC
@@ -829,6 +832,7 @@ set(PTSCOTCH_C_SOURCES
 if(BUILD_PTSCOTCH)
   add_library(ptscotch
     ${PTSCOTCH_C_SOURCES})
+  add_library(SCOTCH::ptscotch ALIAS ptscotch)
 
   set_target_properties(ptscotch PROPERTIES
     VERSION ${SCOTCH_VERSION_LONG}
@@ -855,6 +859,8 @@ if(BUILD_PTSCOTCH)
   endif()
 
   add_library(ptscotcherr library_error.c)
+  add_library(SCOTCH::ptscotcherr ALIAS ptscotcherr)
+
   set_target_properties(ptscotcherr PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
     SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
   target_include_directories(ptscotcherr PUBLIC
@@ -866,6 +872,7 @@ if(BUILD_PTSCOTCH)
   add_dependencies(ptscotcherr ptscotch_h scotch_h)
 
   add_library(ptscotcherrexit library_error_exit.c)
+  add_library(SCOTCH::ptscotcherrexit ALIAS ptscotcherrexit)
   set_target_properties(ptscotcherrexit PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
     SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
   target_include_directories(ptscotcherrexit PUBLIC

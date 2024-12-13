@@ -88,6 +88,7 @@ foreach(version 3 5)
     ${GENERATED_INCLUDE_DIR}/scotch.h
     ${GENERATED_INCLUDE_DIR}/metis.h
     ${GENERATED_INCLUDE_DIR}/metisf.h)
+  add_library(SCOTCH::scotchmetisv${version} ALIAS scotchmetisv${version})
 
   set_target_properties(scotchmetisv${version} PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
     SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
