@@ -1,4 +1,4 @@
-/* Copyright 2008-2010,2012,2018,2019,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2008-2010,2012,2018,2019,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -34,6 +34,7 @@
 /**   NAME       : parmetis_dgraph_part.c                  **/
 /**                                                        **/
 /**   AUTHOR     : Francois PELLEGRINI                     **/
+/**                Clement BARTHELEMY                      **/
 /**                                                        **/
 /**   FUNCTION   : This module is the compatibility        **/
 /**                library for the ParMeTiS ordering       **/
@@ -44,7 +45,7 @@
 /**                # Version 6.0  : from : 13 sep 2012     **/
 /**                                 to   : 18 may 2019     **/
 /**                # Version 7.0  : from : 21 jan 2023     **/
-/**                                 to   : 13 mar 2023     **/
+/**                                 to   : 19 sep 2024     **/
 /**                                                        **/
 /************************************************************/
 
@@ -94,11 +95,11 @@ SCOTCH_Num * const          intetab)
     if (flotval == flotold)                       /* Skip if same value */
       continue;
 
-    flotold  = flotval;                           /* Remember old value                       */
-    flotval *= flotadj;                           /* See if renormalization factor works      */
-    flottmp  = flotval - floor (flotval + EPSILON); /* Determine its possible fractional part */
-    if (fabs (flottmp) >= EPSILON) {              /* If a residual fractional part exists     */
-      flottmp = flotadj / flottmp;                /* Incorporate it in renormalization factor */
+    flotold  = flotval;                           /* Remember old value                        */
+    flotval *= flotadj;                           /* See if renormalization factor works       */
+    flottmp  = flotval - floorf (flotval + EPSILON); /* Determine its possible fractional part */
+    if (fabs (flottmp) >= EPSILON) {              /* If a residual fractional part exists      */
+      flottmp = flotadj / flottmp;                /* Incorporate it in renormalization factor  */
       flotadj = (flotadj * flottmp) / (float) intGcd ((SCOTCH_Num) round (flotadj), (SCOTCH_Num) round (flottmp));
     }
   }
@@ -118,7 +119,7 @@ SCOTCH_Num * const          intetab)
 }
 
 int
-SCOTCH_ParMETIS_V3_PartKway (
+SCOTCHMETISNAMES (ParMETIS_V3_PartKway) (
 const SCOTCH_Num * const    vtxdist,
 SCOTCH_Num * const          xadj,
 SCOTCH_Num * const          adjncy,
@@ -167,6 +168,8 @@ MPI_Comm *                  commptr)
   veloloctab = ((vwgt   != NULL) && ((*wgtflag & 2) != 0)) ? vwgt   : NULL;
   edloloctab = ((adjwgt != NULL) && ((*wgtflag & 1) != 0)) ? adjwgt : NULL;
 
+  *edgecut = 0;
+
   if (SCOTCH_dgraphBuild (&grafdat, baseval,
                           vertlocnbr, vertlocnbr, xadj, xadj + 1, veloloctab, NULL,
                           edgelocnbr, edgelocnbr, adjncy, NULL, edloloctab) == 0) {
@@ -179,7 +182,13 @@ MPI_Comm *                  commptr)
 
       if ((SCOTCH_archCmpltw (&archdat, *nparts, twintab) == 0) &&
           (SCOTCH_dgraphMapInit (&grafdat, &mappdat, &archdat, part) == 0)) {
+        SCOTCH_Num          cdsttab[256];         /* Communication load histogram */
+
         SCOTCH_dgraphMapCompute (&grafdat, &mappdat, &stradat);
+
+        SCOTCH_dgraphMapStat (&grafdat, &mappdat, NULL, NULL, NULL, NULL, NULL, NULL,
+                              NULL, NULL, NULL, NULL, cdsttab, NULL, NULL, NULL);
+        *edgecut = cdsttab[1];                    /* For mapping onto complete graphs, distance 1 is the cut */
 
         SCOTCH_dgraphMapExit (&grafdat, &mappdat);
       }
@@ -188,8 +197,6 @@ MPI_Comm *                  commptr)
     SCOTCH_stratExit (&stradat);
   }
   SCOTCH_dgraphExit (&grafdat);
-
-  *edgecut = 0;                                   /* TODO : compute real edge cut for people who might want it */
 
   free (twintab);
 
@@ -208,7 +215,7 @@ MPI_Comm *                  commptr)
 */
 
 int
-SCOTCH_ParMETIS_V3_PartGeomKway (
+SCOTCHMETISNAMES (ParMETIS_V3_PartGeomKway) (
 const SCOTCH_Num * const    vtxdist,
 SCOTCH_Num * const          xadj,
 SCOTCH_Num * const          adjncy,
@@ -227,7 +234,8 @@ SCOTCH_Num * const          edgecut,
 SCOTCH_Num * const          part,
 MPI_Comm *                  commptr)
 {
-  return (SCOTCH_ParMETIS_V3_PartKway (vtxdist, xadj, adjncy, vwgt, adjwgt, wgtflag, numflag, ncon, nparts, tpwgts, ubvec, options, edgecut, part, commptr));
+  return (SCOTCHMETISNAMES (ParMETIS_V3_PartKway) (vtxdist, xadj, adjncy, vwgt, adjwgt, wgtflag, numflag,
+                                                   ncon, nparts, tpwgts, ubvec, options, edgecut, part, commptr));
 }
 
 /**********************/
@@ -237,10 +245,9 @@ MPI_Comm *                  commptr)
 /**********************/
 
 #if (SCOTCH_PARMETIS_VERSION == 3)
-#ifndef SCOTCH_METIS_PREFIX                       /* With "SCOTCH_" prefix, names already defined */
 
 int
-METISNAMEU (ParMETIS_V3_PartKway) (
+SCOTCHMETISNAMEC (ParMETIS_V3_PartKway) (
 const SCOTCH_Num * const    vtxdist,
 SCOTCH_Num * const          xadj,
 SCOTCH_Num * const          adjncy,
@@ -257,8 +264,8 @@ SCOTCH_Num * const          edgecut,
 SCOTCH_Num * const          part,
 MPI_Comm *                  commptr)
 {
-  return (SCOTCH_ParMETIS_V3_PartKway (vtxdist, xadj, adjncy, vwgt, adjwgt, wgtflag, numflag,
-                                       ncon, nparts, tpwgts, ubvec, options, edgecut, part, commptr));
+  return (SCOTCHMETISNAMES (ParMETIS_V3_PartKway) (vtxdist, xadj, adjncy, vwgt, adjwgt, wgtflag, numflag,
+                                                   ncon, nparts, tpwgts, ubvec, options, edgecut, part, commptr));
 }
 
 /*
@@ -266,7 +273,7 @@ MPI_Comm *                  commptr)
 */
 
 int
-METISNAMEU (ParMETIS_V3_PartGeomKway) (
+SCOTCHMETISNAMEC (ParMETIS_V3_PartGeomKway) (
 const SCOTCH_Num * const    vtxdist,
 SCOTCH_Num * const          xadj,
 SCOTCH_Num * const          adjncy,
@@ -285,9 +292,8 @@ SCOTCH_Num * const          edgecut,
 SCOTCH_Num * const          part,
 MPI_Comm *                  commptr)
 {
-  return (SCOTCH_ParMETIS_V3_PartGeomKway (vtxdist, xadj, adjncy, vwgt, adjwgt, wgtflag, numflag,
-                                           ndims, xyz, ncon, nparts, tpwgts, ubvec, options, edgecut, part, commptr));
+  return (SCOTCHMETISNAMES (ParMETIS_V3_PartGeomKway) (vtxdist, xadj, adjncy, vwgt, adjwgt, wgtflag, numflag, ndims, xyz,
+                                                       ncon, nparts, tpwgts, ubvec, options, edgecut, part, commptr));
 }
 
-#endif /* SCOTCH_METIS_PREFIX */
 #endif /* (SCOTCH_PARMETIS_VERSION == 3) */

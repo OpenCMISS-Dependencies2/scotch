@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2008,2010-2012,2014,2018,2019,2021,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2008,2010-2012,2014,2018,2019,2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -61,7 +61,7 @@
 /**                # Version 6.1  : from : 04 apr 2021     **/
 /**                                 to   : 28 aug 2021     **/
 /**                # Version 7.0  : from : 31 aug 2021     **/
-/**                                 to   : 21 jan 2023     **/
+/**                                 to   : 30 nov 2024     **/
 /**                                                        **/
 /************************************************************/
 
@@ -667,15 +667,16 @@ int * const                 codeval,             /* Pointer to the code value to
 char * const                string)              /* Pointer to the string to parse     */
 {
   int                 code;                      /* Code found                       */
-  int                 codelen;                   /* Code name length                 */
+  size_t              codelen;                   /* Code name length                 */
   char                argbuf[128];               /* Buffer for argument scanning     */
-  int                 arglen;                    /* Length of the current argument   */
+  size_t              arglen;                    /* Length of the current argument   */
   char *              argbeg;                    /* Pointer to beginning of argument */
   char *              argend;                    /* Pointer to end of argument       */
   char *              argequ;                    /* Position of the '=' character    */
-  int                 i, j;
+  int                 i;
+  size_t              j;
 
-  code    =
+  code    = 0;
   codelen = 0;                                   /* No code recognized yet              */
   for (i = 0; codeptr[i].name != NULL; i ++) {   /* For all the codes                   */
     if ((strncasecmp (string,                    /* Find the longest matching code name */
@@ -724,9 +725,6 @@ char * const                string)              /* Pointer to the string to par
                     argptr[j].format,
                     argptr[j].ptr) != 1)
           return (2);                            /* Return if error                */
-        if (argptr[j].func != NULL)              /* If there is a control function */
-          if (argptr[j].func (argptr[j].ptr) != 0) /* If the function fails        */
-            return (2);                          /* Return the error value         */
       }
       else {                                     /* If no value needed           */
         if (argequ != NULL)                      /* If there is one however      */

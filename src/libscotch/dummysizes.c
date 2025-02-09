@@ -1,4 +1,4 @@
-/* Copyright 2004,2007-2010,2012,2014,2018,2019,2021,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007-2010,2012,2014,2018,2019,2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -56,7 +56,7 @@
 /**                # Version 6.1  : from : 09 feb 2021     **/
 /**                                 to   : 22 jun 2021     **/
 /**                # Version 7.0  : from : 25 aug 2019     **/
-/**                                 to   : 19 jan 2023     **/
+/**                                 to   : 02 dec 2024     **/
 /**                                                        **/
 /************************************************************/
 
@@ -214,7 +214,7 @@ char *                      argv[])
           break;
         case 'V' :
           fprintf (stderr, "dummysizes, version " SCOTCH_VERSION_STRING "\n");
-          fprintf (stderr, "Copyright 2004,2007-2010,2018 IPB, Universite de Bordeaux, INRIA & CNRS, France\n");
+          fprintf (stderr, SCOTCH_COPYRIGHT_STRING "\n");
           fprintf (stderr, "This software is libre/free software under CeCILL-C -- see the user's manual for more information\n");
           return  (0);
         default :
@@ -239,6 +239,7 @@ char *                      argv[])
   subsFill ("library_pt.h", "ptscotch.h  ");
   subsFill ("library_pt_f.h", "ptscotchf.h   ");
   subsSuffix ("PTSCOTCH_H");
+  subsFill ("DUMMYINTMPI", EXPAND (COMM_INT));
 #else /* SCOTCH_PTSCOTCH */
   subsFill ("library.h", "scotch.h ");
   subsFill ("library_f.h", "scotchf.h  ");
@@ -319,10 +320,9 @@ char *                      argv[])
   }
 
   while (fgets (chartab, CHARMAX, C_filepntrhedinp) != NULL) { /* Loop on file lines */
-    int                 charnbr;
     int                 subsnum;
 
-    if (((charnbr = strlen (chartab)) >= (CHARMAX - 1)) && /* If line read is at least as long as maximum size     */
+    if ((strlen (chartab)) >= (CHARMAX - 1) &&    /* If line read is at least as long as maximum size              */
         (chartab[CHARMAX - 1] != '\n')) {         /* And last character is not a newline, that is, some is missing */
       fprintf (stderr, "dummysizes: ERROR: line too long\n");
       exit    (EXIT_FAILURE);
@@ -333,7 +333,7 @@ char *                      argv[])
 
       charptr = chartab;                          /* Start from beginning of string                      */
       while ((charptr = strstr (charptr, substab[subsnum][0])) != NULL) { /* As long as a matching found */
-        int                 subslen;
+        size_t              subslen;
 
         subslen = strlen (substab[subsnum][0]);
         if (isalnum (charptr[subslen]) || (charptr[subslen] == '_')) { /* If next character is part of a longer identifier */
