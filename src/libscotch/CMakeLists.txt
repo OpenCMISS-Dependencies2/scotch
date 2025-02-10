@@ -517,9 +517,9 @@ set_target_properties(scotch PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
 add_dependencies(scotch parser_yy_c parser_ll_c)
 
 # scotcherr lib
-if(NOT "${LIBSCOTCHERR}" STREQUAL "")
-  target_link_libraries(scotch PUBLIC ${LIBSCOTCHERR})
-endif()
+#if(NOT "${LIBSCOTCHERR}" STREQUAL "")
+target_link_libraries(scotch PUBLIC scotcherr)
+#endif()
 
 if(NOT WIN32)
   target_link_libraries(scotch PUBLIC m)
@@ -849,9 +849,9 @@ if(BUILD_PTSCOTCH)
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
   add_dependencies(ptscotcherrexit ptscotch_h scotch_h)
-  if(NOT "${LIBPTSCOTCHERR}" STREQUAL "")
-    target_link_libraries(ptscotch PUBLIC ${LIBPTSCOTCHERR})
-  endif()
+  #if(NOT "${LIBPTSCOTCHERR}" STREQUAL "")
+  target_link_libraries(ptscotch PUBLIC ptscotcherr)
+  #endif()
 endif()
 
 set_target_properties(scotch PROPERTIES PUBLIC_HEADER "${GENERATED_INCLUDE_DIR}/scotch.h;${GENERATED_INCLUDE_DIR}/scotchf.h")

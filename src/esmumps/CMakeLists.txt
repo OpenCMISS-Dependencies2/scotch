@@ -108,9 +108,9 @@ target_include_directories(esmumps PRIVATE
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 target_link_libraries(esmumps PRIVATE scotch)
-if(NOT "${LIBSCOTCHERR}" STREQUAL "")
-  target_link_libraries(esmumps PRIVATE ${LIBSCOTCHERR})
-endif()
+#if(NOT "${LIBSCOTCHERR}" STREQUAL "")
+target_link_libraries(esmumps PRIVATE scotcherr)
+#endif()
 
 add_dependencies(esmumps scotch_h)
 
@@ -160,9 +160,9 @@ if(BUILD_PTSCOTCH)
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
   target_link_libraries(ptesmumps PRIVATE scotch)
-  if(NOT "${LIBSCOTCHERR}" STREQUAL "")
-    target_link_libraries(ptesmumps PRIVATE ${LIBSCOTCHERR})
-  endif()
+  #if(NOT "${LIBSCOTCHERR}" STREQUAL "")
+  target_link_libraries(ptesmumps PRIVATE ptscotcherr)
+  #endif()
   add_dependencies(ptesmumps scotch_h)
 
   # libptesmumps targets install
