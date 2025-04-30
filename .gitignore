@@ -1,6 +1,8 @@
 bin
 include
 lib
+tags
+src/tags
 doc/src/*/*.aux
 doc/src/*/*.bbl
 doc/src/*/*.blg
@@ -31,6 +33,7 @@ src/libscotch/*[.][ao]
 src/libscotch/*[.]so
 src/libscotch/dummysizes
 src/libscotch/parser_ll.c
+src/libscotch/parser_lh.h
 src/libscotch/parser_ly.h
 src/libscotch/parser_yy.c
 src/libscotch/ptdummysizes
@@ -48,3 +51,4 @@ src/scotch/*
 !src/scotch/*[.][ch]
 !src/check/CMakeLists.txt
 !src/scotch/Makefile
+build*/
