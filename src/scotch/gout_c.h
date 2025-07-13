@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2008,2014,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2008,2014,2024,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -54,7 +54,7 @@
 /**                # Version 6.0  : from : 12 nov 2014     **/
 /**                                 to   : 12 nov 2014     **/
 /**                # Version 7.0  : from : 10 sep 2024     **/
-/**                                 to   : 10 sep 2024     **/
+/**                                 to   : 13 jul 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -99,14 +99,14 @@
 /*+ This structure defines a source graph. +*/
 
 typedef struct C_Graph_ {
-  SCOTCH_Graph            grafdat;                /*+ Source graph data  +*/
-  SCOTCH_Num              baseval;                /*+ Base value         +*/
-  SCOTCH_Num              vertnbr;                /*+ Number of vertices +*/
-  SCOTCH_Num *            verttab;                /*+ Vertex array       +*/
-  SCOTCH_Num *            vendtab;                /*+ Vertex end array   +*/
-  SCOTCH_Num *            vlbltab;                /*+ Vertex label array +*/
-  SCOTCH_Num              edgenbr;                /*+ Number of edges    +*/
-  SCOTCH_Num *            edgetab;                /*+ Edge array         +*/
+  SCOTCH_Graph              grafdat;              /*+ Source graph data  +*/
+  SCOTCH_Num                baseval;              /*+ Base value         +*/
+  SCOTCH_Num                vertnbr;              /*+ Number of vertices +*/
+  SCOTCH_Num *              verttax;              /*+ Vertex array       +*/
+  SCOTCH_Num *              vendtax;              /*+ Vertex end array   +*/
+  SCOTCH_Num *              vlbltab;              /*+ Vertex label array +*/
+  SCOTCH_Num                edgenbr;              /*+ Number of edges    +*/
+  SCOTCH_Num *              edgetax;              /*+ Edge array         +*/
 } C_Graph;
 
 /*+ This structure defines a geometrical vertex. +*/
@@ -120,8 +120,8 @@ typedef struct C_GeoVert_ {
     of the graph vertices.               +*/
 
 typedef struct C_Geometry_ {
-  const C_Graph *         grafptr;                /*+ Pointer to source graph      +*/
-  C_GeoVert *             verttab;                /*+ Pointer to coordinates array +*/
+  const C_Graph *           grafptr;              /*+ Pointer to source graph      +*/
+  C_GeoVert *               coortab;              /*+ Pointer to coordinates array +*/
 } C_Geometry;
 
 /*+ This structure defines a domain label
@@ -129,33 +129,33 @@ typedef struct C_Geometry_ {
     to the mapping source graph.          +*/
 
 typedef struct C_Mapping_ {
-  const C_Graph *         grafptr;                /*+ Pointer to source graph +*/
-  SCOTCH_Num *            labltab;                /*+ Pointer to label array  +*/
+  const C_Graph *           grafptr;              /*+ Pointer to source graph +*/
+  SCOTCH_Num *              labltab;              /*+ Pointer to label array  +*/
 } C_Mapping;
 
 /*+ The sort structure, used to sort graph vertices by label. +*/
 
 typedef struct C_VertSort_ {
-  SCOTCH_Num                labl;                 /*+ Vertex label  +*/
-  SCOTCH_Num                num;                  /*+ Vertex number +*/
+  SCOTCH_Num                lablval;              /*+ Vertex label  +*/
+  SCOTCH_Num                vertnum;              /*+ Vertex number +*/
 } C_VertSort;
 
 /*+ This structure is the code
     name array entries.        +*/
 
 typedef struct C_ParseCode_ {
-  int                       code;                 /*+ Code value +*/
-  char *                    name;                 /*+ Code name  +*/
+  int                       codeval;              /*+ Code value +*/
+  char *                    nameptr;              /*+ Code name  +*/
 } C_ParseCode;
 
 /* This structure defines the
    code argument array entries. */
 
 typedef struct C_ParseArg_ {
-  const char *              name;                 /*+ Name of the argument                         +*/
-  int                       code;                 /*+ Code value                                   +*/
-  const char *              format;               /*+ scanf-like format; NULL means char, no value +*/
-  const void *              ptr;                  /*+ Pointer to the argument location             +*/
+  const char *              nameptr;              /*+ Name of the argument                         +*/
+  int                       codeval;              /*+ Code value                                   +*/
+  const char *              formptr;              /*+ scanf-like format; NULL means char, no value +*/
+  const void *              avalptr;              /*+ Pointer to the argument value location       +*/
 } C_ParseArg;
 
 /*

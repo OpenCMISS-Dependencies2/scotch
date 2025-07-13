@@ -55,6 +55,8 @@
 /**                                 to   : 26 oct 2007     **/
 /**                # Version 6.1  : from : 28 aug 2021     **/
 /**                                 to   : 28 aug 2021     **/
+/**                # Version 7.0  : from : 13 jul 2025     **/
+/**                                 to   : 13 jul 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -108,61 +110,61 @@ typedef enum O_OutType_ {
 /*+ The output parameter data structure. +*/
 
 typedef struct O_OutParam_ {
-  O_OutType                 type;                 /*+ Output type              +*/
+  O_OutType                 typeval;              /*+ Output type              +*/
   struct {                                        /*+ Inventor mesh structure  +*/
-    char                    color;                /*+ 'c' : color; 'g' : gray  +*/
-    char                    edge;                 /*+ 'r' : remove; 'v' : view +*/
+    char                    coloval;              /*+ 'c' : color; 'g' : gray  +*/
+    char                    edgeval;              /*+ 'r' : remove; 'v' : view +*/
   } InvMesh;
   struct {                                        /*+ PostScript matrix structure +*/
-    char                    type;                 /*+ 'f' : page; 'e' : EPSF      +*/
+    char                    typeval;              /*+ 'f' : page; 'e' : EPSF      +*/
   } PosMatr;
   struct {                                        /*+ PostScript mesh structure +*/
-    char                    type;                 /*+ 'f' : page; 'e' : EPSF    +*/
-    char                    color;                /*+ 'c' : color; 'g' : gray   +*/
-    char                    edge;                 /*+ 'r' : remove; 'v' : view  +*/
-    char                    disk;                 /*+ 'd' : draw; 'a' : avoid   +*/
-    char                    clip;                 /*+ 'l' : large; 's' : short  +*/
-    O_Point                 min;                  /*+ Clipping ratios           +*/
-    O_Point                 max;
+    char                    typeval;              /*+ 'f' : page; 'e' : EPSF    +*/
+    char                    coloval;              /*+ 'c' : color; 'g' : gray   +*/
+    char                    edgeval;              /*+ 'r' : remove; 'v' : view  +*/
+    char                    diskval;              /*+ 'd' : draw; 'a' : avoid   +*/
+    char                    clipval;              /*+ 'l' : large; 's' : short  +*/
+    O_Point                 pminval;              /*+ Clipping ratios           +*/
+    O_Point                 pmaxval;
   } PosMesh;
   struct {                                        /*+ Tulip graph structure    +*/
-    char                    color;                /*+ 'b' : b/w; 'c' : color   +*/
-    char                    edge;                 /*+ 'r' : remove; 'v' : view +*/
-    char                    disk;                 /*+ 'd' : draw; 'a' : avoid  +*/
+    char                    coloval;              /*+ 'b' : b/w; 'c' : color   +*/
+    char                    edgeval;              /*+ 'r' : remove; 'v' : view +*/
+    char                    diskval;              /*+ 'd' : draw; 'a' : avoid  +*/
   } TulMesh;
   struct {                                        /*+ VTK mesh structure       +*/
-    char                    edge;                 /*+ 'r' : remove; 'v' : view +*/
+    char                    edgeval;              /*+ 'r' : remove; 'v' : view +*/
   } VtkMesh;
 } O_OutParam;
 
 /*+ The Inventor path array element. +*/
 
 typedef struct O_InvMeshPath_ {
-  SCOTCH_Num                nbr;                  /*+ Number of output paths     +*/
-  SCOTCH_Num                idx;                  /*+ Index from which to search +*/
+  SCOTCH_Num                pathnbr;              /*+ Number of output paths     +*/
+  SCOTCH_Num                edgenum;              /*+ Index from which to search +*/
 } O_InvMeshPath;
 
 /*+ The PostScript path array element. +*/
 
 typedef struct O_PosMeshPath_ {
-  SCOTCH_Num                nbr;                  /*+ Number of output paths     +*/
-  SCOTCH_Num                idx;                  /*+ Index from which to search +*/
+  SCOTCH_Num                pathnbr;              /*+ Number of output paths     +*/
+  SCOTCH_Num                edgenum;              /*+ Index from which to search +*/
 } O_PosMeshPath;
 
 /*+ The PostScript mesh graph vertex. +*/
 
 typedef struct O_PosMeshVertex_ {
-  int                       vis;                  /*+ Visibility flag  +*/
-  O_Point                   pos;                  /*+ Point position   +*/
-  double                    rad;                  /*+ Disk radius      +*/
-  int                       col;                  /*+ Disk color index +*/
+  int                       visival;              /*+ Visibility flag  +*/
+  O_Point                   coorval;              /*+ Point position   +*/
+  double                    dradval;              /*+ Disk radius      +*/
+  int                       coloval;              /*+ Disk color index +*/
 } O_PosMeshVertex;
 
 /*+ The VTK path array element. +*/
 
 typedef struct O_VtkMeshPath_ {
-  SCOTCH_Num                nbr;                  /*+ Number of output paths     +*/
-  SCOTCH_Num                idx;                  /*+ Index from which to search +*/
+  SCOTCH_Num                pathnbr;              /*+ Number of output paths     +*/
+  SCOTCH_Num                edgenum;              /*+ Index from which to search +*/
 } O_VtkMeshPath;
 
 /*

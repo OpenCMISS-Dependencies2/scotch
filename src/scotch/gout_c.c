@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2008,2010-2012,2014,2018,2019,2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2008,2010-2012,2014,2018,2019,2021,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -61,7 +61,7 @@
 /**                # Version 6.1  : from : 04 apr 2021     **/
 /**                                 to   : 28 aug 2021     **/
 /**                # Version 7.0  : from : 31 aug 2021     **/
-/**                                 to   : 30 nov 2024     **/
+/**                                 to   : 13 jul 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -205,17 +205,11 @@ char *                      argv[])
   SCOTCH_graphInit (&grafdat.grafdat);            /* Create graph structure          */
   SCOTCH_graphLoad (&grafdat.grafdat, C_filepntrsrcinp, -1, 3); /* Read source graph */
   SCOTCH_graphData (&grafdat.grafdat, &grafdat.baseval,
-                    &grafdat.vertnbr, &grafdat.verttab, &grafdat.vendtab, NULL, &grafdat.vlbltab,
-                    &grafdat.edgenbr, &grafdat.edgetab, NULL);
-  if (grafdat.baseval != 0) {                     /* Un-base graph contents while keeping old base value to match with other files */
-    SCOTCH_Num          vertnum;
-    SCOTCH_Num          edgenum;
-
-    for (vertnum = 0; vertnum <= grafdat.vertnbr; vertnum ++)
-      grafdat.verttab[vertnum] -= grafdat.baseval;
-    for (edgenum = 0; edgenum <= grafdat.edgenbr; edgenum ++)
-      grafdat.edgetab[edgenum] -= grafdat.baseval;
-  }
+                    &grafdat.vertnbr, &grafdat.verttax, &grafdat.vendtax, NULL, &grafdat.vlbltab,
+                    &grafdat.edgenbr, &grafdat.edgetax, NULL);
+  grafdat.verttax -= grafdat.baseval;
+  grafdat.vendtax -= grafdat.baseval;
+  grafdat.edgetax -= grafdat.baseval;
 
   C_geoInit (&geo, &grafdat);                     /* Create geometry structure */
   if (C_geoFlag & C_GEOFLAGUSE)                   /* If geometry is wanted     */
@@ -254,10 +248,10 @@ int
 C_geoParse (
 const char * const          string)
 {
-  const char *        cptr;
+  const char *        charptr;
 
-  for (cptr = string; ; cptr ++) {
-    switch (*cptr) {
+  for (charptr = string; ; charptr ++) {
+    switch (*charptr) {
       case 'N' :                                  /* Do not read geometry data */
       case 'n' :
         C_geoFlag &= ~C_GEOFLAGUSE;
@@ -290,7 +284,7 @@ C_Geometry * const          geomptr,
 const C_Graph * const       grafptr)
 {
   geomptr->grafptr = grafptr;
-  geomptr->verttab = NULL;
+  geomptr->coortab = NULL;
 }
 
 /* This routine deletes a geometry.
@@ -302,8 +296,8 @@ void
 C_geoExit (
 C_Geometry * const          geomptr)
 {
-  if (geomptr->verttab != NULL)                   /* If there is a geometry array */
-    memFree (geomptr->verttab);                   /* Free it                      */
+  if (geomptr->coortab != NULL)                   /* If there is a geometry array */
+    memFree (geomptr->coortab);                   /* Free it                      */
 }
 
 /* This routine loads a mapping.
@@ -319,10 +313,10 @@ C_Geometry * const          geomptr)
 static
 int
 C_geoLoad2 (
-const C_VertSort * const    vert0,
-const C_VertSort * const    vert1)
+const C_VertSort * const    ver0ptr,
+const C_VertSort * const    ver1ptr)
 {
-  return ((vert0->labl > vert1->labl) ?  1 : -1);
+  return ((ver0ptr->lablval > ver1ptr->lablval) ?  1 : -1);
 }
 
 /** This is the loading routine. **/
@@ -330,174 +324,185 @@ const C_VertSort * const    vert1)
 int
 C_geoLoad (
 C_Geometry * const          geomptr,
-FILE * const                stream)
+FILE * const                fileptr)
 {
-  C_VertSort *        vertsorttab;                /* Pointer to graph sorting array             */
-  int                 vertsortflag;               /* Flag set if graph data sorted by label     */
-  C_VertSort *        geomsorttab;                /* Pointer to geometric data sorting array    */
-  int                 geomsortflag;               /* Flag set if geometric data sorted by label */
-  int                 geomfiletype;               /* Type of geometry file                      */
-  SCOTCH_Num          geomfilenbr;                /* Number of geometric coordinates in file    */
-  SCOTCH_Num          geomfileval;                /* Value of maximum size for compatibility    */
-  C_GeoVert *         geomfiletab;                /* Pointer to geometric data read from file   */
-  SCOTCH_Num          vertlablval;                /* Value of maximum size for compatibility    */
-  SCOTCH_Num          i, j;
-  int                 o;
+  C_VertSort * restrict lablsorttab;              /* Pointer to graph labels sorting array      */
+  SCOTCH_Num            lablvertnum;              /* Number of current vertex in label array    */
+  C_GeoVert * restrict  geomcoortab;              /* Pointer to geometric data read from file   */
+  C_VertSort *          geomsorttab;              /* Pointer to geometric data sorting array    */
+  int                   geomflagval;              /* Flag set if geometric data sorted by label */
+  int                   geomtypeval;              /* Type of geometry file                      */
+  SCOTCH_Num            geomvertnbr;              /* Number of geometric coordinates in file    */
+  SCOTCH_Num            geomvertnum;              /* Number of current vertex in geometry array */
+  int                   o;
 
-  if ((geomptr->verttab == NULL) &&               /* Allocate geometry if necessary */
-      ((geomptr->verttab = (C_GeoVert *) memAlloc (geomptr->grafptr->vertnbr * sizeof (C_GeoVert))) == NULL)) {
+  const SCOTCH_Num                  baseval = geomptr->grafptr->baseval;
+  const SCOTCH_Num                  vertnbr = geomptr->grafptr->vertnbr;
+  const SCOTCH_Num * restrict const vlbltab = geomptr->grafptr->vlbltab;
+
+  if ((geomptr->coortab == NULL) &&               /* Allocate geometry if necessary */
+      ((geomptr->coortab = (C_GeoVert *) memAlloc (vertnbr * sizeof (C_GeoVert))) == NULL)) {
     errorPrint ("C_geoLoad: out of memory (1)");
     return (1);
   }
 
-  if ((fscanf (stream, "%d" SCOTCH_NUMSTRING,     /* Read type and number of geometry items */
-               &geomfiletype,
-               &geomfileval) != 2) ||
-      (geomfiletype < 1)           ||
-      (geomfiletype > 3)           ||
-      (geomfileval  < 1)) {
+  if ((fscanf (fileptr, "%d" SCOTCH_NUMSTRING,    /* Read type and number of geometry items */
+               &geomtypeval,
+               &geomvertnbr) != 2) ||
+      (geomtypeval < 1)           ||
+      (geomtypeval > 3)           ||
+      (geomvertnbr  < 1)) {
     errorPrint ("C_geoLoad: bad input (1)");
     return (1);
   }
-  geomfilenbr = (SCOTCH_Num) geomfileval;
 
   if (memAllocGroup ((void **) (void *)
-                     &geomfiletab, (size_t) (geomfilenbr               * sizeof (C_GeoVert)),
-                     &geomsorttab, (size_t) (geomfilenbr               * sizeof (C_VertSort)),
-                     &vertsorttab, (size_t) (geomptr->grafptr->vertnbr * sizeof (C_VertSort)), NULL) == NULL) {
+                     &geomcoortab, (size_t) (geomvertnbr * sizeof (C_GeoVert)), /* Temporary array for geometry */
+                     &geomsorttab, (size_t) (geomvertnbr * sizeof (C_VertSort)),
+                     &lablsorttab, (size_t) (vertnbr     * sizeof (C_VertSort)), NULL) == NULL) {
     errorPrint ("C_geoLoad: out of memory (2)");
     return (1);
   }
 
   o = 0;
-  geomsortflag = 1;                               /* Assume geometry data sorted */
-  switch (geomfiletype) {
+  geomflagval = 1;                                /* Assume geometry data sorted */
+  switch (geomtypeval) {
     case 1 :                                      /* Load 2D coordinates array */
-      for (i = 0; (i < geomfilenbr) && (o == 0); i ++) {
-        if (fscanf (stream, SCOTCH_NUMSTRING "%lf",
-                    &vertlablval,
-                    &geomfiletab[i].x) != 2)
+      for (geomvertnum = 0; (geomvertnum < geomvertnbr) && (o == 0); geomvertnum ++) {
+        SCOTCH_Num          lablval;
+
+        if (fscanf (fileptr, SCOTCH_NUMSTRING "%lf",
+                    &lablval,
+                    &geomcoortab[geomvertnum].x) != 2)
           o = 1;
-        geomsorttab[i].labl = (SCOTCH_Num) vertlablval;
-        geomfiletab[i].y    =                     /* No Y and Z coordinates */
-        geomfiletab[i].z    = 0.0;
-        geomsorttab[i].num  = i;
+        geomcoortab[geomvertnum].y =              /* No Y and Z coordinates */
+        geomcoortab[geomvertnum].z = 0.0;
+        geomsorttab[geomvertnum].lablval = lablval;
+        geomsorttab[geomvertnum].vertnum = geomvertnum;
 
         if (C_geoFlag & C_GEOFLAGROTATE) {        /* Rotate picture if necessary */
           double              t;                  /* Temporary swap variable     */
 
-          t                = geomfiletab[i].y;
-          geomfiletab[i].y = geomfiletab[i].x;
-          geomfiletab[i].x = - t;
+          t                          = geomcoortab[geomvertnum].y;
+          geomcoortab[geomvertnum].y = geomcoortab[geomvertnum].x;
+          geomcoortab[geomvertnum].x = - t;
         }
 
-        if ((i > 0) &&                            /* Check if geometry data sorted */
-            (geomsorttab[i].labl < geomsorttab[i - 1].labl))
-          geomsortflag = 0;                       /* Geometry data not sorted */
+        if ((geomvertnum > 0) &&                  /* Check if geometry data sorted */
+            (geomsorttab[geomvertnum].lablval < geomsorttab[geomvertnum - 1].lablval))
+          geomflagval = 0;                        /* Geometry data not sorted */
       }
       break;
     case 2 :                                      /* Load 2D coordinates array */
-      for (i = 0; (i < geomfilenbr) && (o == 0); i ++) {
-        if (fscanf (stream, SCOTCH_NUMSTRING "%lf%lf",
-                    &vertlablval,
-                    &geomfiletab[i].x,
-                    &geomfiletab[i].y) != 3)
+      for (geomvertnum = 0; (geomvertnum < geomvertnbr) && (o == 0); geomvertnum ++) {
+        SCOTCH_Num          lablval;
+
+        if (fscanf (fileptr, SCOTCH_NUMSTRING "%lf%lf",
+                    &lablval,
+                    &geomcoortab[geomvertnum].x,
+                    &geomcoortab[geomvertnum].y) != 3)
           o = 1;
-        geomsorttab[i].labl = (SCOTCH_Num) vertlablval;
-        geomfiletab[i].z    = 0.0;                /* No Z coordinate */
-        geomsorttab[i].num  = i;
+        geomcoortab[geomvertnum].z = 0.0;         /* No Z coordinate */
+        geomsorttab[geomvertnum].lablval = lablval;
+        geomsorttab[geomvertnum].vertnum = geomvertnum;
 
         if (C_geoFlag & C_GEOFLAGROTATE) {        /* Rotate picture if necessary */
           double              t;                  /* Temporary swap variable     */
 
-          t                = geomfiletab[i].y;
-          geomfiletab[i].y = geomfiletab[i].x;
-          geomfiletab[i].x = - t;
+          t                          = geomcoortab[geomvertnum].y;
+          geomcoortab[geomvertnum].y = geomcoortab[geomvertnum].x;
+          geomcoortab[geomvertnum].x = - t;
         }
 
-        if ((i > 0) &&                            /* Check if geometry data sorted */
-            (geomsorttab[i].labl < geomsorttab[i - 1].labl))
-          geomsortflag = 0;                       /* Geometry data are not sorted */
+        if ((geomvertnum > 0) &&                  /* Check if geometry data sorted */
+            (geomsorttab[geomvertnum].lablval < geomsorttab[geomvertnum - 1].lablval))
+          geomflagval = 0;                        /* Geometry data are not sorted */
       }
       break;
     case 3 :                                      /* Load 3D coordinates array */
-      for (i = 0; (i < geomfilenbr) && (o == 0); i ++) {
-        if (fscanf (stream, SCOTCH_NUMSTRING "%lf%lf%lf",
-                    &vertlablval,
-                    &geomfiletab[i].x,
-                    &geomfiletab[i].y,
-                    &geomfiletab[i].z) != 4)
+      for (geomvertnum = 0; (geomvertnum < geomvertnbr) && (o == 0); geomvertnum ++) {
+        SCOTCH_Num          lablval;
+
+        if (fscanf (fileptr, SCOTCH_NUMSTRING "%lf%lf%lf",
+                    &lablval,
+                    &geomcoortab[geomvertnum].x,
+                    &geomcoortab[geomvertnum].y,
+                    &geomcoortab[geomvertnum].z) != 4)
           o = 1;
-        geomsorttab[i].labl = (SCOTCH_Num) vertlablval;
-        geomsorttab[i].num  = i;
+        geomsorttab[geomvertnum].lablval = lablval;
+        geomsorttab[geomvertnum].vertnum = geomvertnum;
 
         if (C_geoFlag & C_GEOFLAGPERMUT) {        /* Rotate picture if necessary */
           double              t;                  /* Temporary swap variable     */
 
-          t                = geomfiletab[i].z;
-          geomfiletab[i].z = geomfiletab[i].y;
-          geomfiletab[i].y = t;
+          t                          = geomcoortab[geomvertnum].z;
+          geomcoortab[geomvertnum].z = geomcoortab[geomvertnum].y;
+          geomcoortab[geomvertnum].y = t;
         }
-        if ((i > 0) &&                            /* Check if geometry data sorted */
-            (geomsorttab[i].labl < geomsorttab[i - 1].labl))
-          geomsortflag = 0;                       /* Geometry data not sorted */
+        if ((geomvertnum > 0) &&                  /* Check if geometry data sorted */
+            (geomsorttab[geomvertnum].lablval < geomsorttab[geomvertnum - 1].lablval))
+          geomflagval = 0;                        /* Geometry data not sorted */
       }
       break;
     default :
-      errorPrint ("C_geoLoad: invalid geometry type (%d)", geomfiletype);
-      memFree    (geomfiletab);                   /* Free group leader */
+      errorPrint ("C_geoLoad: invalid geometry type (%d)", geomtypeval);
+      memFree    (geomcoortab);                   /* Free group leader */
       return (1);
   }
   if (o != 0) {
     errorPrint ("C_geoLoad: bad input (2)");
-    memFree    (geomfiletab);                     /* Free group leader */
+    memFree    (geomcoortab);                     /* Free group leader */
     return (1);
   }
 
-  if (geomsortflag != 1)                          /* If geometry data not sorted        */
-    qsort ((char *) geomsorttab, geomfilenbr,     /* Sort sort area by ascending labels */
+  if (geomflagval != 1)                           /* If geometry data not sorted        */
+    qsort ((char *) geomsorttab, geomvertnbr,     /* Sort sort area by ascending labels */
            sizeof (C_VertSort), (int (*) (const void *, const void *)) C_geoLoad2);
-  for (i = 1; i < geomfilenbr; i ++) {            /* Check geometric data integrity */
-    if (geomsorttab[i].labl == geomsorttab[i - 1].labl) {
+  for (geomvertnum = 1; geomvertnum < geomvertnbr; geomvertnum ++) { /* Check geometric data integrity */
+    if (geomsorttab[geomvertnum].lablval == geomsorttab[geomvertnum - 1].lablval) {
       errorPrint ("C_geoLoad: duplicate vertex label");
-      memFree    (geomfiletab);                   /* Free group leader */
+      memFree    (geomcoortab);                   /* Free group leader */
       return (1);
     }
   }
 
-  if (geomptr->grafptr->vlbltab != NULL) {        /* If graph has vertex labels */
-    vertsortflag = 1;                             /* Assume graph data sorted   */
-    for (i = 0; i < geomptr->grafptr->vertnbr; i ++) {
-      vertsorttab[i].labl = geomptr->grafptr->vlbltab[i];
-      vertsorttab[i].num  = i;
-      if ((i > 0) &&                              /* Check if graph data sorted */
-          (vertsorttab[i].labl < vertsorttab[i - 1].labl))
-        vertsortflag = 0;                         /* Graph data not sorted */
+  if (vlbltab != NULL) {                          /* If graph has vertex labels */
+    SCOTCH_Num          lablvertnum;
+    int                 lablflagval;              /* Flag set if graph data sorted by label */
+
+    lablflagval = 1;                              /* Assume graph data sorted */
+    for (lablvertnum = 0; lablvertnum < vertnbr; lablvertnum ++) {
+      lablsorttab[lablvertnum].lablval = vlbltab[lablvertnum];
+      lablsorttab[lablvertnum].vertnum = lablvertnum; /* Un-based index for matching */
+      if ((lablvertnum > 0) &&                    /* Check if graph data sorted      */
+          (lablsorttab[lablvertnum].lablval < lablsorttab[lablvertnum - 1].lablval))
+        lablflagval = 0;                          /* Graph data not sorted */
     }
-    if (vertsortflag != 1)                        /* If graph data not sorted                       */
-      qsort ((char *) vertsorttab, geomptr->grafptr->vertnbr, /* Sort sort area by ascending labels */
+    if (lablflagval != 1)                         /* If graph data not sorted           */
+      qsort ((char *) lablsorttab, vertnbr,       /* Sort sort area by ascending labels */
              sizeof (C_VertSort), (int (*) (const void *, const void *)) C_geoLoad2);
   }
   else {                                          /* Graph does not have vertex labels */
-    for (i = 0; i < geomptr->grafptr->vertnbr; i ++) {
-      vertsorttab[i].labl = i + geomsorttab[0].labl; /* Use first index as base value */
-      vertsorttab[i].num  = i;
+    for (lablvertnum = 0; lablvertnum < vertnbr; lablvertnum ++) {
+      lablsorttab[lablvertnum].lablval = lablvertnum + baseval;
+      lablsorttab[lablvertnum].vertnum = lablvertnum; /* Un-based index for matching */
     }
   }
 
-  for (i = 0, j = 0; i < geomptr->grafptr->vertnbr; i ++) { /* For all vertices in graph */
-    while ((j < geomfilenbr) && (geomsorttab[j].labl < vertsorttab[i].labl))
-      j ++;                                       /* Search geometry vertex with same label             */
-    if ((j >= geomfilenbr) || (geomsorttab[j].labl > vertsorttab[i].labl)) { /* If label does not exist */
+  for (lablvertnum = geomvertnum = 0; lablvertnum < vertnbr; lablvertnum ++) { /* For all vertices in graph */
+    while ((geomvertnum < geomvertnbr) && (geomsorttab[geomvertnum].lablval < lablsorttab[lablvertnum].lablval))
+      geomvertnum ++;                             /* Search geometry vertex with same label */
+    if ((geomvertnum >= geomvertnbr) ||           /* If label does not exist                */
+        (geomsorttab[geomvertnum].lablval > lablsorttab[lablvertnum].lablval)) {
       errorPrint ("C_geoLoad: vertex geometry data not found for label '" SCOTCH_NUMSTRING "'",
-                  vertsorttab[i].labl);
-      memFree    (geomfiletab);                   /* Free group leader */
+                  lablsorttab[lablvertnum].lablval);
+      memFree    (geomcoortab);                   /* Free group leader */
       return (1);
     }
-    geomptr->verttab[vertsorttab[i].num] = geomfiletab[geomsorttab[j ++].num];
+    geomptr->coortab[lablsorttab[lablvertnum].vertnum] = geomcoortab[geomsorttab[geomvertnum ++].vertnum];
   }
 
-  memFree (geomfiletab);                          /* Free group leader */
+  memFree (geomcoortab);                          /* Free group leader */
 
   return (0);
 }
@@ -516,11 +521,11 @@ FILE * const                stream)
 
 void
 C_mapInit (
-C_Mapping * const           mapptr,
+C_Mapping * const           mappptr,
 const C_Graph * const       grafptr)
 {
-  mapptr->grafptr = grafptr;
-  mapptr->labltab = NULL;
+  mappptr->grafptr = grafptr;
+  mappptr->labltab = NULL;
 }
 
 /* This routine deletes a mapping.
@@ -530,10 +535,10 @@ const C_Graph * const       grafptr)
 
 void
 C_mapExit (
-C_Mapping * const           mapptr)
+C_Mapping * const           mappptr)
 {
-  if (mapptr->labltab != NULL)                    /* If there is a domain array */
-    memFree (mapptr->labltab);                    /* Free it                    */
+  if (mappptr->labltab != NULL)                   /* If there is a domain array */
+    memFree (mappptr->labltab);                   /* Free it                    */
 }
 
 /* This routine loads a mapping.
@@ -544,103 +549,105 @@ C_Mapping * const           mapptr)
 
 int
 C_mapLoad (
-C_Mapping * const           mapptr,
-FILE * const                stream)
+C_Mapping * const           mappptr,
+FILE * const                fileptr)
 {
-  C_VertSort *        vertsorttab;                /* Pointer to graph sorting array           */
-  int                 vertsortflag;               /* Flag set if graph data sorted by label   */
-  C_VertSort *        mapsorttab;                 /* Pointer to mapping data sorting array    */
-  int                 mapsortflag;                /* Flag set if mapping data sorted by label */
-  SCOTCH_Num          mapsortval;                 /* Value of maximum size for compatibility  */
-  SCOTCH_Num          mapfileval;                 /* Value of maximum size for compatibility  */
-  SCOTCH_Num          mapfilenbr;                 /* Number of mapping pairs in file          */
-  SCOTCH_Num *        mapfiletab;                 /* Pointer to mapping data read from file   */
-  SCOTCH_Num          i, j;
+  C_VertSort * restrict lablsorttab;              /* Pointer to graph sorting array            */
+  SCOTCH_Num            lablvertnum;              /* Number of current vertex in label array   */
+  SCOTCH_Num * restrict mappparttab;              /* Pointer to mapping data read from file    */
+  C_VertSort * restrict mappsorttab;              /* Pointer to mapping data sorting array     */
+  int                   mappflagval;              /* Flag set if mapping data sorted by label  */
+  SCOTCH_Num            mappvertnbr;              /* Number of mapping pairs in file           */
+  SCOTCH_Num            mappvertnum;              /* Number of current vertex in mapping array */
 
-  if ((mapptr->labltab == NULL) &&                /* Allocate array if necessary */
-      ((mapptr->labltab = (SCOTCH_Num *) memAlloc (mapptr->grafptr->vertnbr * sizeof (SCOTCH_Num))) == NULL)) {
+  const SCOTCH_Num                  baseval = mappptr->grafptr->baseval;
+  const SCOTCH_Num                  vertnbr = mappptr->grafptr->vertnbr;
+  const SCOTCH_Num * restrict const vlbltab = mappptr->grafptr->vlbltab;
+
+  if ((mappptr->labltab == NULL) &&               /* Allocate array if necessary */
+      ((mappptr->labltab = (SCOTCH_Num *) memAlloc (vertnbr * sizeof (SCOTCH_Num))) == NULL)) {
     errorPrint ("C_mapLoad: out of memory (1)");
     return (1);
   }
 
-  memset (mapptr->labltab, ~0, mapptr->grafptr->vertnbr * sizeof (SCOTCH_Num)); /* Pre-initialize mapping */
+  memset (mappptr->labltab, ~0, vertnbr * sizeof (SCOTCH_Num)); /* Pre-initialize mapping */
 
-  if (stream == NULL)                             /* If stream is invalid */
+  if (fileptr == NULL)                            /* If stream is invalid */
     return (0);
 
-  if ((fscanf (stream, SCOTCH_NUMSTRING,          /* Read number of mapping pairs */
-               &mapfileval) != 1) ||
-      (mapfileval < 1)) {
+  if ((fscanf (fileptr, SCOTCH_NUMSTRING,         /* Read number of mapping pairs */
+               &mappvertnbr) != 1) ||
+      (mappvertnbr < 1)) {
     errorPrint ("C_mapLoad: bad input (1)");
     return (1);
   }
-  mapfilenbr = (SCOTCH_Num) mapfileval;
 
   if (memAllocGroup ((void **) (void *)
-                     &mapfiletab,  (size_t) (mapfilenbr               * sizeof (SCOTCH_Num)),
-                     &mapsorttab,  (size_t) (mapfilenbr               * sizeof (C_VertSort)),
-                     &vertsorttab, (size_t) (mapptr->grafptr->vertnbr * sizeof (C_VertSort)), NULL) == NULL) {
+                     &mappparttab, (size_t) (mappvertnbr * sizeof (SCOTCH_Num)),
+                     &mappsorttab, (size_t) (mappvertnbr * sizeof (C_VertSort)),
+                     &lablsorttab, (size_t) (vertnbr     * sizeof (C_VertSort)), NULL) == NULL) {
     errorPrint ("C_mapLoad: out of memory (2)");
     return (1);
   }
 
-  mapsortflag = 1;                                /* Assume mapping data sorted */
-  for (i = 0; i < mapfilenbr; i ++) {
-    if (fscanf (stream, SCOTCH_NUMSTRING SCOTCH_NUMSTRING,
-                &mapsortval,
-                &mapfileval) != 2) {
+  mappflagval = 1;                                /* Assume mapping data sorted */
+  for (mappvertnum = 0; mappvertnum < mappvertnbr; mappvertnum ++) {
+    if (fscanf (fileptr, SCOTCH_NUMSTRING SCOTCH_NUMSTRING,
+                &mappsorttab[mappvertnum].lablval,
+                &mappparttab[mappvertnum]) != 2) {
       errorPrint ("C_mapLoad: bad input (2)");
-      memFree    (mapfiletab);                    /* Free group leader */
+      memFree    (mappparttab);                   /* Free group leader */
       return (1);
     }
-    mapsorttab[i].labl = mapsortval;
-    mapsorttab[i].num  = i;
-    mapfiletab[i]      = mapfileval;
+    mappsorttab[mappvertnum].vertnum = mappvertnum;
 
-    if ((i > 0) &&                                /* Check if mapping data sorted */
-        (mapsorttab[i].labl < mapsorttab[i - 1].labl))
-      mapsortflag = 0;                            /* Mapping data not sorted */
+    if ((mappvertnum > 0) &&                      /* Check if mapping data sorted */
+        (mappsorttab[mappvertnum].lablval < mappsorttab[mappvertnum - 1].lablval))
+      mappflagval = 0;                            /* Mapping data not sorted */
   }
-  if (mapsortflag != 1)                           /* If mapping data not sorted         */
-      qsort ((char *) mapsorttab, mapfilenbr,     /* Sort sort area by ascending labels */
+  if (mappflagval != 1)                           /* If mapping data not sorted         */
+      qsort ((char *) mappsorttab, mappvertnbr,   /* Sort sort area by ascending labels */
              sizeof (C_VertSort), (int (*) (const void *, const void *)) C_geoLoad2);
-  for (i = 1; i < mapfilenbr; i ++) {             /* Check mapping data integrity */
-    if (mapsorttab[i].labl == mapsorttab[i - 1].labl) {
+  for (mappvertnum = 1; mappvertnum < mappvertnbr; mappvertnum ++) { /* Check mapping data integrity */
+    if (mappsorttab[mappvertnum].lablval == mappsorttab[mappvertnum - 1].lablval) {
       errorPrint ("C_mapLoad: duplicate vertex label");
-      memFree    (mapfiletab);                    /* Free group leader */
+      memFree    (mappparttab);                   /* Free group leader */
       return (1);
     }
   }
 
-  if (mapptr->grafptr->vlbltab != NULL) {         /* If graph has vertex labels */
-    vertsortflag = 1;                             /* Assume graph data sorted   */
-    for (i = 0; i < mapptr->grafptr->vertnbr; i ++) {
-      vertsorttab[i].labl = mapptr->grafptr->vlbltab[i];
-      vertsorttab[i].num  = i;
-      if ((i > 0) &&                              /* Check if graph data sorted */
-          (vertsorttab[i].labl < vertsorttab[i - 1].labl))
-        vertsortflag = 0;                         /* Graph data not sorted */
+  if (vlbltab != NULL) {                          /* If graph has vertex labels */
+    int                 lablflagval;              /* Flag set if graph data sorted by label */
+
+    lablflagval = 1;                              /* Assume graph data sorted */
+    for (lablvertnum = 0; lablvertnum < vertnbr; lablvertnum ++) {
+      lablsorttab[lablvertnum].lablval = vlbltab[lablvertnum];
+      lablsorttab[lablvertnum].vertnum = lablvertnum; /* Un-based index for matching */
+      if ((lablvertnum > 0) &&                    /* Check if graph data sorted      */
+          (lablsorttab[lablvertnum].lablval < lablsorttab[lablvertnum - 1].lablval))
+        lablflagval = 0;                          /* Graph data not sorted */
     }
-    if (vertsortflag != 1)                        /* If graph data not sorted                      */
-      qsort ((char *) vertsorttab, mapptr->grafptr->vertnbr, /* Sort sort area by ascending labels */
+    if (lablflagval != 1)                         /* If graph data not sorted           */
+      qsort ((char *) lablsorttab, vertnbr,       /* Sort sort area by ascending labels */
              sizeof (C_VertSort), (int (*) (const void *, const void *)) C_geoLoad2);
   }
   else {                                          /* Graph does not have vertex labels */
-    for (i = 0; i < mapptr->grafptr->vertnbr; i ++) {
-      vertsorttab[i].labl = i + mapptr->grafptr->baseval;
-      vertsorttab[i].num  = i;
+    for (lablvertnum = 0; lablvertnum < vertnbr; lablvertnum ++) {
+      lablsorttab[lablvertnum].lablval = lablvertnum + baseval;
+      lablsorttab[lablvertnum].vertnum = lablvertnum; /* Un-based index for matching */
     }
   }
 
-  for (i = 0, j = 0; i < mapptr->grafptr->vertnbr; i ++) { /* For all vertices in graph */
-    while ((j < mapfilenbr) && (mapsorttab[j].labl < vertsorttab[i].labl))
-      j ++;                                       /* Search mapping vertex with same label          */
-    if ((j >= mapfilenbr) || (mapsorttab[j].labl > vertsorttab[i].labl)) /* If label does not exist */
-      continue;                                   /* This vertex has no related mapping data        */
-    mapptr->labltab[vertsorttab[i].num] = mapfiletab[mapsorttab[j ++].num];
+  for (lablvertnum = mappvertnum = 0; lablvertnum < vertnbr; lablvertnum ++) { /* For all vertices in graph */
+    while ((mappvertnum < mappvertnbr) && (mappsorttab[mappvertnum].lablval < lablsorttab[lablvertnum].lablval))
+      mappvertnum ++;                             /* Search geometry vertex with same label */
+    if ((mappvertnum >= mappvertnbr) ||           /* If label does not exist                */
+        (mappsorttab[mappvertnum].lablval > lablsorttab[lablvertnum].lablval))
+      continue;                                   /* This vertex has no related mapping data */
+    mappptr->labltab[lablsorttab[lablvertnum].vertnum] = mappparttab[mappsorttab[mappvertnum ++].vertnum];
   }
 
-  memFree (mapfiletab);                           /* Free group leader */
+  memFree (mappparttab);                          /* Free group leader */
 
   return (0);
 }
@@ -661,80 +668,84 @@ FILE * const                stream)
 
 int
 C_parse (
-const C_ParseCode * const   codeptr,             /* Pointer to the code array          */
-const C_ParseArg * const    argptr,              /* Pointer to the code argument array */
-int * const                 codeval,             /* Pointer to the code value to set   */
-char * const                string)              /* Pointer to the string to parse     */
+const C_ParseCode * const   codetab,              /* Pointer to the code array          */
+const C_ParseArg * const    arguptr,              /* Pointer to the code argument array */
+int * const                 codeptr,              /* Pointer to the code value to set   */
+char * const                strgptr)              /* Pointer to the string to parse     */
 {
-  int                 code;                      /* Code found                       */
-  size_t              codelen;                   /* Code name length                 */
-  char                argbuf[128];               /* Buffer for argument scanning     */
-  size_t              arglen;                    /* Length of the current argument   */
-  char *              argbeg;                    /* Pointer to beginning of argument */
-  char *              argend;                    /* Pointer to end of argument       */
-  char *              argequ;                    /* Position of the '=' character    */
-  int                 i;
-  size_t              j;
+  int                 codeval;                    /* Code found                       */
+  size_t              codesiz;                    /* Code name length                 */
+  char                argubuf[128];               /* Buffer for argument scanning     */
+  size_t              argusiz;                    /* Length of the current argument   */
+  char *              argbptr;                    /* Pointer to beginning of argument */
+  char *              argeptr;                    /* Pointer to end of argument       */
+  char *              argqptr;                    /* Position of the '=' character    */
+  int                 codenum;
 
-  code    = 0;
-  codelen = 0;                                   /* No code recognized yet              */
-  for (i = 0; codeptr[i].name != NULL; i ++) {   /* For all the codes                   */
-    if ((strncasecmp (string,                    /* Find the longest matching code name */
-                      codeptr[i].name,
-                      j = strlen (codeptr[i].name)) == 0) &&
-        (j > codelen)) {
-      code    = codeptr[i].code;
-      codelen = j;
+  codeval = -1;
+  codesiz = 0;                                    /* No code recognized yet               */
+  for (codenum = 0; codetab[codenum].nameptr != NULL; codenum ++) { /* For all code names */
+    size_t              codetmp;
+
+    codetmp = strlen (codetab[codenum].nameptr);
+    if ((strncasecmp (strgptr, codetab[codenum].nameptr, codetmp) == 0) && /* Find longest matching code name */
+        (codetmp > codesiz)) {
+      codeval = codetab[codenum].codeval;
+      codesiz = codetmp;
     }
   }
-  if (codelen == 0)                              /* If no code recognized  */
-    return (1);                                  /* Return the error value */
-  *codeval = code;                               /* Set the code value     */
+  if (codesiz == 0)                               /* If no code recognized */
+    return (1);                                   /* Return error value    */
+  *codeptr = codeval;                             /* Set code value        */
 
-  argbeg = string + codelen;                     /* Point to the end of the code name */
-  if (*argbeg == '{') {                          /* If there are arguments            */
-    argbeg ++;                                   /* Point to argument beginning       */
-    do {                                         /* For all arguments                 */
-      argend = strpbrk (argbeg, ",}\0");         /* Search for the argument end       */
-      if (*argend == '\0')                       /* If there is no end delimiter      */
-        return (3);                              /* Return the syntax error value     */
+  argbptr = strgptr + codesiz;                    /* Point to the end of the code name */
+  if (*argbptr == '{') {                          /* If there are arguments            */
+    argbptr ++;                                   /* Point to argument beginning       */
+    do {                                          /* For all arguments                 */
+      int                 argunum;
+      int                 flagval;
 
-      arglen = ((argend - argbeg) < 127)         /* Get argument bounded length */
-               ? (argend - argbeg)
-               : 127;
-      strncpy (argbuf, argbeg, arglen);          /* Copy the argument to the buffer */
-      argbuf[arglen] = '\0';                     /* Mark the end of the argument    */
-      argequ = strpbrk (argbuf, "=");            /* Search for the '=' character    */
-      if (argequ != NULL)                        /* If it exists                    */
-        *argequ++ = '\0';                        /* Turn it into a separating null  */
+      argeptr = strpbrk (argbptr, ",}\0");        /* Search for the argument end  */
+      if (*argeptr == '\0')                       /* If there is no end delimiter */
+        return (3);                               /* Return syntax error value    */
 
-      for (i = 0, j = -1; argptr[i].name != NULL; i ++) { /* Scan all the possible arguments */
-        if ((argptr[i].code == code) &&          /* If the proper name is found              */
-            (strcmp (argbuf, argptr[i].name) == 0)) {
-          j = i;                                 /* Record the position */
-          break;                                 /* Exit the loop       */
+      argusiz = ((argeptr - argbptr) < 127)       /* Get argument bounded length */
+                ? (argeptr - argbptr)
+                : 127;
+      strncpy (argubuf, argbptr, argusiz);        /* Copy argument to the buffer    */
+      argubuf[argusiz] = '\0';                    /* Mark the end of the argument   */
+      argqptr = strpbrk (argubuf, "=");           /* Search for the '=' character   */
+      if (argqptr != NULL)                        /* If it exists                   */
+        *argqptr ++ = '\0';                       /* Turn it into a separating null */
+
+      flagval = 0;                                /* No argument found yet                */
+      for (argunum = 0; arguptr[argunum].nameptr != NULL; argunum ++) { /* Scan arguments */
+        if ((arguptr[argunum].codeval == codeval) && /* If argument name found            */
+            (strcmp (argubuf, arguptr[argunum].nameptr) == 0)) {
+          flagval = 1;                            /* Argument found */
+          break;
         }
       }
-      if (j == -1)                               /* If invalid argument     */
-        return (2);                              /* Return the proper value */
+      if (flagval != 1)                           /* If invalid argument     */
+        return (2);                               /* Return the proper value */
 
-      if (argptr[j].format != NULL) {            /* If there is a value to read    */
-        if (argequ == NULL)                      /* If none has been given however */
-          return (2);                            /* Return the error value         */
-        if (sscanf (argequ,                      /* Try to read the argument value */
-                    argptr[j].format,
-                    argptr[j].ptr) != 1)
-          return (2);                            /* Return if error                */
+      if (arguptr[argunum].formptr != NULL) {     /* If there is a value to read    */
+        if (argqptr == NULL)                      /* If none has been given however */
+          return (2);                             /* Return the error value         */
+        if (sscanf (argqptr,                      /* Try to read the argument value */
+                    arguptr[argunum].formptr,
+                    arguptr[argunum].avalptr) != 1)
+          return (2);                             /* Return if error */
       }
-      else {                                     /* If no value needed           */
-        if (argequ != NULL)                      /* If there is one however      */
-          return (2);                            /* Return the error code        */
-        *((char *) argptr[j].ptr) = argbuf[0];   /* Copy the first argument char */
+      else {                                      /* If no value needed                */
+        if (argqptr != NULL)                      /* If there is one however           */
+          return (2);                             /* Return the error code             */
+        *((char *) arguptr[argunum].avalptr) = argubuf[0]; /* Copy first argument char */
       }
 
-      argbeg = argend + 1;                       /* Skip the processed argument         */
-    } while (*argend != '}');                    /* Loop as long as there are arguments */
+      argbptr = argeptr + 1;                      /* Skip the processed argument         */
+    } while (*argeptr != '}');                    /* Loop as long as there are arguments */
   }
 
-  return ((*argbeg == '\0') ? 0 : 3);            /* Check if no extraneous characters */
+  return ((*argbptr == '\0') ? 0 : 3);            /* Check if no extraneous characters */
 }
