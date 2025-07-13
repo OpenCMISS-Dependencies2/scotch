@@ -1,4 +1,4 @@
-## Copyright 2014-2016,2021,2022,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+## Copyright 2014-2016,2021,2022,2024,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,
 ## graph partitioning and sparse matrix ordering.
@@ -35,13 +35,14 @@
 ##                Florent PRUVOST                         ##
 ##                Cedric LACHAT                           ##
 ##                Amaury JACQUES                          ##
+##                Francois PELLEGRINI                     ##
 ##                                                        ##
 ##   FUNCTION   : Secondary configuration file for CMake  ##
 ##                                                        ##
 ##   DATES      : # Version 6.0  : from : 01 sep 2014     ##
 ##                                 to     01 sep 2021     ##
 ##                # Version 7.0  : from : 01 sep 2021     ##
-##                                 to     26 jan 2023     ##
+##                                 to     14 jul 2025     ##
 ##                                                        ##
 ############################################################
 
@@ -411,9 +412,9 @@ add_test(NAME gmap_bump COMMAND $<TARGET_FILE:gmap> ${dat}/bump.grf ${tgt}/h3.tg
 add_test(NAME gmap_small COMMAND $<TARGET_FILE:gmap> ${dat}/small.grf ${tgt}/m11x13.tgt small_m11x13.map -vmt)
 
 # check_prog_gord
-add_test(NAME gord_bump COMMAND $<TARGET_FILE:gord> ${dat}/bump.grf ${dev_null} -vt)
-add_test(NAME gord_bump_b1 COMMAND $<TARGET_FILE:gord> ${dat}/bump_b1.grf ${dev_null} -vt)
-add_test(NAME gord_cmplx COMMAND ${BASH} -c "'$<TARGET_FILE:gord>' '${dat}/bump_b1.grf' '-On{sep=(/((vert)>(240))?(e{strat=g}|g|h);),ole=d{cmin=15,cmax=100000,frat=0},ose=g{pass=3}}' bump_b1_2.ord -vt")
+add_test(NAME gord_bump COMMAND $<TARGET_FILE:gord> ${dat}/bump.grf bump.ord -vt)
+add_test(NAME gord_bump_b100000 COMMAND $<TARGET_FILE:gord> ${dat}/bump_b100000.grf bump_b100000.ord -vt)
+add_test(NAME gord_cmplx COMMAND ${BASH} -c "'$<TARGET_FILE:gord>' '${dat}/bump_b1.grf' '-On{sep=(/((vert)>(240))?(e{strat=g}|g|h);),ole=d{cmin=15,cmax=100000,frat=0},ose=g{pass=3}}' bump_b1.ord -vt")
 add_test(NAME gord_bump_imbal COMMAND $<TARGET_FILE:gord> ${dat}/bump_imbal_32.grf bump_imbal_32.ord -vt)
 add_test(NAME gord_ship001 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/ship001.msh' ship001.grf && \
   '$<TARGET_FILE:gord>' ship001.grf ship001.ord -vt")
@@ -433,17 +434,30 @@ add_test(NAME gord_block_2 COMMAND $<TARGET_FILE:gord> ${dat}/m4x4_b1_ev.grf m4x
 add_test(NAME gord_block_3 COMMAND $<TARGET_FILE:gord> ${dat}/m4x4_b1_ev.grf m4x4_b1_ev.ord '-ob{cmin=1,strat=s}')
 
 # check_prog_gout
-add_test(NAME gout_1 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump.grf' bump_k9.map -vmt && \
-  '$<TARGET_FILE:gord>' '${dat}/bump.grf' bump.ord -vt && \
-  '$<TARGET_FILE:gout>' '-Om{e}' -gn '${dat}/bump.grf' ${dev_null} bump.ord bump_ord.eps")
-add_test(NAME gout_2 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump.grf' bump_k9.map -vmt && \
-  '$<TARGET_FILE:gout>' '-Op{d,e,g,r,s}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.eps")
-add_test(NAME gout_3 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump.grf' bump_k9.map -vmt && \
+add_test(NAME gout_1 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump.grf' bump_k9.map && \
   '$<TARGET_FILE:gout>' '-Oi{c,r}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.iv")
+add_test(NAME gout_2 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump_b100000.grf' bump_k9_b100000.map && \
+  '$<TARGET_FILE:gout>' '-Oi{g,r}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.iv")
+add_test(NAME gout_3 COMMAND ${BASH} -c "'$<TARGET_FILE:gord>' '${dat}/bump.grf' bump.ord -vt && \
+  '$<TARGET_FILE:gout>' '-Om{e}' -gn '${dat}/bump.grf' ${dev_null} bump.ord bump_ord.eps")
+add_test(NAME gout_4 COMMAND ${BASH} -c "'$<TARGET_FILE:gord>' '${dat}/bump_b100000.grf' bump_b100000.ord -vt && \
+  '$<TARGET_FILE:gout>' '-Om{e}' -gn '${dat}/bump_b100000.grf' ${dev_null} bump_b100000.ord bump_ord_b100000.eps")
+add_test(NAME gout_5 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump.grf' bump_k9.map -vmt && \
+  '$<TARGET_FILE:gout>' '-Op{d,e,g,r,s}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.eps")
+add_test(NAME gout_6 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump_b100000.grf' bump_k9_b100000.map -vmt && \
+  '$<TARGET_FILE:gout>' '-Op{a,e,c,d,l}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.eps")
+add_test(NAME gout_7 COMMAND ${BASH} -c " \
+  '$<TARGET_FILE:gout>' '-Ot{c,d,v}' -mn '${dat}/bump.grf' '${dat}/bump.xyz' ${dev_null} bump_k9.tlp")
+add_test(NAME gout_8 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump_b100000.grf' bump_k9_b100000.map -vmt && \
+  '$<TARGET_FILE:gout>' '-Ot{b,a,r}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.tlp")
+add_test(NAME gout_9 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump.grf' bump_k9.map -vmt && \
+  '$<TARGET_FILE:gout>' '-Ov{r}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.vtk")
+add_test(NAME gout_10 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump_b100000.grf' bump_k9_b100000.map -vmt && \
+  '$<TARGET_FILE:gout>' '-Ov{v}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.vtk")
 
 # check_prog_gpart
 add_test(NAME gpart_1 COMMAND $<TARGET_FILE:gpart> 9 ${dat}/bump.grf bump_k9.map -vmt)
-add_test(NAME gpart_2 COMMAND $<TARGET_FILE:gpart> 9 ${dat}/bump_b100000.grf bump_k9.map -vmt)
+add_test(NAME gpart_2 COMMAND $<TARGET_FILE:gpart> 9 ${dat}/bump_b100000.grf bump_k9_b100000.map -vmt)
 
 # check_prog_gpart_clustering
 add_test(NAME gpart_cluster_1 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' -q 1 '${dat}/bump.grf' bump_part_cls_9.map -vmt && \

@@ -636,8 +636,8 @@ check_prog_gmap			:
 
 check_prog_gord			:	check_prog_gmk_msh
 					$(EXECS) $(SCOTCHBINDIR)/gord data/bump.grf $(TMPDIR)/bump.ord -Cu -vt
-					$(EXECS) $(SCOTCHBINDIR)/gord data/bump_b1.grf $(TMPDIR)/bump_b1.ord -Cd -vt
-					$(EXECS) $(SCOTCHBINDIR)/gord data/bump_b1.grf '-On{sep=(/((vert)>(240))?(e{strat=g}|g|h);),ole=d{cmin=15,cmax=100000,frat=0},ose=g{pass=3}}' $(TMPDIR)/bump_b1_2.ord -Cr -vt
+					$(EXECS) $(SCOTCHBINDIR)/gord data/bump_b100000.grf $(TMPDIR)/bump_b100000.ord -Cd -vt
+					$(EXECS) $(SCOTCHBINDIR)/gord data/bump_b1.grf '-On{sep=(/((vert)>(240))?(e{strat=g}|g|h);),ole=d{cmin=15,cmax=100000,frat=0},ose=g{pass=3}}' $(TMPDIR)/bump_b1.ord -Cr -vt
 					$(EXECS) $(SCOTCHBINDIR)/gord data/bump_imbal_32.grf $(TMPDIR)/bump_imbal_32.ord -Cf -vt
 					$(EXECS) $(SCOTCHBINDIR)/gord data/nocoarsen.grf $(TMPDIR)/nocoarsen.ord -vt
 					$(EXECS) $(SCOTCHBINDIR)/gord data/compress-coarsen.grf $(TMPDIR)/compress-coarsen.ord -vt
@@ -645,7 +645,7 @@ check_prog_gord			:	check_prog_gmk_msh
 
 check_prog_gotst		:	check_prog_gord
 					$(EXECS) $(SCOTCHBINDIR)/gotst data/bump.grf $(TMPDIR)/bump.ord
-					$(EXECS) $(SCOTCHBINDIR)/gotst data/bump_b1.grf $(TMPDIR)/bump_b1.ord
+					$(EXECS) $(SCOTCHBINDIR)/gotst data/bump_b100000.grf $(TMPDIR)/bump_b100000.ord
 					$(EXECS) $(SCOTCHBINDIR)/gotst data/bump_imbal_32.grf $(TMPDIR)/bump_imbal_32.ord
 					$(EXECS) $(SCOTCHBINDIR)/gotst data/nocoarsen.grf $(TMPDIR)/nocoarsen.ord
 					$(EXECS) $(SCOTCHBINDIR)/gotst data/compress-coarsen.grf $(TMPDIR)/compress-coarsen.ord
@@ -659,14 +659,19 @@ check_prog_gord_block		:	check_prog_gord
 check_prog_gout			:	check_prog_gord		\
 					check_prog_gpart
 					$(EXECS) $(SCOTCHBINDIR)/gout '-Oi{c,r}' data/bump.grf data/bump.xyz $(TMPDIR)/bump_k9.map $(TMPDIR)/bump_k9.iv
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Oi{g,r}' data/bump_b100000.grf data/bump_b100000.xyz $(TMPDIR)/bump_k9_b100000.map $(TMPDIR)/bump_k9_b100000.iv
 					$(EXECS) $(SCOTCHBINDIR)/gout '-Om{e}' -gn data/bump.grf /dev/null $(TMPDIR)/bump.ord $(TMPDIR)/bump_ord.eps
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Om{e}' -gn data/bump_b100000.grf /dev/null $(TMPDIR)/bump_b100000.ord $(TMPDIR)/bump_ord_b100000.eps
 					$(EXECS) $(SCOTCHBINDIR)/gout '-Op{d,e,g,r,s}' data/bump.grf data/bump.xyz $(TMPDIR)/bump_k9.map $(TMPDIR)/bump_k9.eps
-					$(EXECS) $(SCOTCHBINDIR)/gout '-Ot{b,c,r}' -mn data/bump.grf data/bump.xyz /dev/null $(TMPDIR)/bump_k9.tlp
-					$(EXECS) $(SCOTCHBINDIR)/gout '-Ov{v}' data/bump.grf data/bump.xyz $(TMPDIR)/bump_k9.map $(TMPDIR)/bump_k9.vtk
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Op{a,e,c,d,l}' data/bump_b100000.grf data/bump_b100000.xyz $(TMPDIR)/bump_k9_b100000.map $(TMPDIR)/bump_k9_b100000.eps
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Ot{c,d,v}' -mn data/bump.grf data/bump.xyz /dev/null $(TMPDIR)/bump_k9.tlp
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Ot{b,a,r}' data/bump_b100000.grf data/bump_b100000.xyz $(TMPDIR)/bump_k9_b100000.map $(TMPDIR)/bump_k9_b100000.tlp
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Ov{r}' data/bump.grf data/bump.xyz $(TMPDIR)/bump_k9.map $(TMPDIR)/bump_k9.vtk
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Ov{v}' data/bump_b100000.grf data/bump_b100000.xyz $(TMPDIR)/bump_k9_b100000.map $(TMPDIR)/bump_k9_b100000.vtk
 
 check_prog_gpart		:
 					$(EXECS) $(SCOTCHBINDIR)/gpart 9 data/bump.grf $(TMPDIR)/bump_k9.map -Cd -vmt
-					$(EXECS) $(SCOTCHBINDIR)/gpart 9 data/bump_b100000.grf $(TMPDIR)/bump_k9.map -Cu -vmt
+					$(EXECS) $(SCOTCHBINDIR)/gpart 9 data/bump_b100000.grf $(TMPDIR)/bump_k9_b100000.map -Cu -vmt
 					$(EXECS) $(SCOTCHBINDIR)/gpart 9 data/nocoarsen.grf $(TMPDIR)/nocoarsen_k9.map -Cr -vmt
 					$(EXECS) $(SCOTCHBINDIR)/gpart 5 data/bump_b100000.grf $(TMPDIR)/bump_k5.map -Cf -vmt '-Mr{bal=0.05,sep=m{vert=120,low=h{pass=10}f{bal=0.05,move=120},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}}|m{vert=1000,low=r{bal=0.05,sep=m{vert=120,low=h{pass=10}f{bal=0.05,move=120},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}'
 
