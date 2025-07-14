@@ -926,9 +926,10 @@ At the time being, \texttt{gout} can generate plain and encapsulated PostScript
 files for the display of adjacency matrix patterns and the
 display of planar graphs (although tridimensional objects
 can be displayed by means of isometric projection, the display of
-tridimensional mappings is not efficient), and {\sc Open Inventor}
-files~\cite{oinv} for the interactive visualization of
-tridimensional graphs.
+tridimensional mappings is not efficient), and
+\textsc{Open Inventor}~\cite{oinv}, \textsc{Tulip}~\cite{tulip}, and
+\textsc{VTK} files for the interactive visualization of tridimensional
+graphs.
 \\
 In the case of mapping display,
 the number of mapping pairs contained in the input mapping file may
@@ -1011,7 +1012,7 @@ Specify the type of output, with optional parameters within curly braces
 and separated by commas. The output formats are listed below.
 \begin{itemize}
 \iteme[\texttt{i}]
-Output the graph in SGI's {\sc Open Inventor} format, in ASCII mode,
+Output the graph in SGI's \textsc{Open Inventor} format, in ASCII mode,
 suitable for display by the \texttt{ivview} program~\cite{oinv}. The
 optional parameters are given below.
 \begin{itemize}
@@ -1076,6 +1077,26 @@ Maximum X relative clipping position (in [0.0;1.0]).
 Minimum Y relative clipping position (in [0.0;1.0]).
 \iteme[\texttt{Y=}{\it val}]
 Maximum Y relative clipping position (in [0.0;1.0]).
+\end{itemize}
+\iteme[\texttt{t}]
+Output the graph in the \textsc{Tulip} graph format, suitable for
+display by the \textsc{Tulip} data visualization
+software~\cite{tulip}. The optional parameters are given below.
+\begin{itemize}
+\iteme[\texttt{a}]
+Avoid displaying mapping spheres around vertices. Opposite of \texttt{d}.
+\iteme[\texttt{b}]
+Black-and-white output. Opposite of \texttt{c}.
+\iteme[\texttt{c}]
+Color output, using $16$ different colors. Opposite of \texttt{b}.
+\iteme[\texttt{d}]
+Display mapping spheres around vertices. Opposite of \texttt{a}.
+\iteme[\texttt{r}]
+Remove cut edges. Edges the ends of which are mapped onto different
+processors are not displayed. Opposite of \texttt{v}.
+\iteme[\texttt{v}]
+View cut edges. All graph edges are displayed.
+Opposite of \texttt{r}.
 \end{itemize}
 \iteme[\texttt{v}]
 Output the graph in VTK legacy ASCII format, suitable for display by
