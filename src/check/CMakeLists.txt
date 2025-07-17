@@ -35,6 +35,7 @@
 ##                Florent PRUVOST                         ##
 ##                Cedric LACHAT                           ##
 ##                Amaury JACQUES                          ##
+##                Xavier MULLER                           ##
 ##                Francois PELLEGRINI                     ##
 ##                                                        ##
 ##   FUNCTION   : Secondary configuration file for CMake  ##
@@ -551,43 +552,46 @@ add_test(NAME gord_block_2 COMMAND $<TARGET_FILE:gord> ${dat}/m4x4_b1_ev.grf m4x
 
 add_test(NAME gord_block_3 COMMAND $<TARGET_FILE:gord> ${dat}/m4x4_b1_ev.grf m4x4_b1_ev.ord '-ob{cmin=1,strat=s}')
 
-# check_prog_gout
-
-add_test(NAME gout_1 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump.grf' bump_k9.map && \
-  '$<TARGET_FILE:gout>' '-Oi{c,r}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.iv")
-
-add_test(NAME gout_2 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump_b100000.grf' bump_k9_b100000.map && \
-  '$<TARGET_FILE:gout>' '-Oi{g,r}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.iv")
-
-add_test(NAME gout_3 COMMAND ${BASH} -c "'$<TARGET_FILE:gord>' '${dat}/bump.grf' bump.ord -vt && \
-  '$<TARGET_FILE:gout>' '-Om{e}' -gn '${dat}/bump.grf' ${dev_null} bump.ord bump_ord.eps")
-
-add_test(NAME gout_4 COMMAND ${BASH} -c "'$<TARGET_FILE:gord>' '${dat}/bump_b100000.grf' bump_b100000.ord -vt && \
-  '$<TARGET_FILE:gout>' '-Om{e}' -gn '${dat}/bump_b100000.grf' ${dev_null} bump_b100000.ord bump_ord_b100000.eps")
-
-add_test(NAME gout_5 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump.grf' bump_k9.map -vmt && \
-  '$<TARGET_FILE:gout>' '-Op{d,e,g,r,s}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.eps")
-
-add_test(NAME gout_6 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump_b100000.grf' bump_k9_b100000.map -vmt && \
-  '$<TARGET_FILE:gout>' '-Op{a,e,c,d,l}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.eps")
-
-add_test(NAME gout_7 COMMAND ${BASH} -c " \
-  '$<TARGET_FILE:gout>' '-Ot{c,d,v}' -mn '${dat}/bump.grf' '${dat}/bump.xyz' ${dev_null} bump_k9.tlp")
-
-add_test(NAME gout_8 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump_b100000.grf' bump_k9_b100000.map -vmt && \
-  '$<TARGET_FILE:gout>' '-Ot{b,a,r}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.tlp")
-
-add_test(NAME gout_9 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump.grf' bump_k9.map -vmt && \
-  '$<TARGET_FILE:gout>' '-Ov{r}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.vtk")
-
-add_test(NAME gout_10 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' 9 '${dat}/bump_b100000.grf' bump_k9_b100000.map -vmt && \
-  '$<TARGET_FILE:gout>' '-Ov{v}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.vtk")
-
 # check_prog_gpart
 
 add_test(NAME gpart_1 COMMAND $<TARGET_FILE:gpart> 9 ${dat}/bump.grf bump_k9.map -vmt)
 
 add_test(NAME gpart_2 COMMAND $<TARGET_FILE:gpart> 9 ${dat}/bump_b100000.grf bump_k9_b100000.map -vmt)
+
+# check_prog_gout
+
+set_tests_properties(gord_bump gord_bump_b100000 PROPERTIES FIXTURES_SETUP GORD_DEPS)
+set_tests_properties(gpart_1 gpart_2 PROPERTIES FIXTURES_SETUP GPART_DEPS)
+
+add_test(NAME gout_1 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Oi{c,r}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.iv")
+set_tests_properties(gout_1 PROPERTIES FIXTURES_REQUIRED GORD_DEPS)
+
+add_test(NAME gout_2 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Oi{g,r}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.iv")
+set_tests_properties(gout_2 PROPERTIES FIXTURES_REQUIRED GPART_DEPS)
+
+add_test(NAME gout_3 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Om{e}' -gn '${dat}/bump.grf' ${dev_null} bump.ord bump_ord.eps")
+set_tests_properties(gout_3 PROPERTIES FIXTURES_REQUIRED GORD_DEPS)
+
+add_test(NAME gout_4 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Om{e}' -gn '${dat}/bump_b100000.grf' ${dev_null} bump_b100000.ord bump_ord_b100000.eps")
+set_tests_properties(gout_4 PROPERTIES FIXTURES_REQUIRED GORD_DEPS)
+
+add_test(NAME gout_5 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Op{d,e,g,r,s}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.eps")
+set_tests_properties(gout_5 PROPERTIES FIXTURES_REQUIRED GPART_DEPS)
+
+add_test(NAME gout_6 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Op{a,e,c,d,l}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.eps")
+set_tests_properties(gout_6 PROPERTIES FIXTURES_REQUIRED GPART_DEPS)
+
+add_test(NAME gout_7 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Ot{c,d,v}' -mn '${dat}/bump.grf' '${dat}/bump.xyz' ${dev_null} bump_k9.tlp")
+set_tests_properties(gout_7 PROPERTIES FIXTURES_REQUIRED GPART_DEPS)
+
+add_test(NAME gout_8 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Ot{b,a,r}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.tlp")
+set_tests_properties(gout_8 PROPERTIES FIXTURES_REQUIRED GPART_DEPS)
+
+add_test(NAME gout_9 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Ov{r}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.vtk")
+set_tests_properties(gout_9 PROPERTIES FIXTURES_REQUIRED GPART_DEPS)
+
+add_test(NAME gout_10 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Ov{v}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.vtk")
+set_tests_properties(gout_10 PROPERTIES FIXTURES_REQUIRED GPART_DEPS)
 
 # check_prog_gpart_clustering
 
