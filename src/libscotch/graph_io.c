@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2010,2016,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2010,2016,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -59,7 +59,7 @@
 /**                # Version 6.0  : from : 03 aug 2016     **/
 /**                                 to   : 03 aug 2016     **/
 /**                # Version 7.0  : from : 19 jan 2023     **/
-/**                                 to   : 12 mar 2023     **/
+/**                                 to   : 11 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -90,7 +90,7 @@ graphLoad (
 Graph * restrict const      grafptr,              /* Graph structure to fill              */
 FILE * const                stream,               /* Stream from which to read graph data */
 const Gnum                  baseval,              /* Base value (-1 means keep file base) */
-const GraphFlag             flagval)              /* Graph loading flags                  */
+const GraphLoadFlag         flagval)              /* Graph loading flags                  */
 {
   Gnum                edgenum;                    /* Number of edges really allocated */
   Gnum                edgennd;

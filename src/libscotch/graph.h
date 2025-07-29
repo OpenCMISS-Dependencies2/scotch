@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2008,2010-2012,2014-2019,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2008,2010-2012,2014-2019,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -64,7 +64,7 @@
 /**                # Version 6.0  : from : 03 mar 2011     **/
 /**                                 to   : 10 may 2019     **/
 /**                # Version 7.0  : from : 08 jun 2018     **/
-/**                                 to   : 18 jan 2023     **/
+/**                                 to   : 11 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -88,6 +88,8 @@
 
 #define GRAPHBITSUSED               0x003F        /*+ Significant bits for plain graph routines               +*/
 #define GRAPHBITSNOTUSED            0x0040        /*+ Value above which bits not used by plain graph routines +*/
+
+/*+ Graph loading flags. +*/
 
 #define GRAPHIONOLOADVERT           1             /*+ Remove vertex loads on loading +*/
 #define GRAPHIONOLOADEDGE           2             /*+ Remove edge loads on loading   +*/
@@ -122,6 +124,10 @@ typedef struct VertList_ {
 /*+ The graph flag type. +*/
 
 typedef unsigned int GraphFlag;                   /*+ Graph property flags +*/
+
+/*+ The graph load flag type. +*/
+
+typedef unsigned int GraphLoadFlag;               /*+ Graph property flags +*/
 
 /*+ The graph structure. +*/
 
@@ -167,7 +173,7 @@ Gnum                        graphDiamPV         (const Graph * restrict const, C
 Gnum                        graphIelo           (const Graph * const, Gnum * const, Gnum * const);
 int                         graphInduceList     (const Graph * restrict const, const Gnum, const Gnum * restrict const, Graph * restrict const);
 int                         graphInducePart     (const Graph * restrict const, const GraphPart * restrict const, const Gnum, const GraphPart, Graph * restrict const);
-int                         graphLoad           (Graph * const, FILE * const, const Gnum, const GraphFlag);
+int                         graphLoad           (Graph * const, FILE * const, const Gnum, const GraphLoadFlag);
 int                         graphLoad2          (const Gnum, const Gnum, const Gnum * const, const Gnum * const, Gnum * restrict const, const Gnum, const Gnum * const);
 int                         graphSave           (const Graph * const, FILE * const);
 

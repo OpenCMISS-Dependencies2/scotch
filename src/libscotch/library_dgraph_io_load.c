@@ -1,4 +1,4 @@
-/* Copyright 2007,2012,2018,2019,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2012,2018,2019,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -44,7 +44,7 @@
 /**                # Version 6.0  : from : 29 nov 2012     **/
 /**                                 to   : 25 apr 2018     **/
 /**                # Version 7.0  : from : 20 sep 2019     **/
-/**                                 to   : 21 jan 2023     **/
+/**                                 to   : 11 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -86,7 +86,7 @@ FILE * const                stream,
 const SCOTCH_Num            baseval,
 const SCOTCH_Num            flagval)
 {
-  GraphFlag           srcgrafflag;                /* Graph flags */
+  GraphLoadFlag       flagtmp;                    /* Graph load loags */
 
   if ((baseval < -1) || (baseval > 1)) {
     errorPrint (STRINGIFY (SCOTCH_dgraphLoad) ": invalid base parameter");
@@ -97,8 +97,8 @@ const SCOTCH_Num            flagval)
     return     (1);
   }
 
-  srcgrafflag = (((flagval & 1) != 0) ? GRAPHIONOLOADVERT : 0) +
-                (((flagval & 2) != 0) ? GRAPHIONOLOADEDGE : 0);
+  flagtmp = (((flagval & 1) != 0) ? GRAPHIONOLOADVERT : 0) +
+            (((flagval & 2) != 0) ? GRAPHIONOLOADEDGE : 0);
 
-  return (dgraphLoad ((Dgraph * const) CONTEXTOBJECT (grafptr), stream, (Gnum) baseval, srcgrafflag));
+  return (dgraphLoad ((Dgraph * const) CONTEXTOBJECT (grafptr), stream, (Gnum) baseval, flagtmp));
 }
