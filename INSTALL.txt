@@ -228,16 +228,19 @@ basing on the structure of existing ones.
 In particular, the Makefile.inc file contains three variables
 which specify which C compiler to use. Their semantic is as
 follows:
-  - The compiler command in variable CCS is used to compile
+  - The C compiler command in variable CCS is used to compile
     the sequential (hence the "S" in "CCS") Scotch distribution.
-  - The compiler command in CCP is used to compile the parallel ("P")
-    PT-Scotch distribution.
-  - The compiler command in CCD is used to compile the version of the
+  - The C compiler command in CCP is used to compile the parallel ("P")
+    PT-Scotch distribution, using the MPI interface.
+  - The C compiler command in CCD is used to compile the version of the
     "dummysizes" ("D") executable used for compiling PT-Scotch, as
     explained below.
+  - The optional Fortran compiler command FCS is used to compile
+    Fortran tests.
 
-Create a symbolic link from the configuration file to the
-current "src/" working directory, renaming it as "Makefile.inc":
+Create a custom "src/Makefile.inc" file, or create a symbolic link
+from a sample configuration file to the current "src/" working
+directory, renaming it as "Makefile.inc":
 
 %prompt% ln -s Make.inc/Makefile.inc.xxxx_xxx_xxx Makefile.inc
 

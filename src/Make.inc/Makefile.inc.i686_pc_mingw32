@@ -21,6 +21,7 @@ CAT			= cat
 CCS			= gcc
 CCP			= gcc
 CCD			= gcc
+FCS			= gfortran
 
 #--- Compiler/loader flags
 CFLAGS_CPL		= -O0 -g3 -fPIC -U_FORTIFY_SOURCE

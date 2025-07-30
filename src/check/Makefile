@@ -1,4 +1,4 @@
-## Copyright 2011,2012,2014-2016,2018-2021 IPB, Universite de Bordeaux, INRIA & CNRS
+## Copyright 2011,2012,2014-2016,2018-2021,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,
 ## graph partitioning and sparse matrix ordering.
@@ -123,10 +123,13 @@ PROGSED			?= sed
 ##  Project rules.
 ##
 
-.PHONY				:	check	ptcheck	clean	realclean
+.PHONY				:	check	ptcheck	clean	realclean	nothing
+
+nothing				:
 
 check				:	realclean
 					$(MAKE) CC="$(CCS)" CCD="$(CCS)" SCOTCHLIBS="$(LIBSCOTCH)" $(CHECKSCOTCH)
+					$(MAKE) CC="$(CCS)" CCD="$(CCS)" FC="$(FCS)" SCOTCHLIBS="$(LIBSCOTCH)" $(CHECKSCOTCHF)
 
 check_full			:	realclean
 					$(MAKE) CC="$(CCS) -DSCOTCH_DEBUG_FULL" CCD="$(CCS)" SCOTCHLIBS="$(LIBSCOTCH)" check_prog_full
@@ -207,8 +210,6 @@ CHECKSCOTCH = 		check_common_file_compress		\
 			check_libmetis_v5			\
 			check_libmetis_dual_v3			\
 			check_libmetis_dual_v5			\
-			check_libmetis_dual_f_v3		\
-			check_libmetis_dual_f_v5		\
 			check_prog_amk				\
 			check_prog_amk_grf			\
 			check_prog_acpl				\
@@ -228,6 +229,13 @@ CHECKSCOTCH = 		check_common_file_compress		\
 			check_prog_gtst				\
 			check_prog_mmk				\
 			check_prog_mord
+
+CHECKSCOTCHF = 		check_libmetis_dual_f_v3		\
+			check_libmetis_dual_f_v5
+
+ifeq ($(strip $(FCS)),)
+  CHECKSCOTCHF =	nothing
+endif
 
 CHECKPTSCOTCH = 	check_strat_par				\
 			check_scotch_dgraph_check		\
