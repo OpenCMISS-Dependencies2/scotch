@@ -207,7 +207,7 @@ endif(BUILD_LIBSCOTCHMETIS)
 
 add_test_scotch(test_scotch_arch)
 
-add_test(NAME test_scotch_arch COMMAND test_scotch_arch  arch.tgt)
+add_test(NAME test_scotch_arch COMMAND test_scotch_arch arch.tgt)
 
 # test_scotch_arch_deco
 
@@ -304,7 +304,7 @@ add_test(NAME test_scotch_graph_part_ovl_2 COMMAND test_scotch_graph_part_ovl 4 
 
 add_test_scotch(test_scotch_mesh_graph)
 
-add_test(NAME test_scotch_mesh_graph COMMAND test_scotch_mesh_graph  ${cur_src}/data/ship001.msh)
+add_test(NAME test_scotch_mesh_graph COMMAND test_scotch_mesh_graph ${cur_src}/data/ship001.msh)
 
 # test_strat_seq
 
@@ -426,15 +426,15 @@ add_test(NAME atst_4x4x4 COMMAND $<TARGET_FILE:atst> ${tgt}/t4x4x4.tgt)
 
 add_test(NAME test_gbase_1 COMMAND ${BASH} -c
   "'$<TARGET_FILE:gbase>' 1 '${dat}/m4x4.grf' m4x4_b1.grf && \
-  '${CMAKE_COMMAND}' -E compare_files  '${dat}/m4x4_b1.grf' m4x4_b1.grf")
+  '${CMAKE_COMMAND}' -E compare_files '${dat}/m4x4_b1.grf' m4x4_b1.grf")
 
 add_test(NAME test_gbase_2 COMMAND ${BASH} -c
   "'$<TARGET_FILE:gbase>' 1 '${dat}/m4x4_b1.grf' m4x4_b1.grf && \
-  '${CMAKE_COMMAND}' -E compare_files  '${dat}/m4x4_b1.grf' m4x4_b1.grf")
+  '${CMAKE_COMMAND}' -E compare_files '${dat}/m4x4_b1.grf' m4x4_b1.grf")
 
 add_test(NAME test_gbase_3 COMMAND ${BASH} -c
   "'$<TARGET_FILE:gbase>' 0 '${dat}/m4x4_b1.grf' m4x4.grf && \
-  '${CMAKE_COMMAND}' -E compare_files  '${dat}/m4x4.grf' m4x4.grf")
+  '${CMAKE_COMMAND}' -E compare_files '${dat}/m4x4.grf' m4x4.grf")
 
 # check_prog_gmk
 
