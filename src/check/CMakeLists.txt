@@ -467,12 +467,12 @@ add_test(NAME gmk_msh_ship001 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${da
   '$<TARGET_FILE:gtst>' ship001.grf")
 
 foreach(i RANGE 1 2)
-  add_test(NAME gmk_msh_dual_${i} COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/small_55.msh' small_55_d${i}.grf -d${i} && \
-    '${CMAKE_COMMAND}' -E compare_files  '${dat}/small_55_d${i}.grf' small_55_d${i}.grf")
+  add_test(NAME gmk_msh_dual_${i} COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/small2.msh' small2_d${i}.grf -d${i} && \
+    '${CMAKE_COMMAND}' -E compare_files '${dat}/small2_d${i}.grf' small2_d${i}.grf")
 endforeach()
 
-add_test(NAME gmk_msh_dual_3 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/small_55.msh' small_55_d3.grf -d3 && \
-  '${CMAKE_COMMAND}' -E compare_files  '${dat}/small_55_d2.grf' small_55_d3.grf")
+add_test(NAME gmk_msh_dual_3 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/small2.msh' small2_d3.grf -d3 && \
+  '${CMAKE_COMMAND}' -E compare_files '${dat}/small2_d2.grf' small2_d3.grf")
 
 # check_prog_mmk
 
@@ -518,7 +518,7 @@ add_test(NAME mord_ship001 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/
 
 add_test(NAME gmap_bump COMMAND $<TARGET_FILE:gmap> ${dat}/bump.grf ${tgt}/h3.tgt bump_h3.map -vmt)
 
-add_test(NAME gmap_small COMMAND $<TARGET_FILE:gmap> ${dat}/small.grf ${tgt}/m11x13.tgt small_m11x13.map -vmt)
+add_test(NAME gmap_small COMMAND $<TARGET_FILE:gmap> ${dat}/small1.grf ${tgt}/m11x13.tgt small1_m11x13.map -vmt)
 
 # check_prog_gord
 
@@ -619,9 +619,9 @@ add_test(NAME gpart_remap COMMAND $<TARGET_FILE:gpart> 32 ${dat}/bump_imbal_32.g
 
 # check_prog_gscat
 
-add_test(NAME gscat_1 COMMAND $<TARGET_FILE:gscat> 4 ${dat}/small.grf small_%r.grf)
+add_test(NAME gscat_1 COMMAND $<TARGET_FILE:gscat> 4 ${dat}/small1.grf small1-%r.grf)
 
-add_test(NAME gscat_2 COMMAND $<TARGET_FILE:gscat> 4 -i1 ${dat}/bump.grf bump4_%r.grf)
+add_test(NAME gscat_2 COMMAND $<TARGET_FILE:gscat> 4 -i1 ${dat}/bump.grf bump4-%r.grf)
 
 # check_prog_gtst
 
@@ -647,7 +647,7 @@ if(BUILD_PTSCOTCH)
 
   add_test(NAME dgord_2 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 $<TARGET_FILE:dgord> ${dat}/bump_b100000.grf ${dev_null} -vt)
 
-  add_test(NAME dgord_3 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 4 $<TARGET_FILE:dgord> ${dat}/small_%r.grf small.ord -vt)
+  add_test(NAME dgord_3 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 4 $<TARGET_FILE:dgord> ${dat}/small1-%r.grf small1.ord -vt)
 
   # check_prog_dgpart
 
@@ -655,27 +655,27 @@ if(BUILD_PTSCOTCH)
 
   add_test(NAME dgpart_2 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 $<TARGET_FILE:dgpart> 9 ${dat}/bump_b100000.grf ${dev_null} -vmt)
 
-  add_test(NAME dgpart_3 COMMAND ${BASH} -c "'${MPIEXEC_EXECUTABLE}' ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 4 '$<TARGET_FILE:dgpart>' 50 '${dat}/small_%r.grf' ${dev_null} -vmt")
+  add_test(NAME dgpart_3 COMMAND ${BASH} -c "'${MPIEXEC_EXECUTABLE}' ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 4 '$<TARGET_FILE:dgpart>' 50 '${dat}/small1-%r.grf' ${dev_null} -vmt")
 
   # check_prog_dgscat-dggath
 
   add_test(NAME test_dgscat COMMAND
     ${BASH} -c "'${MPIEXEC_EXECUTABLE}' ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 '$<TARGET_FILE:dgscat>' \
-      -r1 -c '${dat}/m16x16.grf' out_dgscat_%r.grf ; \
+      -r1 -c '${dat}/m16x16.grf' out_dgscat-%r.grf ; \
       '${MPIEXEC_EXECUTABLE}' ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 '$<TARGET_FILE:dggath>' \
-      -r1 -c out_dgscat_%r.grf out_dggat.grf ; \
-      '${CMAKE_COMMAND}' -E compare_files  '${dat}/m16x16.grf' out_dggat.grf")
+      -r1 -c out_dgscat-%r.grf out_dggat.grf ; \
+      '${CMAKE_COMMAND}' -E compare_files '${dat}/m16x16.grf' out_dggat.grf")
 
   add_test(NAME test_dgscat_b1 COMMAND
     ${BASH} -c "'${MPIEXEC_EXECUTABLE}' ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 '$<TARGET_FILE:dgscat>' \
-      -c '${dat}/m16x16_b1.grf' out_b1_dgscat_%r.grf ; \
+      -c '${dat}/m16x16_b1.grf' out_b1_dgscat-%r.grf ; \
       '${MPIEXEC_EXECUTABLE}' ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 '$<TARGET_FILE:dggath>' \
-      -c out_b1_dgscat_%r.grf out_b1_ddgat.grf ; \
+      -c out_b1_dgscat-%r.grf out_b1_ddgat.grf ; \
       '${CMAKE_COMMAND}' -E compare_files '${dat}/m16x16_b1.grf' out_b1_ddgat.grf")
 
   # check_prog_dgtst
 
-  add_test(NAME dgtst COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 4 $<TARGET_FILE:dgtst> ${dat}/small_%r.grf)
+  add_test(NAME dgtst COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 4 $<TARGET_FILE:dgtst> ${dat}/small1-%r.grf)
 
   # check_prog_dfull
 

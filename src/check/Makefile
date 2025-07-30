@@ -598,12 +598,12 @@ check_prog_gmk_msh		:	check_prog_mmk
 					$(EXECS) $(SCOTCHBINDIR)/gtst $(TMPDIR)/m2_5_4_3.grf
 					$(EXECS) $(SCOTCHBINDIR)/gmk_msh data/ship001.msh $(TMPDIR)/ship001.grf
 					$(EXECS) $(SCOTCHBINDIR)/gtst $(TMPDIR)/ship001.grf
-					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small_55.msh" $(TMPDIR)/small_55_d1.grf -d1
-					$(PROGDIFF) "data/small_55_d1.grf" $(TMPDIR)/small_55_d1.grf
-					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small_55.msh" $(TMPDIR)/small_55_d2.grf -d2
-					$(PROGDIFF) "data/small_55_d2.grf" $(TMPDIR)/small_55_d2.grf
-					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small_55.msh" $(TMPDIR)/small_55_d3.grf -d3
-					$(PROGDIFF) "data/small_55_d2.grf" $(TMPDIR)/small_55_d3.grf
+					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small2.msh" $(TMPDIR)/small2_d1.grf -d1
+					$(PROGDIFF) "data/small2_d1.grf" $(TMPDIR)/small2_d1.grf
+					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small2.msh" $(TMPDIR)/small2_d2.grf -d2
+					$(PROGDIFF) "data/small2_d2.grf" $(TMPDIR)/small2_d2.grf
+					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small2.msh" $(TMPDIR)/small2_d3.grf -d3
+					$(PROGDIFF) "data/small2_d2.grf" $(TMPDIR)/small2_d3.grf
 					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/cube_8.msh" $(TMPDIR)/cube_8_d3.grf -d3
 					$(PROGDIFF) "data/cube_8_d3.grf" $(TMPDIR)/cube_8_d3.grf
 
@@ -632,7 +632,7 @@ check_prog_mord                 :	check_prog_gmk_msh
 
 check_prog_gmap			:
 					$(EXECS) $(SCOTCHBINDIR)/gmap data/bump.grf $(SCOTCHTGTDIR)/h3.tgt $(TMPDIR)/bump_h3.map -vmt
-					$(EXECS) $(SCOTCHBINDIR)/gmap data/small.grf $(SCOTCHTGTDIR)/m11x13.tgt $(TMPDIR)/small_m11x13.map -vmt
+					$(EXECS) $(SCOTCHBINDIR)/gmap data/small1.grf $(SCOTCHTGTDIR)/m11x13.tgt $(TMPDIR)/small1_m11x13.map -vmt
 
 check_prog_gord			:	check_prog_gmk_msh
 					$(EXECS) $(SCOTCHBINDIR)/gord data/bump.grf $(TMPDIR)/bump.ord -Cu -vt
@@ -696,8 +696,8 @@ check_prog_gpart_remap		:
 					$(EXECS) $(SCOTCHBINDIR)/gpart 32 data/bump_imbal_32.grf /dev/null -rodata/bump_old.map -vmt
 
 check_prog_gscat		:
-					$(EXECS) $(SCOTCHBINDIR)/gscat 4 data/small.grf $(TMPDIR)/small_%r.grf
-					$(EXECS) $(SCOTCHBINDIR)/gscat 4 -i1 data/bump.grf $(TMPDIR)/bump4_%r.grf
+					$(EXECS) $(SCOTCHBINDIR)/gscat 4 data/small1.grf $(TMPDIR)/small1-%r.grf
+					$(EXECS) $(SCOTCHBINDIR)/gscat 4 -i1 data/bump.grf $(TMPDIR)/bump4-%r.grf
 
 check_prog_gtst			:
 					$(EXECS) $(SCOTCHBINDIR)/gtst data/m4x4_b1_ev.grf $(TMPDIR)/gtst_ev.txt
@@ -718,24 +718,24 @@ check_prog_full		:
 check_prog_dgord		:
 					$(EXECP3) $(SCOTCHBINDIR)/dgord data/bump.grf /dev/null -Cu -vt
 					$(EXECP3) $(SCOTCHBINDIR)/dgord data/bump_b100000.grf /dev/null -Cd -vt
-					$(EXECP4) $(SCOTCHBINDIR)/dgord data/small_%r.grf $(TMPDIR)/small.ord -vt
+					$(EXECP4) $(SCOTCHBINDIR)/dgord data/small1-%r.grf $(TMPDIR)/small1.ord -vt
 
 check_prog_dgpart		:
 					$(EXECP3) $(SCOTCHBINDIR)/dgpart 9 data/bump.grf /dev/null -Cu -vmt
 					$(EXECP3) $(SCOTCHBINDIR)/dgpart 9 data/bump_b100000.grf /dev/null -Cd -vmt
-					$(EXECP4) $(SCOTCHBINDIR)/dgpart 50 data/small_%r.grf /dev/null -vmt
+					$(EXECP4) $(SCOTCHBINDIR)/dgpart 50 data/small1-%r.grf /dev/null -vmt
 
 check_prog_dgscat-dggath	:	TMP := $(shell mktemp -u)
 check_prog_dgscat-dggath	:
-					$(EXECP3) $(SCOTCHBINDIR)/dgscat -r1 -c data/m16x16.grf "$(TMP)1_%r.grf"
-					$(EXECP3) $(SCOTCHBINDIR)/dggath -r1 -c "$(TMP)1_%r.grf" "$(TMP)1.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dgscat -r1 -c data/m16x16.grf "$(TMP)1-%r.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dggath -r1 -c "$(TMP)1-%r.grf" "$(TMP)1.grf"
 					$(PROGDIFF) data/m16x16.grf "$(TMP)1.grf"
-					$(EXECP3) $(SCOTCHBINDIR)/dgscat -c data/m16x16_b100000.grf "$(TMP)2_%r.grf"
-					$(EXECP3) $(SCOTCHBINDIR)/dggath -c "$(TMP)2_%r.grf" "$(TMP)2.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dgscat -c data/m16x16_b100000.grf "$(TMP)2-%r.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dggath -c "$(TMP)2-%r.grf" "$(TMP)2.grf"
 					$(PROGDIFF) data/m16x16_b100000.grf "$(TMP)2.grf"
 
 check_prog_dgtst		:
-					$(EXECP4) $(SCOTCHBINDIR)/dgtst data/small_%r.grf
+					$(EXECP4) $(SCOTCHBINDIR)/dgtst data/small1-%r.grf
 ##
 
 check_prog_dfull		:
