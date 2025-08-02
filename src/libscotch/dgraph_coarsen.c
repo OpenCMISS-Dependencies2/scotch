@@ -52,7 +52,7 @@
 /**                # Version 6.1  : from : 17 jun 2021     **/
 /**                                 to   : 27 dec 2021     **/
 /**                # Version 7.0  : from : 14 jan 2020     **/
-/**                                 to   : 01 aug 2025     **/
+/**                                 to   : 02 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -795,7 +795,7 @@ abort1:
 abort2:
   coarptr->thrdtab[thrdnum].retuval = o;
 
-  threadReduce (descptr, coarptr->thrdtab, sizeof (DgraphCoarsenThread), (ThreadReduceFunc) dgraphCoarsenBuildThrReduce, 0, NULL); /* Sum edges and get maximum of degrmax */
+  threadReduce (descptr, &coarptr->thrdtab[thrdnum], sizeof (DgraphCoarsenThread), (ThreadReduceFunc) dgraphCoarsenBuildThrReduce, 0, NULL); /* Sum edges and get maximum of degrmax */
 
   return;
 }
