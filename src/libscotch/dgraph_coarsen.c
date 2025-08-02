@@ -1,4 +1,4 @@
-/* Copyright 2007-2012,2014,2018-2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007-2012,2014,2018-2021,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -52,7 +52,7 @@
 /**                # Version 6.1  : from : 17 jun 2021     **/
 /**                                 to   : 27 dec 2021     **/
 /**                # Version 7.0  : from : 14 jan 2020     **/
-/**                                 to   : 31 jul 2024     **/
+/**                                 to   : 01 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -1443,7 +1443,7 @@ Context * restrict const              contptr)    /*+ Execution context         
   if (dgraphCheck (coargrafptr) != 0) {           /* Check graph consistency */
     errorPrint ("dgraphCoarsen: inconsistent graph data");
     dgraphFree (coargrafptr);
-    return (1);
+    return (2);
   }
 #endif /* SCOTCH_DEBUG_DGRAPH2 */
 
