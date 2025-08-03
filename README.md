@@ -45,6 +45,7 @@ To use the lastest version of **Scotch**, please clone the master branch:
 
 Tarballs of the **Scotch** releases are available [here](https://gitlab.inria.fr/scotch/scotch/-/releases).
 
+
 Documentation
 -------------
 
@@ -77,7 +78,6 @@ Linux and MacOS-X are fully supported. MacOS-X users must use recent versions of
 ``` bash
 cmake -DBUILD_SHARED_LIBS=ON -DBISON_EXECUTABLE=/usr/local/Cellar/bison/3.8.2/bin/bison -DFLEX_EXECUTABLE=/usr/local/Cellar/flex/2.6.4_2/bin/flex
 ```
-
 You may also use alternate compilers, by overloading the `CMAKE_*_COMPILER` variables, e.g.:
 
 ```bash
@@ -98,13 +98,13 @@ cmake -DLIBSCOTCHERR=scotcherr
 
 * With a traditional Makefile:
 
-CMake installation is easy and straightforward. It allows one to compile and install **Scotch** and **PT-Scotch**, depending on flags such as the use of multi-threading and/or MPI. The traditional Makefile installation gives additional freedom to perform (cross-)compilation for non-standard systems and configurations.
+CMake installation is easy and straightforward. It allows one to compile and install **Scotch** and **PT-Scotch**, depending on flags such as the use of multi-threading and/or MPI. The traditional Makefile installation provides additional freedom to perform (cross-)compilation for non-standard systems and configurations. Please refer to the `INSTALL.txt` file at the root of the package tree for more information on the use of traditional `Makefile`s.
 
 
 Contributing to Scotch
 ----------------------
 
-To report a bug or discuss potential improvements, You can contact directly the PI at <francois.pellegrini@u-bordeaux.fr>. However, the GitLab environment provides features that are worth taking advantage of, so we recommend you to take the time to use them. Before reporting a bug or submitting a patch in the Inria GitLab environment, you will need an account on the server.
+To report a bug or discuss potential improvements, you can contact directly the PI at <francois.pellegrini@u-bordeaux.fr>. However, the GitLab environment provides features that are worth taking advantage of, so we recommend you to take the time to use them. Before reporting a bug or submitting a patch in the Inria GitLab environment, you will need an account on the server.
 **Please dot not hesitate to send an e-mail to <marc.fuentes@inria.fr> so that we create an account for you on the Inria Gitlab repository**. You will then be able to open issues in the bug tracker, request features, or propose patches using the "merge requests" feature.
 
 
@@ -155,4 +155,4 @@ Feel free to use the following publications to reference **Scotch**:
 Licence
 -------
 
-https://gitlab.inria.fr/scotch/scotch/blob/master/LICENSE_en.txt
+[https://gitlab.inria.fr/scotch/scotch/blob/master/LICENSE_en.txt](https://gitlab.inria.fr/scotch/scotch/blob/master/LICENSE_en.txt)
