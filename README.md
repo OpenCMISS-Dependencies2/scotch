@@ -7,21 +7,23 @@ The **Scotch** distribution is a set of programs and libraries which implement t
 
 * Its capabilities can be used through a set of stand-alone programs as well as through the **Scotch** library, which offers both C and Fortran interfaces.
 
-* It provides algorithms to partition graph structures, as well as mesh structures defined as node-element bipartite graphs and which can also represent hypergraphs.
+* It possesses an official Python interface, [ScotchPy](https://codeberg.org/fpellegr/scotchpy).
 
-* To speed-up its computations, the **Scotch** library dynamically takes advantage of either POSIX threads or native Windows threads. **The PT-Scotch** library, used to manage very large graphs distributed across the nodes of a parallel computer, uses the MPI interface, possibly in combination with multi-threading when the MPI implementation allows for it.
+* It provides algorithms to partition graph structures, as well as mesh structures defined as node-element bipartite graphs and which can also represent hypergraphs.
 
 * It can map any weighted source graph onto any weighted target graph. The source and target graphs may have any topology, and their vertices and edges may be weighted. Moreover, both source and target graphs may be disconnected. This feature allows for the mapping of programs onto disconnected subparts of a parallel architecture made up of heterogeneous processors and communication links.
 
-* It computes amalgamated block orderings of sparse matrices, for efficient solving using BLAS routines.
-
 * Its running time is linear in the number of edges of the source graph, and logarithmic in the number of vertices of the target graph for mapping computations.
+
+* It computes amalgamated block orderings of sparse matrices, for efficient solving using BLAS routines.
 
 * It can handle indifferently graph and mesh data structures created within C or Fortran programs, with array indices starting from 0 or 1.
 
 * It offers extended support for adaptive graphs and meshes through the handling of disjoint edge arrays.
 
 * It is dynamically parametrizable thanks to strategy strings that are interpreted at run-time.
+
+* To speed-up its computations, the **Scotch** library dynamically takes advantage of either POSIX threads or native Windows threads. **The PT-Scotch** library, used to manage very large graphs distributed across the nodes of a parallel computer, uses the MPI interface, possibly in combination with multi-threading when the MPI implementation allows for it.
 
 * It uses system memory efficiently, to process large graphs and meshes without incurring out-of-memory faults.
 
@@ -98,7 +100,7 @@ cmake -DLIBSCOTCHERR=scotcherr
 
 * With a traditional Makefile:
 
-CMake installation is easy and straightforward. It allows one to compile and install **Scotch** and **PT-Scotch**, depending on flags such as the use of multi-threading and/or MPI. The traditional Makefile installation provides additional freedom to perform (cross-)compilation for non-standard systems and configurations. Please refer to the `INSTALL.txt` file at the root of the package tree for more information on the use of traditional `Makefile`s.
+CMake installation is easy and straightforward. It allows one to compile and install **Scotch** and **PT-Scotch**, depending on flags such as the use of multi-threading and/or MPI. The traditional Makefile installation provides additional freedom to perform (cross-)compilation for non-standard systems and configurations. Please refer to the `[INSTALL.txt](https://gitlab.inria.fr/scotch/scotch/blob/master/INSTALL.txt)` file at the root of the package tree for more information on the use of traditional `Makefile`s.
 
 
 Contributing to Scotch
@@ -106,6 +108,8 @@ Contributing to Scotch
 
 To report a bug or discuss potential improvements, you can contact directly the PI at <francois.pellegrini@u-bordeaux.fr>. However, the GitLab environment provides features that are worth taking advantage of, so we recommend you to take the time to use them. Before reporting a bug or submitting a patch in the Inria GitLab environment, you will need an account on the server.
 **Please dot not hesitate to send an e-mail to <marc.fuentes@inria.fr> so that we create an account for you on the Inria Gitlab repository**. You will then be able to open issues in the bug tracker, request features, or propose patches using the "merge requests" feature.
+
+Contribtions to `ScotchPy` are made on the [Codeberg](https://codeberg.org/) platform, on which registration is much easier.
 
 
 Past and current contributors
