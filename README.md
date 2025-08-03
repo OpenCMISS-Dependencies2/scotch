@@ -1,7 +1,7 @@
 Scotch: a software package for graph and mesh/hypergraph partitioning, graph clustering, and sparse matrix ordering
 ===================================================================================================================
 
-The **Scotch** distribution is a set of programs and libraries which implement the static mapping and sparse matrix reordering algorithms developed within the **Scotch** project.
+The **Scotch** distribution is a set of programs and libraries which implement the static mapping and sparse matrix reordering algorithms developed within the **Scotch** project. The development of **Scotch** is supported in part by **The Scotch Consortium** (see below).
 
 **Scotch** has many interesting features:
 
@@ -101,6 +101,12 @@ cmake -DLIBSCOTCHERR=scotcherr
 * With a traditional Makefile:
 
 CMake installation is easy and straightforward. It allows one to compile and install **Scotch** and **PT-Scotch**, depending on flags such as the use of multi-threading and/or MPI. The traditional Makefile installation provides additional freedom to perform (cross-)compilation for non-standard systems and configurations. Please refer to the `[INSTALL.txt](https://gitlab.inria.fr/scotch/scotch/blob/master/INSTALL.txt)` file at the root of the package tree for more information on the use of traditional `Makefile`s.
+
+
+Consortium
+----------
+
+**The Scotch Consortium**, hosted by Inria within the InriaSoft program, aims at supporting the scientific and industrial development and the long-term maintenance of **Scotch**. Through their subscriptions, industrial and academic Consortium Members, which have a strategic need in the availability and robustness of the **Scotch** software, benefit from extended support, direct contact with the development team, participation in the project roadmap, and access to early releases. Please contact the PI at <francois.pellegrini@u-bordeaux.fr> for more information.
 
 
 Contributing to Scotch
