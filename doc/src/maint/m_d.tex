@@ -1042,8 +1042,8 @@ of the outer loop exemplified below.
   hashtab = memRealloc (hashtab, 2 * hashold * sizeof (HashCell)); /* Resize hash table  */
   memSet (hashtab + hashold, ~0, hashold * sizeof (HashCell)); /* Initialize second half */
 
-  for (hashbas = hashold - 1; hashtab[hashbas].vertnum != ~0; hashbas --) ; /* Find start index of last block     */
-  hashnnd = hashold;                              /* First segment to reconsider ends at the end of the old array */
+  for (hashbas = hashold - 1; hashtab[hashbas].vertnum == vertnum; hashbas --) ; /* Find start index of last block */
+  hashnnd = hashold;                              /* First segment to reconsider ends at the end of the old array  */
 
   while (hashnnd != hashbas) {                    /* For each of the two segments to consider    */
     for (hashnum = hashbas; hashnum < hashnnd; hashnum ++) { /* Re-compute position in new table */
