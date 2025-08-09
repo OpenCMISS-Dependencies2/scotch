@@ -41,7 +41,7 @@
 ##   DATES      : # Version 6.0  : from : 01 sep 2014     ##
 ##                                 to     01 sep 2021     ##
 ##                # Version 7.0  : from : 01 sep 2021     ##
-##                                 to     10 jun 2025     ##
+##                                 to     11 aug 2025     ##
 ##                                                        ##
 ############################################################
 
@@ -692,6 +692,8 @@ set(PTSCOTCH_C_SOURCES
   dmapping.c
   dmapping.h
   dmapping_io.c
+  dmesh.c
+  dmesh.h
   dorder.c
   dorder.h
   dorder_gather.c
@@ -780,6 +782,8 @@ set(PTSCOTCH_C_SOURCES
   library_dgraph_stat_f.c
   library_dmapping.c
   library_dmapping.h
+  library_dmesh.c
+  library_dmesh_f.c
   library_dorder.c
   ${GENERATED_INCLUDE_DIR}/scotch.h
   ${GENERATED_INCLUDE_DIR}/ptscotch.h

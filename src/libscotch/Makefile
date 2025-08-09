@@ -190,6 +190,7 @@ LIBPTSCOTCHDEPS =	arch_mpi$(OBJ)				\
 			dgraph_view$(OBJ)			\
 			dmapping$(OBJ)				\
 			dmapping_io$(OBJ)			\
+			dmesh$(OBJ)				\
 			dorder$(OBJ)				\
 			dorder_gather$(OBJ)			\
 			dorder_io$(OBJ)				\
@@ -262,6 +263,8 @@ LIBPTSCOTCHDEPS =	arch_mpi$(OBJ)				\
 			library_dgraph_stat$(OBJ)		\
 			library_dgraph_stat_f$(OBJ)		\
 			library_dmapping$(OBJ)			\
+			library_dmesh$(OBJ)			\
+			library_dmesh_f$(OBJ)			\
 			library_dorder$(OBJ)			\
 			vdgraph$(OBJ)				\
 			vdgraph_check$(OBJ)			\
@@ -1218,6 +1221,11 @@ dmapping_io$(OBJ)		:	dmapping_io.c				\
 					dgraph.h				\
 					dgraph_allreduce.h			\
 					dmapping.h
+
+dmesh$(OBJ)			:	dmesh.c					\
+					module.h				\
+					common.h				\
+					dmesh.h
 
 dorder$(OBJ)			:	dorder.c				\
 					module.h				\
@@ -2479,6 +2487,18 @@ library_dgraph_stat_f$(OBJ)	:	library_dgraph_stat_f.c			\
 					ptscotch.h
 
 library_dmapping$(OBJ)		:	library_dmapping.c			\
+					module.h				\
+					common.h				\
+					ptscotch.h
+
+library_dmesh$(OBJ)		:	library_dmesh.c				\
+					module.h				\
+					common.h				\
+					context.h				\
+					dmesh.h					\
+					ptscotch.h
+
+library_dmesh_f$(OBJ)		:	library_dmesh_f.c			\
 					module.h				\
 					common.h				\
 					ptscotch.h

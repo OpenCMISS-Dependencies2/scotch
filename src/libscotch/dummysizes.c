@@ -56,7 +56,7 @@
 /**                # Version 6.1  : from : 09 feb 2021     **/
 /**                                 to   : 22 jun 2021     **/
 /**                # Version 7.0  : from : 25 aug 2019     **/
-/**                                 to   : 07 jun 2025     **/
+/**                                 to   : 13 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -103,6 +103,7 @@
 #include "dgraph.h"
 #include "dgraph_halo.h"
 #include "dmapping.h"
+#include "dmesh.h"
 #include "dorder.h"
 #include "library_dmapping.h"
 #endif /* SCOTCH_PTSCOTCH */
@@ -267,11 +268,13 @@ char *                      argv[])
   subsFill ("DUMMYSIZEDGRAPHHALOREQ", subsSize (sizeof (DgraphHaloRequest))); /* TRICK: before DUMMYSIZEDGRAPH */
   subsFill ("DUMMYSIZEDGRAPH", subsSize (sizeof (Dgraph)));
   subsFill ("DUMMYSIZEDMAP", subsSize (sizeof (LibDmapping)));
+  subsFill ("DUMMYSIZEDMESH", subsSize (sizeof (Dmesh)));
   subsFill ("DUMMYSIZEDORDER", subsSize (sizeof (Dorder)));
 #else /* SCOTCH_PTSCOTCH */
   subsFill ("DUMMYSIZEDGRAPHHALOREQ", "1");       /* TRICK: before DUMMYSIZEDGRAPH */
   subsFill ("DUMMYSIZEDGRAPH", "1");
   subsFill ("DUMMYSIZEDMAP", "1");
+  subsFill ("DUMMYSIZEDMESH", "1");
   subsFill ("DUMMYSIZEDORDER", "1");
 #endif /* SCOTCH_PTSCOTCH */
   subsFill ("##SCOTCH_NAME_SUFFIX", suffptr);
@@ -326,6 +329,7 @@ char *                      argv[])
     subsSuffix ("SCOTCH_Dgraph");
     subsSuffix ("SCOTCH_DgraphHaloReq");
     subsSuffix ("SCOTCH_Dmapping");
+    subsSuffix ("SCOTCH_Dmesh");
     subsSuffix ("SCOTCH_Dordering");
     subsSuffix ("SCOTCH_DGRAPHDIM");
     subsSuffix ("SCOTCH_DGRAPHHALOREQDIM");

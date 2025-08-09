@@ -58,7 +58,7 @@
 /**                # Version 6.1  : from : 15 mar 2021     **/
 /**                                 to   : 15 mar 2021     **/
 /**                # Version 7.0  : from : 27 aug 2019     **/
-/**                                 to   : 09 jan 2025     **/
+/**                                 to   : 13 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -124,6 +124,10 @@ typedef struct {
 typedef struct {
   double                    dummy[DUMMYSIZEDMAP];
 } SCOTCH_Dmapping;
+
+typedef struct {
+  double                    dummy[DUMMYSIZEDMESH];
+} SCOTCH_Dmesh;
 
 typedef struct {
   double                    dummy[DUMMYSIZEDORDER];
@@ -192,6 +196,14 @@ int                         SCOTCH_dgraphOrderGather (const SCOTCH_Dgraph * cons
 
 SCOTCH_Dmapping *           SCOTCH_dmapAlloc    (void);
 int                         SCOTCH_dmapSizeof   (void);
+
+SCOTCH_Dmesh *              SCOTCH_dmeshAlloc   (void);
+int                         SCOTCH_dmeshSizeof  (void);
+int                         SCOTCH_dmeshInit    (SCOTCH_Dmesh * const, MPI_Comm);
+void                        SCOTCH_dmeshExit    (SCOTCH_Dmesh * const);
+void                        SCOTCH_dmeshFree    (SCOTCH_Dmesh * const);
+void                        SCOTCH_dmeshSize    (const SCOTCH_Dmesh * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const);
+void                        SCOTCH_dmeshData    (const SCOTCH_Dmesh * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num ** const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num ** const, SCOTCH_Num * const, MPI_Comm * const);
 
 SCOTCH_Dordering *          SCOTCH_dorderAlloc  (void);
 int                         SCOTCH_dorderSizeof (void);

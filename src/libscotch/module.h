@@ -55,7 +55,7 @@
 /**                # Version 6.1  : from : 24 aug 2020     **/
 /**                                 to   : 30 dec 2021     **/
 /**                # Version 7.0  : from : 19 feb 2018     **/
-/**                                 to   : 05 jul 2025     **/
+/**                                 to   : 10 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -158,6 +158,7 @@
 #define SCOTCH_DEBUG_BGRAPH2
 #define SCOTCH_DEBUG_DGRAPH2
 #define SCOTCH_DEBUG_DMAP2
+#define SCOTCH_DEBUG_DMESH2
 #define SCOTCH_DEBUG_DORDER2
 #define SCOTCH_DEBUG_GEOM2
 #define SCOTCH_DEBUG_GRAPH2
@@ -188,6 +189,7 @@
 #define SCOTCH_DEBUG_BGRAPH1
 #define SCOTCH_DEBUG_DGRAPH1
 #define SCOTCH_DEBUG_DMAP1
+#define SCOTCH_DEBUG_DMESH1
 #define SCOTCH_DEBUG_DORDER1
 #define SCOTCH_DEBUG_GEOM1
 #define SCOTCH_DEBUG_GRAPH1
@@ -795,6 +797,10 @@
 #define dmapAdd                     SCOTCH_NAME_INTERN (dmapAdd)
 #define dmapTerm                    SCOTCH_NAME_INTERN (dmapTerm)
 #define dmapSave                    SCOTCH_NAME_INTERN (dmapSave)
+
+#define dmeshExit                   SCOTCH_NAME_INTERN (dmeshExit)
+#define dmeshFree                   SCOTCH_NAME_INTERN (dmeshFree)
+#define dmeshInit                   SCOTCH_NAME_INTERN (dmeshInit)
 
 #define dorderDispose               SCOTCH_NAME_INTERN (dorderDispose)
 #define dorderExit                  SCOTCH_NAME_INTERN (dorderExit)
