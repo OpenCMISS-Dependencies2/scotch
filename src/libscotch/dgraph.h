@@ -61,7 +61,7 @@
 /**                # Version 6.1  : from : 19 jun 2021     **/
 /**                                 to   : 19 jun 2021     **/
 /**                # Version 7.0  : from : 03 may 2019     **/
-/**                                 to   : 28 jul 2024     **/
+/**                                 to   : 09 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -113,9 +113,13 @@ typedef INT                 Gnum;                 /* Vertex or edge number      
 #define GNUMSTRING                  INTSTRING     /* String to printf a Gnum    */
 #endif /* GNUMMAX */
 
+#ifndef GNUM_MPI
 #define GNUM_MPI                    COMM_INT      /* MPI type for Gnum is MPI type for INT */
+#endif /* GNUM_MPI */
 
+#ifndef GRAPHPART_MPI
 #define GRAPHPART_MPI               COMM_BYTE     /* Raw byte type for graph parts */
+#endif /* GRAPHPART_MPI */
 
 /* Tags used for point-to-point communications. */
 
