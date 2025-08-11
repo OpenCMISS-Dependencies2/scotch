@@ -1146,7 +1146,9 @@ dgraph_induce$(OBJ)		:	dgraph_induce.c				\
 dgraph_io_load$(OBJ)		:	dgraph_io_load.c			\
 					module.h				\
 					common.h				\
+					graph.h					\
 					dgraph.h				\
+					dgraph_allreduce.h			\
 					dgraph_io_load.h
 
 dgraph_io_save$(OBJ)		:	dgraph_io_save.c			\
