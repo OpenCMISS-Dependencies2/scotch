@@ -128,7 +128,7 @@ add_custom_target(parser_yy_c DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${
 # Generate parser_ll.c using Flex
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c
   ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h
-  COMMAND ${FLEX_EXECUTABLE} "-Pscotchyy${SCOTCH_NAME_SUFFIX}"  "-oparser_ll.c"
+  COMMAND ${FLEX_EXECUTABLE} "${FLEX_FLAG}" "-Pscotchyy${SCOTCH_NAME_SUFFIX}"  "-oparser_ll.c"
   "--header-file=parser_lh.h"
   ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l
