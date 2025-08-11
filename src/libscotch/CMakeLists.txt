@@ -132,7 +132,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c
   "--header-file=parser_lh.h"
   ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l
-  ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h module.h common.h parser.h parser_ll.h parser_ly.h
+  module.h common.h parser.h parser_ll.h parser_ly.h
   COMMENT "Generate parser_ll.c using Flex")
 add_custom_target(parser_ll_c DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c)
 
