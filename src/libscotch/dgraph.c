@@ -128,19 +128,19 @@ Dgraph * restrict const     grafptr)
       memFree (grafptr->vertloctax + grafptr->baseval);
     if ((grafptr->flagval & DGRAPHVERTGROUP) == 0) { /* If vertex arrays not grouped */
       if (grafptr->vendloctax != (grafptr->vertloctax + 1))
-	memFree (grafptr->vendloctax + grafptr->baseval);
+        memFree (grafptr->vendloctax + grafptr->baseval);
       if (grafptr->veloloctax != NULL)
-	memFree (grafptr->veloloctax + grafptr->baseval);
+        memFree (grafptr->veloloctax + grafptr->baseval);
       if (grafptr->vnumloctax != NULL)
         memFree (grafptr->vnumloctax + grafptr->baseval);
       if (grafptr->vlblloctax != NULL)
-	memFree (grafptr->vlblloctax + grafptr->baseval);
+        memFree (grafptr->vlblloctax + grafptr->baseval);
     }
     if (grafptr->edgeloctax != NULL)
       memFree (grafptr->edgeloctax + grafptr->baseval);
     if ((grafptr->flagval & DGRAPHEDGEGROUP) == 0) { /* If edge arrays not grouped */
       if (grafptr->edloloctax != NULL)
-	memFree (grafptr->edloloctax + grafptr->baseval);
+        memFree (grafptr->edloloctax + grafptr->baseval);
     }
   }
   if ((grafptr->flagval & DGRAPHFREEPSID) != 0) { /* If process send arrays must be freed */
