@@ -119,7 +119,7 @@ add_scotch_exe(gpart gmap.c gmap.h)
 target_compile_definitions(gpart PRIVATE SCOTCH_COMPILE_PART)
 
 # Install all Scotch executables
-foreach(target ${scotch_exe} gpart)
+foreach(target ${scotch_exe} gout gpart)
   install(TARGETS ${target} COMPONENT scotch RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endforeach()
 
