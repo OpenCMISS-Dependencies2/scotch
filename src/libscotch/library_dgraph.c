@@ -113,11 +113,11 @@ MPI_Comm                    proccomm)             /* Communicator to be used for
 #ifdef SCOTCH_DEBUG_DGRAPH2
   if (sizeof (SCOTCH_Num) != sizeof (Gnum)) {
     errorPrint (STRINGIFY (SCOTCH_dgraphInit) ": internal error (1)");
-    return     (1);
+    return (1);
   }
   if (sizeof (SCOTCH_Dgraph) < sizeof (Dgraph)) {
     errorPrint (STRINGIFY (SCOTCH_dgraphInit) ": internal error (2)");
-    return     (1);
+    return (1);
   }
 #endif /* SCOTCH_DEBUG_DGRAPH2 */
 
