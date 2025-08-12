@@ -232,6 +232,8 @@ set(SCOTCH_C_SOURCES
   graph_coarsen.c
   graph_coarsen.h
   graph_diam.c
+  graph_dump.c
+  graph_dump.h
   graph_ielo.c
   library_graph_induce.c
   graph_induce.c
@@ -365,6 +367,7 @@ set(SCOTCH_C_SOURCES
   library_graph_color_f.c
   library_graph_diam.c
   library_graph_diam_f.c
+  library_graph_dump.c
   library_graph_f.c
   library_graph_io_chac.c
   library_graph_io_chac_f.c

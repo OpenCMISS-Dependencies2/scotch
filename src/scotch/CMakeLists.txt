@@ -86,6 +86,7 @@ set(scotch_exe
   atst
   gbase
   gcv
+  gdump
   gmap
   gmk_hy
   gmk_m2
