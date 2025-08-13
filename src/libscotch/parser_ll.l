@@ -64,6 +64,10 @@
 /************************************************************/
 
 #define YY_DECL                     int yylex (YYSTYPE * yylval_param, YYLTYPE * yylloc, yyscan_t yyscanner)
+
+#if (defined COMMON_OS_WINDOWS || defined HAVE_NOT_UNISTD_H)
+#define YY_NO_UNISTD_H
+#endif /* (defined COMMON_OS_WINDOWS || defined HAVE_NOT_UNISTD_H) */
 }
 
 %{
@@ -73,10 +77,6 @@
 
 #include "module.h"
 #include "common.h"
-
-#if (defined COMMON_OS_WINDOWS || defined HAVE_NOT_UNISTD_H)
-#define YY_NO_UNISTD_H
-#endif /* (defined COMMON_OS_WINDOWS || defined HAVE_NOT_UNISTD_H) */
 
 #undef INTEGER                                    /* In case someone defined them */
 #undef DOUBLE
