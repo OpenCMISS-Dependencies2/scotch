@@ -123,12 +123,10 @@ set(_map_lzma "LIBLZMA")
 foreach(ext "bz2" "gz" "lzma")
   if(${_map_${ext}}_FOUND)
     set(cur ${CMAKE_CURRENT_BINARY_DIR})
-    set(src_cur ${CMAKE_CURRENT_SOURCE_DIR})
     add_test(NAME test_common_file_compress_${ext} COMMAND ${BASH} -c
-      "'${CMAKE_COMMAND}' -E copy ${src_cur}/data/bump_b1.grf ${cur}/bump_b1.grf && \
-      '$<TARGET_FILE:test_common_file_compress>' ${cur}/bump_b1.grf ${cur}/bump_b1.grf.${ext} && \
-      '$<TARGET_FILE:test_common_file_compress>' ${cur}/bump_b1.grf.${ext} ${cur}/bump_b1.grf && \
-      '${CMAKE_COMMAND}' -E compare_files ${cur}/bump_b1.grf ${src_cur}/data/bump_b1.grf")
+      "'$<TARGET_FILE:test_common_file_compress>' ${dat}/bump_b1.grf ${cur}/bump_b1.grf.${ext} && \
+      '$<TARGET_FILE:test_common_file_compress>' ${cur}/bump_b1.grf.${ext} ${cur}/bump_b1_from_${ext}.grf && \
+      '${CMAKE_COMMAND}' -E compare_files ${cur}/bump_b1_from_${ext}.grf ${dat}/bump_b1.grf")
   endif(${_map_${ext}}_FOUND)
 endforeach()
 
@@ -136,9 +134,9 @@ endforeach()
 
 add_test_scotch(test_common_random)
 
-add_test(NAME test_common_random_0 COMMAND test_common_random ${CMAKE_CURRENT_BINARY_DIR}/rand.dat 0)
-
-add_test(NAME test_common_random_1 COMMAND test_common_random ${CMAKE_CURRENT_BINARY_DIR}/rand.dat 1)
+add_test(NAME test_common_random COMMAND ${BASH} -c
+        "'$<TARGET_FILE:test_common_random>' ${CMAKE_CURRENT_BINARY_DIR}/rand.dat 0 && \
+         '$<TARGET_FILE:test_common_random>' ${CMAKE_CURRENT_BINARY_DIR}/rand.dat 1")
 
 # test_common_thread
 
@@ -190,7 +188,10 @@ if(BUILD_LIBSCOTCHMETIS)
     target_compile_definitions(test_libmetis_dualv${version} PRIVATE SCOTCH_METIS_VERSION=${version})
     target_include_directories(test_libmetis_dualv${version} PRIVATE ${GENERATED_INCLUDE_DIR})
     target_link_libraries(test_libmetis_dualv${version} scotchmetisv${version} scotch scotcherr)
+
     add_test(NAME test_libmetis_dualv${version} COMMAND test_libmetis_dualv${version})
+
+    add_test(NAME test_libmetis_dualv${version}_2 COMMAND test_libmetis_dualv${version} 1)
 
     if(BUILD_FORTRAN)
       add_executable(test_libmetis_dual_f_v${version} ${CMAKE_CURRENT_BINARY_DIR}/test_libmetis_dual_f.f90)
@@ -213,14 +214,13 @@ add_test(NAME test_scotch_arch COMMAND test_scotch_arch arch.tgt)
 
 add_test_scotch(test_scotch_arch_deco)
 
-set(cur_src ${CMAKE_CURRENT_SOURCE_DIR})
-add_test(NAME test_scotch_arch_deco COMMAND test_scotch_arch_deco ${cur_src}/data/m4x4.grf arch2.tgt)
+add_test(NAME test_scotch_arch_deco COMMAND test_scotch_arch_deco ${dat}/m4x4.grf arch2.tgt)
 
 # test_scotch_context
 
 add_test_scotch(test_scotch_context)
 
-add_test(NAME test_scotch_context COMMAND test_scotch_context ${cur_src}/data/bump_b1.grf)
+add_test(NAME test_scotch_context COMMAND test_scotch_context ${dat}/bump_b1.grf)
 if(Threads_FOUND)
   target_link_libraries(test_scotch_context PRIVATE Threads::Threads ${THREADS_PTHREADS_WIN32_LIBRARY})
 endif(Threads_FOUND)
@@ -229,82 +229,94 @@ endif(Threads_FOUND)
 
 add_test_scotch(test_scotch_graph_coarsen)
 
-add_test(NAME test_scotch_graph_coarsen_1 COMMAND test_scotch_graph_coarsen ${cur_src}/data/bump.grf)
+add_test(NAME test_scotch_graph_coarsen_1 COMMAND test_scotch_graph_coarsen ${dat}/bump.grf)
 
-add_test(NAME test_scotch_graph_coarsen_2 COMMAND test_scotch_graph_coarsen ${cur_src}/data/bump_b100000.grf)
+add_test(NAME test_scotch_graph_coarsen_2 COMMAND test_scotch_graph_coarsen ${dat}/bump_b100000.grf)
 
 # test_graph_color
 
 add_test_scotch(test_scotch_graph_color)
 
-add_test(NAME test_scotch_graph_color_1 COMMAND test_scotch_graph_color ${cur_src}/data/bump.grf)
+add_test(NAME test_scotch_graph_color_1 COMMAND test_scotch_graph_color ${dat}/bump.grf)
 
-add_test(NAME test_scotch_graph_color_2 COMMAND test_scotch_graph_color ${cur_src}/data/bump_b100000.grf)
+add_test(NAME test_scotch_graph_color_2 COMMAND test_scotch_graph_color ${dat}/bump_b100000.grf)
 
 # test_graph_diam
 
 add_test_scotch(test_scotch_graph_diam)
 
-add_test(NAME test_scotch_graph_diam_1 COMMAND test_scotch_graph_diam ${cur_src}/data/bump.grf)
+add_test(NAME test_scotch_graph_diam_1 COMMAND test_scotch_graph_diam ${dat}/bump.grf)
 
-add_test(NAME test_scotch_graph_diam_2 COMMAND test_scotch_graph_diam ${cur_src}/data/m16x16_b1.grf)
+add_test(NAME test_scotch_graph_diam_2 COMMAND test_scotch_graph_diam ${dat}/m16x16_b1.grf)
 
-add_test(NAME test_scotch_graph_diam_3 COMMAND test_scotch_graph_diam ${cur_src}/data/p2-p2.grf)
+add_test(NAME test_scotch_graph_diam_3 COMMAND test_scotch_graph_diam ${dat}/p2-p2.grf)
 
-add_test(NAME test_scotch_graph_diam_4 COMMAND test_scotch_graph_diam ${cur_src}/data/bump_b100000.grf)
+add_test(NAME test_scotch_graph_diam_4 COMMAND test_scotch_graph_diam ${dat}/bump_b100000.grf)
 
 # test_graph_dump
-#TODO
+
+add_custom_command(OUTPUT m16x16_b1.c
+  COMMAND $<TARGET_FILE:gdump> -ptest ${dat}/m16x16_b1.grf ${CMAKE_CURRENT_BINARY_DIR}/m16x16_b1.c)
+
+add_custom_command(OUTPUT test_scotch_graph_dump2.c
+  COMMAND ${CMAKE_COMMAND} -E cat ${CMAKE_CURRENT_SOURCE_DIR}/test_scotch_graph_dump.c m16x16_b1.c > test_scotch_graph_dump2.c
+  DEPENDS m16x16_b1.c)
+
+add_test_scotch(test_scotch_graph_dump2)
+
+add_test(NAME test_scotch_graph_dump COMMAND ${BASH} -c
+  "'$<TARGET_FILE:test_scotch_graph_dump2>' 'm16x16_b1_dump2.grf' && \
+   '${CMAKE_COMMAND}' -E compare_files '${dat}/m16x16_b1.grf' m16x16_b1_dump2.grf")
 
 # test_graph_induce
 
 add_test_scotch(test_scotch_graph_induce)
 
-add_test(NAME test_scotch_graph_induce_1 COMMAND test_scotch_graph_induce ${cur_src}/data/bump.grf)
+add_test(NAME test_scotch_graph_induce_1 COMMAND test_scotch_graph_induce ${dat}/bump.grf)
 
-add_test(NAME test_scotch_graph_induce_2 COMMAND test_scotch_graph_induce ${cur_src}/data/bump_b100000.grf)
+add_test(NAME test_scotch_graph_induce_2 COMMAND test_scotch_graph_induce ${dat}/bump_b100000.grf)
 
 # test_scotch_graph_map
 
 add_test_scotch(test_scotch_graph_map)
 
-add_test(NAME test_scotch_graph_1 COMMAND test_scotch_graph_map ${cur_src}/data/m4x4.grf)
+add_test(NAME test_scotch_graph_1 COMMAND test_scotch_graph_map ${dat}/m4x4.grf)
 
-add_test(NAME test_scotch_graph_2 COMMAND test_scotch_graph_map ${cur_src}/data/m4x4_b1.grf)
+add_test(NAME test_scotch_graph_2 COMMAND test_scotch_graph_map ${dat}/m4x4_b100000.grf)
 
-add_test(NAME test_scotch_graph_3 COMMAND test_scotch_graph_map ${cur_src}/data/m16x16.grf)
+add_test(NAME test_scotch_graph_3 COMMAND test_scotch_graph_map ${dat}/m16x16.grf)
 
-add_test(NAME test_scotch_graph_4 COMMAND test_scotch_graph_map ${cur_src}/data/m16x16_b1.grf)
+add_test(NAME test_scotch_graph_4 COMMAND test_scotch_graph_map ${dat}/m16x16_b100000.grf)
 
 # test_scotch_graph_map_copy
 
 add_test_scotch(test_scotch_graph_map_copy)
 
-add_test(NAME test_scotch_graph_map_copy_1 COMMAND test_scotch_graph_map_copy ${cur_src}/data/bump.grf)
+add_test(NAME test_scotch_graph_map_copy_1 COMMAND test_scotch_graph_map_copy ${dat}/bump.grf)
 
-add_test(NAME test_scotch_graph_map_copy_2 COMMAND test_scotch_graph_map_copy ${cur_src}/data/bump_b100000.grf)
+add_test(NAME test_scotch_graph_map_copy_2 COMMAND test_scotch_graph_map_copy ${dat}/bump_b100000.grf)
 
 # test_scotch_graph_order
 
 add_test_scotch(test_scotch_graph_order)
 
-add_test(NAME test_scotch_graph_order_1 COMMAND test_scotch_graph_order ${cur_src}/data/bump.grf)
+add_test(NAME test_scotch_graph_order_1 COMMAND test_scotch_graph_order ${dat}/bump.grf)
 
-add_test(NAME test_scotch_graph_order_2 COMMAND test_scotch_graph_order ${cur_src}/data/bump_b100000.grf)
+add_test(NAME test_scotch_graph_order_2 COMMAND test_scotch_graph_order ${dat}/bump_b100000.grf)
 
 # test_scotch_graph_part_ovl
 
 add_test_scotch(test_scotch_graph_part_ovl)
 
-add_test(NAME test_scotch_graph_part_ovl_1 COMMAND test_scotch_graph_part_ovl 4 ${cur_src}/data/m16x16.grf ${dev_null})
+add_test(NAME test_scotch_graph_part_ovl_1 COMMAND test_scotch_graph_part_ovl 4 ${dat}/m16x16.grf ${dev_null})
 
-add_test(NAME test_scotch_graph_part_ovl_2 COMMAND test_scotch_graph_part_ovl 4 ${cur_src}/data/m16x16_b1.grf ${dev_null})
+add_test(NAME test_scotch_graph_part_ovl_2 COMMAND test_scotch_graph_part_ovl 4 ${dat}/m16x16_b100000.grf ${dev_null})
 
 # test_scotch_mesh_graph
 
 add_test_scotch(test_scotch_mesh_graph)
 
-add_test(NAME test_scotch_mesh_graph COMMAND test_scotch_mesh_graph ${cur_src}/data/ship001.msh)
+add_test(NAME test_scotch_mesh_graph COMMAND test_scotch_mesh_graph ${dat}/ship001.msh)
 
 # test_strat_seq
 
@@ -339,51 +351,51 @@ if(BUILD_PTSCOTCH)
 
   add_exec_ptscotch(test_scotch_dgraph_band)
 
-  add_test_ptscotch(test_scotch_dgraph_band ${CMAKE_CURRENT_SOURCE_DIR}/data/bump.grf test_scotch_dgraph_band.map)
+  add_test_ptscotch(test_scotch_dgraph_band ${dat}/bump.grf test_scotch_dgraph_band_bump.map)
 
-  add_test_ptscotch(test_scotch_dgraph_band ${CMAKE_CURRENT_SOURCE_DIR}/data/bump_b100000.grf test_scotch_dgraph_band.map)
+  add_test_ptscotch(test_scotch_dgraph_band ${dat}/bump_b100000.grf test_scotch_dgraph_band_bump_b100000.map)
 
   # test_scotch_dgraph_coarsen
 
   add_exec_ptscotch(test_scotch_dgraph_coarsen)
 
-  add_test_ptscotch(test_scotch_dgraph_coarsen ${CMAKE_CURRENT_SOURCE_DIR}/data/bump.grf)
+  add_test_ptscotch(test_scotch_dgraph_coarsen ${dat}/bump.grf)
 
-  add_test_ptscotch(test_scotch_dgraph_coarsen ${CMAKE_CURRENT_SOURCE_DIR}/data/bump_b100000.grf)
+  add_test_ptscotch(test_scotch_dgraph_coarsen ${dat}/bump_b100000.grf)
 
-  add_test_ptscotch(test_scotch_dgraph_coarsen ${CMAKE_CURRENT_SOURCE_DIR}/data/m4x4_b1.grf)
+  add_test_ptscotch(test_scotch_dgraph_coarsen ${dat}/m4x4_b1.grf)
 
   # test_scotch_dgraph_check
 
   add_exec_ptscotch(test_scotch_dgraph_check)
 
-  add_test_ptscotch(test_scotch_dgraph_check ${CMAKE_CURRENT_SOURCE_DIR}/data/bump.grf)
+  add_test_ptscotch(test_scotch_dgraph_check ${dat}/bump.grf)
 
-  add_test_ptscotch(test_scotch_dgraph_check ${CMAKE_CURRENT_SOURCE_DIR}/data/bump_b100000.grf)
+  add_test_ptscotch(test_scotch_dgraph_check ${dat}/bump_b100000.grf)
 
   # test_scotch_dgraph_grow
 
   add_exec_ptscotch(test_scotch_dgraph_grow)
 
-  add_test_ptscotch(test_scotch_dgraph_grow ${CMAKE_CURRENT_SOURCE_DIR}/data/bump.grf test_scotch_dgraph_grow.map)
+  add_test_ptscotch(test_scotch_dgraph_grow ${dat}/bump.grf test_scotch_dgraph_grow.map)
 
-  add_test_ptscotch(test_scotch_dgraph_grow ${CMAKE_CURRENT_SOURCE_DIR}/data/bump_b100000.grf test_scotch_dgraph_grow.map)
+  add_test_ptscotch(test_scotch_dgraph_grow ${dat}/bump_b100000.grf test_scotch_dgraph_grow_bump_b100000.map)
 
   # test_scotch_dgraph_induce
 
   add_exec_ptscotch(test_scotch_dgraph_induce)
 
-  add_test_ptscotch(test_scotch_dgraph_induce ${CMAKE_CURRENT_SOURCE_DIR}/data/bump.grf)
+  add_test_ptscotch(test_scotch_dgraph_induce ${dat}/bump.grf)
 
-  add_test_ptscotch(test_scotch_dgraph_induce ${CMAKE_CURRENT_SOURCE_DIR}/data/bump_b100000.grf)
+  add_test_ptscotch(test_scotch_dgraph_induce ${dat}/bump_b100000.grf)
 
   # test_scotch_dgraph_redist
 
   add_exec_ptscotch(test_scotch_dgraph_redist)
 
-  add_test_ptscotch(test_scotch_dgraph_redist ${CMAKE_CURRENT_SOURCE_DIR}/data/bump.grf)
+  add_test_ptscotch(test_scotch_dgraph_redist ${dat}/bump.grf)
 
-  add_test_ptscotch(test_scotch_dgraph_redist ${CMAKE_CURRENT_SOURCE_DIR}/data/bump_b100000.grf)
+  add_test_ptscotch(test_scotch_dgraph_redist ${dat}/bump_b100000.grf)
   if(BUILD_LIBSCOTCHMETIS)
     set(version 3)
     # Small test (procnbr, baseval, noconbr) = (3, 1, 2)
@@ -440,17 +452,13 @@ add_test(NAME atst_4x4x4 COMMAND $<TARGET_FILE:atst> ${tgt}/t4x4x4.tgt)
 
 # check_prog_gbase
 
-add_test(NAME test_gbase_1 COMMAND ${BASH} -c
+add_test(NAME test_gbase COMMAND ${BASH} -c
   "'$<TARGET_FILE:gbase>' 1 '${dat}/m4x4.grf' m4x4_b1.grf && \
-  '${CMAKE_COMMAND}' -E compare_files '${dat}/m4x4_b1.grf' m4x4_b1.grf")
-
-add_test(NAME test_gbase_2 COMMAND ${BASH} -c
-  "'$<TARGET_FILE:gbase>' 1 '${dat}/m4x4_b1.grf' m4x4_b1.grf && \
-  '${CMAKE_COMMAND}' -E compare_files '${dat}/m4x4_b1.grf' m4x4_b1.grf")
-
-add_test(NAME test_gbase_3 COMMAND ${BASH} -c
-  "'$<TARGET_FILE:gbase>' 0 '${dat}/m4x4_b1.grf' m4x4.grf && \
-  '${CMAKE_COMMAND}' -E compare_files '${dat}/m4x4.grf' m4x4.grf")
+   '${CMAKE_COMMAND}' -E compare_files '${dat}/m4x4_b1.grf' m4x4_b1.grf && \
+   '$<TARGET_FILE:gbase>' 1 '${dat}/m4x4_b1.grf' m4x4_b1.grf && \
+   '${CMAKE_COMMAND}' -E compare_files '${dat}/m4x4_b1.grf' m4x4_b1.grf && \
+   '$<TARGET_FILE:gbase>' 0 '${dat}/m4x4_b1.grf' m4x4.grf && \
+   '${CMAKE_COMMAND}' -E compare_files '${dat}/m4x4.grf' m4x4.grf")
 
 # check_prog_gmk
 
@@ -468,67 +476,55 @@ add_test(NAME gmk_m3 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_m3>' -b1 5 4 3 -g${d
 
 add_test(NAME gmk_ub2 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_ub2>' 5 | '$<TARGET_FILE:gtst>'")
 
-# check_prog_gmk_gmsh
+# check_prog_mmk
 
-foreach(msh_arg "5_1" "5_4")
-  string(REPLACE "_" " " args ${msh_arg})
-  add_test(NAME gmk_msh_${msh_arg} COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m2>' ${args} ${msh_arg}.msh && \
-    '$<TARGET_FILE:gmk_msh>' ${msh_arg}.msh ${msh_arg}.grf && '$<TARGET_FILE:gtst>' ${msh_arg}.grf")
+add_test(NAME mmk_m2_5_1 COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m2>' 5 1 m2_5_1.msh && '$<TARGET_FILE:mtst>' m2_5_1.msh")
+
+add_test(NAME mmk_m2_5_4 COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m2>' 5 4 m2_5_4.msh && '$<TARGET_FILE:mtst>' m2_5_4.msh")
+
+add_test(NAME mmk_m3_5_4_3 COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m3>' 5 4 3 m3_5_4_3.msh && '$<TARGET_FILE:mtst>' m3_5_4_3.msh")
+
+set_tests_properties(mmk_m2_5_1 mmk_m2_5_4 mmk_m3_5_4_3 PROPERTIES FIXTURES_SETUP MMK_MESHES)
+
+# check_prog_gmk_msh
+
+foreach(mmk_msh m2_5_1 m2_5_4 m3_5_4_3) 
+  add_test(NAME gmk_msh_${mmk_msh} COMMAND ${BASH} -c 
+    "'$<TARGET_FILE:gmk_msh>' ${mmk_msh}.msh ${mmk_msh}.grf && '$<TARGET_FILE:gtst>' ${mmk_msh}.grf")
+  set_tests_properties(gmk_msh_${mmk_msh} PROPERTIES FIXTURES_REQUIRED MMK_MESHES FIXTURES_SETUP GMK_GRAPHS)
 endforeach()
 
-add_test(NAME gmk_msh_3_5_4_3 COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m3>' 5 4 3 3_5_4_3.msh && \
-  '$<TARGET_FILE:gmk_msh>' 3_5_4_3.msh 3_5_4_3.grf && '$<TARGET_FILE:gtst>' 3_5_4_3.grf")
-
-add_test(NAME gmk_msh_ship001 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/ship001.msh' ship001.grf && \
-  '$<TARGET_FILE:gtst>' ship001.grf")
+add_test(NAME gmk_msh_ship001 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' ${dat}/ship001.msh ship001.grf && '$<TARGET_FILE:gtst>' ship001.grf")
+set_tests_properties(gmk_msh_ship001 PROPERTIES FIXTURES_SETUP GMK_GRAPHS)
 
 foreach(i RANGE 1 2)
   add_test(NAME gmk_msh_dual_${i} COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/small2.msh' small2_d${i}.grf -d${i} && \
     '${CMAKE_COMMAND}' -E compare_files '${dat}/small2_d${i}.grf' small2_d${i}.grf")
+  set_tests_properties(gmk_msh_dual_${i} PROPERTIES FIXTURES_SETUP GMK_GRAPHS)
 endforeach()
 
 add_test(NAME gmk_msh_dual_3 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/small2.msh' small2_d3.grf -d3 && \
   '${CMAKE_COMMAND}' -E compare_files '${dat}/small2_d2.grf' small2_d3.grf")
-
-# check_prog_mmk
-
-add_test(NAME mmk_m2_5_1 COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m2>' 5 1 m2_5_1.msh && \
-  '$<TARGET_FILE:mtst>' m2_5_1.msh")
-
-add_test(NAME mmk_m2_5_4 COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m2>' 5 4 m2_5_4.msh && \
-  '$<TARGET_FILE:mtst>' m2_5_4.msh")
-
-add_test(NAME mmk_m3_5_4_3 COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m3>' 5 4 3 m3_5_4_3.msh && \
-  '$<TARGET_FILE:mtst>' m3_5_4_3.msh")
+set_tests_properties(gmk_msh_dual_3 PROPERTIES FIXTURES_SETUP GMK_GRAPHS)
 
 # check_prog_mcv
 
-foreach(msh_arg "5_1" "5_4")
-  string(REPLACE "_" " " args ${msh_arg})
-  add_test(NAME mcv_msh_${msh_arg} COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m2>' ${args} m2_${msh_arg}.msh && \
-    '$<TARGET_FILE:mcv>' m2_${msh_arg}.msh output_m2_${msh_arg}.msh -is -os && \
-    '${CMAKE_COMMAND}' -E compare_files m2_${msh_arg}.msh output_m2_${msh_arg}.msh")
+foreach(mmk_msh m2_5_1 m2_5_4 m3_5_4_3)
+  add_test(NAME mcv_msh_${mmk_msh} COMMAND ${BASH} -c 
+    "'$<TARGET_FILE:mcv>' ${mmk_msh}.msh output_${mmk_msh}.msh -is -os && \
+    '${CMAKE_COMMAND}' -E compare_files ${mmk_msh}.msh output_${mmk_msh}.msh")
+  set_tests_properties(mcv_msh_${mmk_msh} PROPERTIES FIXTURES_REQUIRED MMK_MESHES)
 endforeach()
-
-add_test(NAME mcv_2_5_4_3 COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m3>' 5 4 3 m2_5_4_3.msh && \
-  '$<TARGET_FILE:mcv>' m2_5_4_3.msh output_m2_5_4_3.msh -is -os && \
-  '${CMAKE_COMMAND}' -E compare_files m2_5_4_3.msh output_m2_5_4_3.msh")
 
 # check_prog_mord
 
-foreach(msh_arg "5_1" "5_4")
-  string(REPLACE "_" " " args ${msh_arg})
-  add_test(NAME mord_${msh_arg} COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m2>' ${args} m2_${msh_arg}.msh && \
-    '$<TARGET_FILE:gmk_msh>' m2_${msh_arg}.msh m2_${msh_arg}.grf && \
-    '$<TARGET_FILE:mord>' m2_${msh_arg}.msh | '$<TARGET_FILE:gotst>' m2_${msh_arg}.grf")
+foreach(mmk_msh m2_5_1 m2_5_4 m3_5_4_3)
+  add_test(NAME mord_${mmk_msh} COMMAND ${BASH} -c "'$<TARGET_FILE:mord>' ${mmk_msh}.msh | '$<TARGET_FILE:gotst>' ${mmk_msh}.grf")
+  set_tests_properties(mord_${mmk_msh} PROPERTIES FIXTURES_REQUIRED MMK_MESHES)
 endforeach()
 
-add_test(NAME mord_5_4_3 COMMAND ${BASH} -c "'$<TARGET_FILE:mmk_m3>' 5 4 3 m2_5_4_3.msh && \
-  '$<TARGET_FILE:gmk_msh>' m2_5_4_3.msh m2_5_4_3.grf && \
-  '$<TARGET_FILE:mord>' m2_5_4_3.msh | '$<TARGET_FILE:gotst>' m2_5_4_3.grf")
-
-add_test(NAME mord_ship001 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/ship001.msh' ship001.grf && \
-  '$<TARGET_FILE:mord>' '${dat}/ship001.msh' | '$<TARGET_FILE:gotst>' ship001.grf")
+add_test(NAME mord_ship001 COMMAND ${BASH} -c "'$<TARGET_FILE:mord>' ${dat}/ship001.msh | '$<TARGET_FILE:gotst>' ship001.grf")
+set_tests_properties(mord_ship001 PROPERTIES FIXTURES_REQUIRED GMK_GRAPHS)
 
 # check_prog_gmap
 
@@ -542,23 +538,28 @@ add_test(NAME gord_bump COMMAND $<TARGET_FILE:gord> ${dat}/bump.grf bump.ord -vt
 
 add_test(NAME gord_bump_b100000 COMMAND $<TARGET_FILE:gord> ${dat}/bump_b100000.grf bump_b100000.ord -vt)
 
-add_test(NAME gord_cmplx COMMAND ${BASH} -c "'$<TARGET_FILE:gord>' '${dat}/bump_b1.grf' '-On{sep=(/((vert)>(240))?(e{strat=g}|g|h);),ole=d{cmin=15,cmax=100000,frat=0},ose=g{pass=3}}' bump_b1.ord -vt")
+add_test(NAME gord_bump_b1 COMMAND ${BASH} -c "'$<TARGET_FILE:gord>' '${dat}/bump_b1.grf' '-On{sep=(/((vert)>(240))?(e{strat=g}|g|h);),ole=d{cmin=15,cmax=100000,frat=0},ose=g{pass=3}}' bump_b1.ord -vt")
 
 add_test(NAME gord_bump_imbal COMMAND $<TARGET_FILE:gord> ${dat}/bump_imbal_32.grf bump_imbal_32.ord -vt)
 
-add_test(NAME gord_ship001 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/ship001.msh' ship001.grf && \
-  '$<TARGET_FILE:gord>' ship001.grf ship001.ord -vt")
+add_test(NAME gord_ship001 COMMAND $<TARGET_FILE:gord> ship001.grf ship001.ord -vt)
+set_tests_properties(gord_ship001 PROPERTIES FIXTURES_REQUIRED GMK_GRAPHS)
+
+add_test(NAME gord_nocoarsen COMMAND $<TARGET_FILE:gord> ${dat}/nocoarsen.grf nocoarsen.ord -vt)
+
+add_test(NAME gord_compress-coarsen COMMAND $<TARGET_FILE:gord> ${dat}/compress-coarsen.grf compress-coarsen.ord -vt)
+
+set_tests_properties(gord_bump gord_bump_b100000 gord_ship001 gord_bump_b1 gord_bump_imbal gord_nocoarsen gord_compress-coarsen PROPERTIES FIXTURES_SETUP GORD_DEPS)
 
 # check_prog_gotst
 
-foreach(grf bump bump_b1 bump_imbal_32)
-  add_test(NAME gotst_${grf} COMMAND ${BASH} -c "'$<TARGET_FILE:gord>' '${dat}/${grf}.grf' ${grf}.ord -vt && \
-    '$<TARGET_FILE:gotst>' '${dat}/${grf}.grf' ${grf}.ord")
+foreach(grf bump bump_b1 bump_imbal_32 nocoarsen compress-coarsen)
+  add_test(NAME gotst_${grf} COMMAND $<TARGET_FILE:gotst> ${dat}/${grf}.grf ${CMAKE_CURRENT_BINARY_DIR}/${grf}.ord)
+  set_tests_properties(gotst_${grf} PROPERTIES FIXTURES_REQUIRED GORD_DEPS)
 endforeach()
 
-add_test(NAME gotst_ship001 COMMAND ${BASH} -c "'$<TARGET_FILE:gmk_msh>' '${dat}/ship001.msh' ship001.grf && \
-  '$<TARGET_FILE:gord>' ship001.grf ship001.ord -vt && \
-  '$<TARGET_FILE:gotst>' ship001.grf ship001.ord ")
+add_test(NAME gotst_ship001 COMMAND $<TARGET_FILE:gotst> ${CMAKE_CURRENT_BINARY_DIR}/ship001.grf ${CMAKE_CURRENT_BINARY_DIR}/ship001.ord)
+set_tests_properties(gotst_ship001 PROPERTIES FIXTURES_REQUIRED GORD_DEPS)
 
 # check_prog_gord_block
 
@@ -574,13 +575,16 @@ add_test(NAME gpart_1 COMMAND $<TARGET_FILE:gpart> 9 ${dat}/bump.grf bump_k9.map
 
 add_test(NAME gpart_2 COMMAND $<TARGET_FILE:gpart> 9 ${dat}/bump_b100000.grf bump_k9_b100000.map -vmt)
 
+add_test(NAME gpart_3 COMMAND $<TARGET_FILE:gpart> 9 ${dat}/nocoarsen.grf nocoarsen_k9.map -vmt)
+
+add_test(NAME gpart_4 COMMAND $<TARGET_FILE:gpart> 5 ${dat}/bump_b100000.grf bump_k5.map -vmt -Mr{bal=0.05,sep=m{vert=120,low=h{pass=10}f{bal=0.05,move=120},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}}|m{vert=1000,low=r{bal=0.05,sep=m{vert=120,low=h{pass=10}f{bal=0.05,move=120},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}})
+
+set_tests_properties(gpart_1 gpart_2 gpart_3 gpart_4 PROPERTIES FIXTURES_SETUP GPART_DEPS)
+
 # check_prog_gout
 
-set_tests_properties(gord_bump gord_bump_b100000 PROPERTIES FIXTURES_SETUP GORD_DEPS)
-set_tests_properties(gpart_1 gpart_2 PROPERTIES FIXTURES_SETUP GPART_DEPS)
-
 add_test(NAME gout_1 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Oi{c,r}' '${dat}/bump.grf' '${dat}/bump.xyz' bump_k9.map bump_k9.iv")
-set_tests_properties(gout_1 PROPERTIES FIXTURES_REQUIRED GORD_DEPS)
+set_tests_properties(gout_1 PROPERTIES FIXTURES_REQUIRED GPART_DEPS)
 
 add_test(NAME gout_2 COMMAND ${BASH} -c "'$<TARGET_FILE:gout>' '-Oi{g,r}' '${dat}/bump_b100000.grf' '${dat}/bump_b100000.xyz' bump_k9_b100000.map bump_k9_b100000.iv")
 set_tests_properties(gout_2 PROPERTIES FIXTURES_REQUIRED GPART_DEPS)
@@ -628,6 +632,9 @@ add_test(NAME gpart_overlap_2 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' -o 32 '
   '$<TARGET_FILE:gmtst>' '${dat}/bump_imbal_32.grf' '${tgt}/k32.tgt' bump_imbal_32_part_ovl_32.map")
 
 add_test(NAME gpart_overlap_3 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' -o 6 '${dat}/bump_imbal_32.grf' bump_imbal_32_part_ovl_32_6.map '-me{strat=m{asc=b{width=3,bnd=d{pass=40,dif=1,rem=0}f{move=80,pass=-1,bal=0.01},org=f{move=80,pass=-1,bal=0.01}},low=r{job=t,bal=0.01,map=t,poli=S,sep=(m{asc=b{bnd=f{move=120,pass=-1,bal=0.01,type=b},org=f{move=120,pass=-1,bal=0.01,type=b},width=3},low=h{pass=10}f{move=120,pass=-1,bal=0.01,type=b},vert=120,rat=0.8}|m{asc=b{bnd=f{move=120,pass=-1,bal=0.01,type=b},org=f{move=120,pass=-1,bal=0.01,type=b},width=3},low=h{pass=10}f{move=120,pass=-1,bal=0.01,type=b},vert=120,rat=0.8})},vert=10000,rat=0.8,type=h}}f' -vmt")
+
+add_test(NAME gpart_overlap_4 COMMAND ${BASH} -c "'$<TARGET_FILE:gpart>' -o 24 '${dat}/m4x4.grf' bump_m4x4_part_ovl_24.map -vmt && \
+  '$<TARGET_FILE:gmtst>' -o '${dat}/m4x4.grf' '${tgt}/k24.tgt' bump_m4x4_part_ovl_24.map")
 
 # check_prog_gpart_remap
 

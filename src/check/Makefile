@@ -431,7 +431,7 @@ test_scotch_graph_diam		:	test_scotch_graph_diam.c	\
 
 check_scotch_graph_dump		:	test_scotch_graph_dump2
 					$(EXECS) ./test_scotch_graph_dump2 $(TMPDIR)/m16x16_b1.grf
-					$(PROGDIFF) "data/bump_b1.grf" "$(TMPDIR)/bump_b1.grf"
+					$(PROGDIFF) "data/m16x16_b1.grf" "$(TMPDIR)/m16x16_b1.grf"
 
 test_scotch_graph_dump2		:	test_scotch_graph_dump2.c	\
 					$(SCOTCHLIBDIR)/libscotch$(LIB)
@@ -439,7 +439,6 @@ test_scotch_graph_dump2		:	test_scotch_graph_dump2.c	\
 test_scotch_graph_dump2.c	:	test_scotch_graph_dump.c
 					$(EXECS) $(SCOTCHBINDIR)/gdump -ptest data/m16x16_b1.grf $(TMPDIR)/m16x16_b1.c
 					$(CAT) test_scotch_graph_dump.c $(TMPDIR)/m16x16_b1.c > $(@)
-
 
 ##
 
