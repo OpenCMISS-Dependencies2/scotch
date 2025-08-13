@@ -122,3 +122,6 @@ void                        dmeshFree           (Dmesh * const);
 #ifdef SCOTCH_GRAPH_H
 int                         dmeshLoad           (Dmesh * const, FILE * const, const Gnum, const GraphLoadFlag);
 #endif /* SCOTCH_GRAPH_H */
+#ifdef SCOTCH_DGRAPH_H
+int                         dmeshDgraphDual     (const Dmesh * restrict const, Dgraph * restrict const, const Gnum);
+#endif /* SCOTCH_DGRAPH_H */

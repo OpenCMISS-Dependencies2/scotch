@@ -58,7 +58,7 @@
 /**                # Version 6.1  : from : 15 mar 2021     **/
 /**                                 to   : 15 mar 2021     **/
 /**                # Version 7.0  : from : 27 aug 2019     **/
-/**                                 to   : 13 aug 2025     **/
+/**                                 to   : 14 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -204,6 +204,7 @@ void                        SCOTCH_dmeshExit    (SCOTCH_Dmesh * const);
 void                        SCOTCH_dmeshFree    (SCOTCH_Dmesh * const);
 void                        SCOTCH_dmeshSize    (const SCOTCH_Dmesh * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const);
 void                        SCOTCH_dmeshData    (const SCOTCH_Dmesh * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num ** const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num ** const, SCOTCH_Num * const, MPI_Comm * const);
+int                         SCOTCH_dmeshDgraphDual (const SCOTCH_Dmesh * const, SCOTCH_Dgraph * const, const SCOTCH_Num);
 int                         SCOTCH_dmeshLoad    (SCOTCH_Dmesh * const, FILE * const, const SCOTCH_Num, const SCOTCH_Num);
 
 SCOTCH_Dordering *          SCOTCH_dorderAlloc  (void);
