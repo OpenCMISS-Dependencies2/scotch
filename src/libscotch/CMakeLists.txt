@@ -694,6 +694,7 @@ set(PTSCOTCH_C_SOURCES
   dmapping_io.c
   dmesh.c
   dmesh.h
+  dmesh_build_adm.c
   dmesh_dgraph.c
   dmesh_dgraph.h
   dmesh_io_load.c
@@ -788,6 +789,8 @@ set(PTSCOTCH_C_SOURCES
   library_dmapping.h
   library_dmesh.c
   library_dmesh_f.c
+  library_dmesh_build_adm.c
+  library_dmesh_build_adm_f.c
   library_dmesh_dgraph.c
   library_dmesh_dgraph_f.c
   library_dmesh_io_load.c

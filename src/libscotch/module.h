@@ -798,6 +798,7 @@
 #define dmapTerm                    SCOTCH_NAME_INTERN (dmapTerm)
 #define dmapSave                    SCOTCH_NAME_INTERN (dmapSave)
 
+#define dmeshBuildAdm               SCOTCH_NAME_INTERN (dmeshBuildAdm)
 #define dmeshDgraphDual             SCOTCH_NAME_INTERN (dmeshDgraphDual)
 #define dmeshExit                   SCOTCH_NAME_INTERN (dmeshExit)
 #define dmeshFree                   SCOTCH_NAME_INTERN (dmeshFree)
