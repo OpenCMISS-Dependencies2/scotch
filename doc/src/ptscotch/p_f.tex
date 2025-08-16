@@ -141,3 +141,106 @@ weights and base $0$, distributed across two processors.
 a cube distributed across two processors.}
 \label{fig-file-dsgraph}
 \end{figure}
+
+\subsection{Auxiliary distributed mesh files}
+\label{sec-file-admesh}
+
+The auxiliary distributed mesh file format has been created to support
+the implementation of the prototype \texttt{Dmesh} class representing
+distributed meshes. The main use of these files, which usually end
+in``{\tt \@.adm}'', is as input of the \texttt{dmesh\lbt Load\,()}
+routine. Unlike the \scotch\ mesh data structures and file formats,
+which are symmetric, this mesh format only provides adjacency lists
+for elements: the list of nodes connected to a given element is
+provided, while the opposite is not, hence the name ``auxiliary''.
+
+The first line of an auxiliary distributed mesh file holds the
+distributed mesh file version number, which is currently
+\texttt{3}. The second line holds the number of files across which the
+mesh data is distributed (referred to as \texttt{proc\lbo glb\lbo nbr}
+in \libscotch; see for instance Figure~\ref{fig-lib-dgraf-one},
+page~\pageref{fig-lib-dgraf-one}, for a detailed example in the case
+of distributed graphs), followed by the number of this file in the
+sequence (ranging from $0$ to $(\texttt{proc\lbo glb\lbo nbr} - 1)$,
+and analogous to \texttt{proc\lbo loc\lbo num} in
+Figure~\ref{fig-lib-dgraf-one}). The third line holds the global
+number of mesh element vertices (referred to as
+\texttt{velm\lbo glb\lbo nbr}), followed by the global number of node
+vertices (referred to as \texttt{vnod\lbo glb\lbo nbr}). The fourth
+line holds the number of elements contained in this mesh fragment
+(\texttt{velm\lbo loc\lbo nbr}), followed by the sum of all
+neighboring node indices for these local elements (\texttt{eelm\lbo
+  loc\lbo nbr}). The fifth line holds two figures: the mesh base index
+value (\texttt{baseval}) and a numeric flag.
+
+The mesh base index value records the value of the starting index
+used to describe the mesh; it is usually $0$ when the mesh has been
+output by C programs, and $1$ for Fortran programs. Its purpose is to
+ease the manipulation of meshes within each of these two environments,
+while providing compatibility between them.
+The numeric flag, similar to the one used by the \chaco\ graph
+format~\cite{hele93c}, is made of three decimal digits; it is
+currently not used.
+
+This header data is then followed by as many lines as there are
+elements in the mesh fragment, that is, \texttt{velm\lbo loc\lbo nbr}
+lines. Each of these lines begins with the number of vertices
+contained in the element described by that line.
+
+In the case of the mesh distributed on three processes represented in
+Figure~\ref{fig-lib-dmesh-one}, the contents of the three corresponding
+auxiliary distributed mesh files are shown in
+Figure~\ref{fig-file-admesh}.
+
+\begin{figure}[hbt]
+\begin{center}
+\begin{minipage}{4.0cm}
+{\renewcommand{\baselinestretch}{1.05}
+ \footnotesize \tt
+\begin{verbatim}
+3
+3 0
+6 12
+3 12
+1 000
+4 5 1 7 11
+4 8 11 6 7
+4 4 1 2 7
+\end{verbatim}}
+\end{minipage}
+\hfil~\hfil
+\begin{minipage}{4.0cm}
+{\renewcommand{\baselinestretch}{1.05}
+ \footnotesize \tt
+\begin{verbatim}
+3
+3 1
+6 12
+1 4
+1 000
+4 10 6 3 8
+
+
+\end{verbatim}}
+\end{minipage}
+\hfil~\hfil
+\begin{minipage}{4.0cm}
+{\renewcommand{\baselinestretch}{1.05}
+ \footnotesize \tt
+\begin{verbatim}
+3
+3 2
+6 12
+2 8
+1 000
+4 12 7 2 6
+4 3 9 12 6
+
+\end{verbatim}}
+\end{minipage}
+\caption{The three auxiliary distributed mesh files corresponding to the
+mesh distributed across three processors of
+Figure~\ref{fig-lib-dmesh-one}, page~\pageref{fig-lib-dmesh-one}.}
+\label{fig-file-admesh}
+\end{center}
+\end{figure}
