@@ -117,7 +117,7 @@ program test_libmetis_dual
     end if
   end do
 
-  ! free c pointers calling the stdlib free function
+  ! Free c pointers calling the stdlib free function
   call free_c (xadj)
   call free_c (adjncy)
 
