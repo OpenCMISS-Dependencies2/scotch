@@ -56,7 +56,7 @@
 /**                # Version 6.1  : from : 18 jul 2021     **/
 /**                                 to   : 18 jul 2021     **/
 /**                # Version 7.0  : from : 03 aug 2018     **/
-/**                                 to   : 16 jul 2024     **/
+/**                                 to   : 16 aug 2025     **/
 /**                                                        **/
 /**   NOTES      : # The comploadavg and comploaddlt       **/
 /**                  should always be allocated together,  **/
@@ -87,7 +87,7 @@
 /**                                                        **/
 /************************************************************/
 
-#define KGRAPH_H
+#define SCOTCH_KGRAPH_H
 
 /*
 **  The defines.

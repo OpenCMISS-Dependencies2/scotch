@@ -61,7 +61,7 @@
 /**                # Version 6.1  : from : 19 jun 2021     **/
 /**                                 to   : 19 jun 2021     **/
 /**                # Version 7.0  : from : 03 may 2019     **/
-/**                                 to   : 09 aug 2025     **/
+/**                                 to   : 16 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -148,9 +148,9 @@ typedef unsigned int DgraphFlag;                  /*+ Graph property flags +*/
 
 /*+ The vertex part type, in compressed form. From graph.h +*/
 
-#ifndef GRAPH_H
+#ifndef SCOTCH_GRAPH_H
 typedef byte GraphPart;
-#endif /* GRAPH_H */
+#endif /* SCOTCH_GRAPH_H */
 
 /* The distributed graph structure. */
 
@@ -224,13 +224,13 @@ int                         dgraphInduce2       (Dgraph * restrict const, Gnum (
 
 int                         dgraphInduceList    (Dgraph * const, const Gnum, const Gnum * const, Dgraph * const);
 int                         dgraphInducePart    (Dgraph * const, const GraphPart * restrict const, const Gnum, const GraphPart, Dgraph * const);
-#ifdef GRAPH_H
+#ifdef SCOTCH_GRAPH_H
 int                         dgraphGather        (const Dgraph * restrict const, Graph * restrict);
 int                         dgraphGather2       (const Dgraph * restrict const, Graph * restrict, const int, const Gnum);
 int                         dgraphGatherAll     (const Dgraph * restrict const, Graph * restrict);
 int                         dgraphGatherAll2    (const Dgraph * restrict const, Graph * restrict, const Gnum, const int);
 int                         dgraphScatter       (Dgraph * const, const Graph * const);
-#endif /* GRAPH_H */
+#endif /* SCOTCH_GRAPH_H */
 
 int                         dgraphHaloSync      (Dgraph * const, void * const, MPI_Datatype);
 

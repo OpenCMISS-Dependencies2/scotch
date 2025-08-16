@@ -64,11 +64,11 @@
 /**                # Version 6.0  : from : 03 mar 2011     **/
 /**                                 to   : 10 may 2019     **/
 /**                # Version 7.0  : from : 08 jun 2018     **/
-/**                                 to   : 11 aug 2025     **/
+/**                                 to   : 16 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
-#define GRAPH_H
+#define SCOTCH_GRAPH_H
 
 /*
 **  The defines.
