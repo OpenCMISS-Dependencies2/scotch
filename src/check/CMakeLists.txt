@@ -87,11 +87,11 @@ function(suffix_fortran_file src)
     "${CMAKE_CURRENT_BINARY_DIR}/${file_we}.tmp")
 
   file(WRITE
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/cmake_sed_${file_we}.cmake
+    "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/cmake_sed_${file_we}.cmake"
 "
-file(READ ${file_we}.tmp FILE_CONTENTS)
-string(REGEX REPLACE \"SCOTCHMETISNAMEFU *\\\\(([^()]*)\\\\) *\" "${SCOTCH_METIS_PREFIXFU}\\\\1" FILE_CONTENTS \${FILE_CONTENTS})
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${file_we} \${FILE_CONTENTS})
+file(READ \"${file_we}.tmp\" FILE_CONTENTS)
+string(REGEX REPLACE \"SCOTCHMETISNAMEFU *\\\\(([A-Za-z0-9_]*)\\\\)\" \"\${SCOTCH_METIS_PREFIXFU}\\\\1\" FILE_CONTENTS \"\${FILE_CONTENTS}\")
+file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/${file_we}\" \"\${FILE_CONTENTS}\")
 "
 )
 
@@ -384,6 +384,22 @@ if(BUILD_PTSCOTCH)
   add_test_ptscotch(test_scotch_dgraph_redist ${CMAKE_CURRENT_SOURCE_DIR}/data/bump.grf)
 
   add_test_ptscotch(test_scotch_dgraph_redist ${CMAKE_CURRENT_SOURCE_DIR}/data/bump_b100000.grf)
+  if(BUILD_LIBSCOTCHMETIS)
+    set(version 3)
+    # Small test (procnbr, baseval, noconbr) = (3, 1, 2)
+    add_test(NAME parmetis_mesh2dual_small COMMAND ${BASH} -c
+      "${MPIEXEC_EXECUTABLE} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 $<TARGET_FILE:adm2dgr> -c2 '${dat}/small3-%r.adm' small3-%r.dgr && \
+       '${CMAKE_COMMAND}' -E compare_files '${dat}/small3-0.dgr' small3-0.dgr && \
+       '${CMAKE_COMMAND}' -E compare_files '${dat}/small3-1.dgr' small3-1.dgr && \
+       '${CMAKE_COMMAND}' -E compare_files '${dat}/small3-2.dgr' small3-2.dgr")
+    # Larger test (procnbr, baseval, noconbr) = (4, 0, 3)
+    add_test(NAME parmetis_mesh2dual_larger COMMAND ${BASH} -c
+      "${MPIEXEC_EXECUTABLE} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 4 $<TARGET_FILE:adm2dgr> -c3 '${dat}/ship001-%r.adm' ship001-%r.dgr && \
+       '${CMAKE_COMMAND}' -E compare_files '${dat}/ship001-0.dgr' ship001-0.dgr && \
+       '${CMAKE_COMMAND}' -E compare_files '${dat}/ship001-1.dgr' ship001-1.dgr && \
+       '${CMAKE_COMMAND}' -E compare_files '${dat}/ship001-2.dgr' ship001-2.dgr && \
+       '${CMAKE_COMMAND}' -E compare_files '${dat}/ship001-3.dgr' ship001-3.dgr")
+  endif(BUILD_LIBSCOTCHMETIS)
 endif(BUILD_PTSCOTCH)
 
 ######################################

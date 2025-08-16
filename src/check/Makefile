@@ -242,8 +242,9 @@ CHECKPTSCOTCH = 	check_strat_par				\
 			check_scotch_dgraph_band		\
 			check_scotch_dgraph_coarsen		\
 			check_scotch_dgraph_grow		\
-			check_scotch_dgraph_induce      	\
+			check_scotch_dgraph_induce     		\
 			check_scotch_dgraph_redist		\
+			check_libparmetis_dual          	\
 			check_prog_dgord			\
 			check_prog_dgpart			\
 			check_prog_dgscat-dggath		\
@@ -360,6 +361,18 @@ check_libmetis_dual_f_v5	:	test_libmetis_dual_f_v5
 test_libmetis_dual_f_v5		:	test_libmetis_dual_f.f90	\
 					$(SCOTCHLIBDIR)/libscotch$(LIB)	\
 					$(SCOTCHLIBDIR)/libscotchmetisv5$(LIB)
+# libparmetis
+
+check_libparmetis_dual		:	$(SCOTCHBINDIR)/adm2dgr$(EXE)
+					$(EXECP3) $(SCOTCHBINDIR)/adm2dgr -c2 data/small3-%r.adm $(TMPDIR)/small3-%r.dgr
+					$(PROGDIFF) "data/small3-0.dgr" "$(TMPDIR)/small3-0.dgr"
+					$(PROGDIFF) "data/small3-1.dgr" "$(TMPDIR)/small3-1.dgr"
+					$(PROGDIFF) "data/small3-2.dgr" "$(TMPDIR)/small3-2.dgr"
+					$(EXECP4) $(SCOTCHBINDIR)/adm2dgr -c3 data/ship001-%r.adm $(TMPDIR)/ship001-%r.dgr
+					$(PROGDIFF) "data/ship001-0.dgr" "$(TMPDIR)/ship001-0.dgr"
+					$(PROGDIFF) "data/ship001-1.dgr" "$(TMPDIR)/ship001-1.dgr"
+					$(PROGDIFF) "data/ship001-2.dgr" "$(TMPDIR)/ship001-2.dgr"
+					$(PROGDIFF) "data/ship001-3.dgr" "$(TMPDIR)/ship001-3.dgr"
 
 ##
 
