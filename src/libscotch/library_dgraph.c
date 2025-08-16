@@ -206,7 +206,7 @@ SCOTCH_Num * const          edgelocptz,           /* Size of local edge array   
 SCOTCH_Num ** const         edgeloctab,           /* Local edge array [edgelocsiz]    */
 SCOTCH_Num ** const         edgegsttab,           /* Ghost edge array [edgelocsiz]    */
 SCOTCH_Num ** const         edloloctab,           /* Edge load array [edgelocsiz]     */
-MPI_Comm * const            comm)                 /* MPI Communicator                 */
+MPI_Comm * const            commptr)              /* MPI Communicator                 */
 {
   const Dgraph * const      srcgrafptr = (Dgraph *) CONTEXTOBJECT (libgrafptr);
 
@@ -240,6 +240,6 @@ MPI_Comm * const            comm)                 /* MPI Communicator           
     *edgegsttab = (srcgrafptr->edgegsttax != NULL) ? srcgrafptr->edgegsttax + srcgrafptr->baseval : NULL;
   if (edloloctab != NULL)
     *edloloctab = (srcgrafptr->edloloctax != NULL) ? srcgrafptr->edloloctax + srcgrafptr->baseval : NULL;
-  if (comm != NULL)
-    *comm = srcgrafptr->proccomm;
+  if (commptr != NULL)
+    *commptr = srcgrafptr->proccomm;
 }
