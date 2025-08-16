@@ -5071,6 +5071,46 @@ that the sequential \metis\ library be linked too. When no other
 the ``{\tt -lparmetis}'' argument can be omitted. See
 Section~\ref{sec-examples} for an example.
 
+\subsubsection{\texttt{ParMETIS\_V3\_Mesh2Dual}}
+\label{sec-lib-func-parmetis-meshtodual}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+void ParMETIS\_V3\_Mesh2Dual ( & const SCOTCH\_Num * const & elmdist, \\
+                               & const SCOTCH\_Num * const & eptr, \\
+                               & const SCOTCH\_Num * const & eind, \\
+                               & const SCOTCH\_Num * const & numflag, \\
+                               & const SCOTCH\_Num * const & ncommonnodes, \\
+                               & SCOTCH\_Num ** const      & xadj, \\
+                               & SCOTCH\_Num ** const      & adjncy \\
+                               & MPI\_Comm *               & comm)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+parmetis\_v3\_mesh2dual ( & integer*{\it num} (*)  & elmdist, \\
+                          & integer*{\it num} (*)  & eptr, \\
+                          & integer*{\it num} (*)  & eind, \\
+                          & integer*{\it num}      & numflag, \\
+                          & integer*{\it num}      & ncommonnodes, \\
+                          & integer*{\it num} (**) & xadj, \\
+                          & integer*{\it num} (**) & adjncy, \\
+                          & integer                & comm)
+\end{tabular}}
+
+\progdes
+
+The \texttt{ParMETIS\_V3\_Mesh2Dual} function computes in parallel the
+distributed element graph, also called dual mesh graph, from the given
+element mesh adjacency data. The input mesh is given through the three
+arrays \texttt{elmdist}, \texttt{eptr} and \texttt{eind}. The arrays
+which describe the adjacency of the dual graph are returned in the
+pointers pointed to by \texttt{xadj} and \texttt{adjncy}. It is the
+user's responsibility to free these two arrays after use, by way of
+plain \texttt{free\,()} calls.
+\end{itemize}
+
 \subsubsection{{\tt ParMETIS\_V3\_NodeND}}
 
 \begin{itemize}
