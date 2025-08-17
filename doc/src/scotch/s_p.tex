@@ -332,8 +332,8 @@ page~\pageref{sec-lib-arch-build}, for further information.
 \iteme[\texttt{-b}{\it strategy}]
 Use recursive bipartitioning strategy {\it strategy\/} to build the
 decomposition of the architecture graph. The format of bipartitioning
-strategies is defined within section~\ref{sec-lib-format-map},
-at page~\pageref{sec-lib-format-bipart}.
+strategies is defined within section~\ref{sec-lib-format-strat-bipart},
+at page~\pageref{sec-lib-format-strat-bipart}.
 \iteme[\texttt{-h}]
 Display the program synopsis.
 \iteme[\texttt{-l}{\it input\_vertex\_file}]
@@ -545,9 +545,9 @@ Display the program synopsis.
 Apply mapping strategy {\it strat}. In the case of static mapping or
 of edge-based graph partitioning, the format of mapping strategies
 should comply with the format defined in
-Section~\ref{sec-lib-format-map}.  If the \texttt{-o} option is used (see
+Section~\ref{sec-lib-format-strat-map}. If the \texttt{-o} option is used (see
 below), strategies must be vertex partitioning strategies, which are
-described in Section~\ref{sec-lib-format-part-ovl}.
+described in Section~\ref{sec-lib-format-strat-part-ovl}.
 This option is incompatible with options \texttt{-b} and
 \texttt{-c}.
 \iteme[\texttt{-o}]
@@ -843,7 +843,7 @@ processed by program \texttt{gout} to display the vertex separators and
 supervariable amalgamations that have been computed.
 \iteme[{\texttt{-o}{\it strat}}]
 Apply ordering strategy {\it strat}. The format of ordering
-strategies is defined in section~\ref{sec-lib-format-ord}.
+strategies is defined in section~\ref{sec-lib-format-strat-ord}.
 \iteme[\texttt{-t}{\it output\_tree\_file}]
 Write to {\it output\_tree\_file\/} the structure of the separator
 tree. The data that is written resembles much the one of a mapping
@@ -1303,7 +1303,7 @@ the \texttt{gmk\_\lbt msh} program, to display the node vertex separators
 and supervariable amalgamations that have been computed.
 \iteme[{\texttt{-o}{\it strat}}]
 Apply ordering strategy {\it strat}. The format of ordering
-strategies is defined in section~\ref{sec-lib-format-ord}.
+strategies is defined in section~\ref{sec-lib-format-strat-ord}.
 \iteme[\texttt{-t}{\it output\_tree\_file}]
 Write to {\it output\_tree\_file\/} the structure of the separator
 tree. The data that is written resembles much the one of a mapping
