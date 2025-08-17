@@ -74,3 +74,14 @@ exposes in its interface a new distributed graph handling routine,
 {\tt SCOTCH\_\lbt dgraph\lbt Redist}, that builds a redistributed
 graph from an existing distributed graph and partition data. See
 Section~\ref{sec-lib-func-dgraphredist}.
+
+\subsection{Changes from version 6.1}
+
+The prototype \texttt{Dmesh} distributed mesh data type has been
+created, to allow one to compute dual distributed graphs, using
+the \texttt{dmeshDgraphDual\,()} routine (see
+Section~\ref{sec-lib-func-dmeshdgraphdual}). This routine, and others,
+allowed for the addition of the
+\texttt{ParMETIS\_\lbt V3\_\lbt Mesh2Dual\,()} routine to the
+\parmetis\ compatibility module (see
+Section~\ref{sec-lib-func-parmetis-meshtodual}).
