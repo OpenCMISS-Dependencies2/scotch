@@ -15,13 +15,17 @@ All of the features provided by the programs of the
 \ptscotch\ distribution may be directly accessed by calling
 the appropriate functions of the \libscotch\ library, archived
 in files {\tt libptscotch.a} and {\tt libptscotcherr.a}.
-All of the existing parallel routines belong to four distinct classes:
+All of the existing parallel routines belong to five distinct classes:
 \begin{itemize}
 \item
 distributed source graph handling routines, which serve to declare,
 build, load, save, and check the consistency of distributed source
 graphs;
 %, along with their geometry data;
+\item
+distributed source mesh handling routines, which serve to declare,
+build, and load%, and check the consistency of
+distributed source meshes;
 \item
 strategy handling routines, which allow the user to declare and build
 parallel mapping and ordering strategies;
@@ -613,6 +617,109 @@ loc\lbt tab}\mbox{\tt [}i\mbox{\tt ]}$ and ${\tt vend\lbt loc\lbt
 tab}\mbox{\tt [}i\mbox{\tt ]}$ must be updated accordingly. With
 simple housekeeping of free areas of the edge array, dynamic arrays
 can be updated with as little data movement as possible.
+
+\subsubsection{\texttt{SCOTCH\_Dmesh} distributed mesh type}
+\label{sec-lib-type-dmesh}
+
+The distributed mesh data type is currently a prototype, which has no
+official support. Its main use is to host data that will eventually
+serve to compute a \texttt{SCOTCH\_\lbt Dgraph} distributed dual
+graph. Unlike other \scotch\ and \ptscotch\ data structures, such as
+the \texttt{SCOTCH\_\lbt Mesh} centralized data structure, which are
+symmetric, this mesh data type only provides adjacency lists for
+elements: the list of nodes connected to a given element is available,
+while the node-to-element adjacency is currently not. Hence, at the
+time being, there is no possibility to provide node weights, since
+node vertices have no existence. Element weights are not handled to
+date either, but that may change in the future if the need arises. Due
+to the prototype nature of this data type, its internal structure may
+be subject to changes at any time.
+
+As said, the \texttt{SCOTCH\_\lbt Dmesh} structure only holds the
+minimum set of information needed to perform dual graph
+computation. The only data which are replicated on every process are
+of a size linear in the number of processes and small. Apart from
+these, the sum across all processes of all of the element vertex data
+is in $O(v_e+p)$, where $v_e$ is the overall number of vertices in the
+distributed mesh and $p$ the number of processes, and the sum of all
+of the edge data is in $O(e_e)$, where $e_e$ is the overall number of
+element-to-node arcs in the distributed mesh. No halo information is
+present.
+
+Distributed source meshes are described by means of adjacency
+lists. The description of a distributed mesh requires several
+\texttt{SCOTCH\_\lbt Num} scalars and arrays, as illustrated in
+Figure~\ref{fig-lib-dmesh-one}.
+Some of these data are said to be global, and are duplicated on every
+process that holds part of the distributed mesh; their names contain
+the ``{\tt glb}'' infix. Others are local, that is, their value may
+differ for each process; their names contain the ``{\tt loc}''
+infix. Global data have the following meaning:
+\begin{itemize}
+\iteme[{\tt baseval}]
+Base value for all array indexings.
+\iteme[{\tt velmglbnbr}]
+Overall number of element vertices in the distributed mesh.
+\iteme[{\tt eelmglbnbr}]
+Overall number of element-to-node arcs in the distributed mesh, which
+is also the overall number of node-to-element arcs.
+\iteme[{\tt vnodglbnbr}]
+Overall number of node vertices in the distributed mesh.
+\iteme[{\tt procglbnbr}]
+Overall number of processes that share distributed mesh data.
+\iteme[{\tt prelvrttab}]
+Array holding the global indices from which the element vertices of
+every process are numbered. For optimization purposes, this array has
+an extra slot, to record the after-last based number of
+elements. Since, to date, distributed meshes are compact data
+structures, $\mbox{\tt prel\lbt vrt\lbt tab[0]} = \mbox{\tt baseval}$,
+$\mbox{\tt prel\lbt vrt\lbt tab[proc\lbt glb\lbt nbr]} =
+(\mbox{\tt velm\lbt glb\lbt nbr} + \mbox{\tt baseval})$, and,
+for each process index $p$, and with respect to its local
+variable \texttt{velm\lbt loc\lbt nbr},
+$\mbox{\tt prel\lbt vrt\lbt tab[}p + 1\mbox{\tt]} =
+(\mbox{\tt prel\lbt vrt\lbt tab[}p\mbox{\tt]} +
+\mbox{\tt velm\lbt loc\lbt nbr})$ holds.
+\end{itemize}
+Local data have the following meaning:
+\begin{itemize}
+\iteme[{\tt velmlocnbr}]
+Number of local element vertices borne by the given process.
+\iteme[{\tt eelmlocnbr}]
+Number of local element-to-node arcs borne by the given process.
+\iteme[{\tt velmloctab}]
+Array of start indices in {\tt eelmloctab} of
+vertex adjacency sub-arrays. Since distributed mesh numbering is
+compact, this array possesses and extra slot, to record the after-last
+based number of local element-to-node arcs, that is,
+$\mbox{\tt velm\lbt loc\lbt tab[velm\lbt loc\lbt nbr]} =
+(\mbox{\tt eelm\lbt loc\lbt nbr[} +
+\mbox{\tt base\lbt val})$ holds.
+\iteme[{\tt eelmloctab}]
+Array, of a size equal to \texttt{eelm\lbt loc\lbt nbr}, holding
+the adjacency array of every local element vertex, in the form of a
+set of based, global node vertex indices. For any local element vertex
+$i$, with $\mbox{\tt baseval} \leq i < (\mbox{\tt baseval} + \mbox{\tt
+velm\lbt loc\lbt nbr})$, the global indices of the node neighbors
+of $i$ are stored in \texttt{eelm\lbt loc\lbt tab}
+from \texttt{eelm\lbt loc\lbt tab\lbt [velm\lbt loc\lbt tab[$i$]]} to
+$\mbox{\tt eelm\lbt loc\lbt tab[velm\lbt loc\lbt tab[}i + 1\mbox{\tt ]} -
+1\mbox{\tt ]}$, inclusive.
+\end{itemize}
+
+\begin{figure}
+\centering\includegraphics[scale=0.47]{p_f_adm.eps}
+\caption{Sample distributed mesh and its description by
+\libscotch\ arrays. Numbers within vertices are element and node
+vertex indices. Top mesh is a global view of the distributed mesh,
+labeled with global, continuous, indices. Bottom graphs are local
+views. Since the element edge array is compact, all
+\texttt{velmloctab} arrays are of size $\mbox{\texttt{velmlocnbr}} +
+1$. \texttt{eelmloctab} edge arrays hold global indices
+of end node vertices. \texttt{eelmlocnbr} is the local number of
+element-to-node arcs.}
+\label{fig-lib-dmesh-one}
+\end{figure}
 
 \subsubsection{\texttt{SCOTCH\_Dordering} distributed block ordering type}
 \label{sec-lib-type-dordering}
