@@ -3783,6 +3783,478 @@ as the \texttt{corddat} parameter in Fortran.
 ordering structure has been successfully updated, and $1$ else.
 \end{itemize}
 
+\subsection{Distributed mesh handling routines}
+\label{sec-lib-dmesh}
+
+\subsubsection{\texttt{SCOTCH\_dmeshAlloc}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}l}
+SCOTCH\_Dmesh * SCOTCH\_dmeshAlloc ( & void)
+\end{tabular}}
+
+\progdes
+
+The {\tt SCOTCH\_dmeshAlloc} function allocates a memory area of a
+size sufficient to store a {\tt SCOTCH\_\lbt Dmesh} structure. It is
+the user's responsibility to free this memory when it is no longer
+needed. The allocated space must be initialized before use, by means
+of the {\tt SCOTCH\_\lbt dmesh\lbt Init} routine.
+
+\progret
+
+{\tt SCOTCH\_dmeshAlloc} returns the pointer to the memory area if it
+has been successfully allocated, and {\tt NULL} else.
+\end{itemize}
+
+\subsubsection{{\tt SCOTCH\_dmeshBuildAdm}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+int SCOTCH\_dmeshBuildAdm ( & SCOTCH\_Dmesh *     & meshptr,    \\
+                            & const SCOTCH\_Num   & baseval,    \\
+                            & const SCOTCH\_Num   & vertlocnbr, \\
+                            & const SCOTCH\_Num   & vertlocmax, \\
+                            & const SCOTCH\_Num * & vertloctab, \\
+                            & const SCOTCH\_Num * & vendloctab, \\
+                            & const SCOTCH\_Num * & veloloctab, \\
+                            & const SCOTCH\_Num * & vlblocltab, \\
+                            & const SCOTCH\_Num   & edgelocnbr, \\
+                            & const SCOTCH\_Num   & edgelocsiz, \\
+                            & const SCOTCH\_Num * & edgeloctab, \\
+                            & const SCOTCH\_Num * & edgegsttab, \\
+                            & const SCOTCH\_Num * & edloloctab)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshbuildadm ( & doubleprecision (*)   & meshdat,    \\
+                       & integer*{\it num}     & baseval,    \\
+                       & integer*{\it num}     & vertlocnbr, \\
+                       & integer*{\it num}     & vertlocmax, \\
+                       & integer*{\it num} (*) & vertloctab, \\
+                       & integer*{\it num} (*) & vendloctab, \\
+                       & integer*{\it num} (*) & veloloctab, \\
+                       & integer*{\it num} (*) & vlblloctab, \\
+                       & integer*{\it num}     & edgelocnbr, \\
+                       & integer*{\it num}     & edgelocsiz, \\
+                       & integer*{\it num} (*) & edgeloctab, \\
+                       & integer*{\it num} (*) & edgegsttab, \\
+                       & integer*{\it num} (*) & edloloctab, \\
+                       & integer               & ierr)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshBuildAdm} routine fills the distributed source
+mesh structure pointed to by \texttt{meshptr} with all of the data that
+are passed to it in the auxiliary distributed mesh format (see
+Section~\ref{sec-file-admesh} for more information on this format).
+
+\texttt{baseval} is the mesh base value for index arrays (typically
+$0$ for structures built from C and $1$ for structures built from
+Fortran). \texttt{velmlocnbr} is the number of local element vertices
+on the calling process.
+\texttt{velmloctab} is the local element-to-node adjacency index
+array, of size $(\texttt{velm\lbt loc\lbt nbr} + 1)$.
+\texttt{eelmlocnbr} is the local number of element-to-node arcs.
+\texttt{eelmloctab} is the local adjacency array, of size
+\texttt{eelmlocnbr}, which stores the global indices of end node
+vertices.
+\texttt{vnodglbnbr} is the global number of node vertices.
+All these data must be provided on all processes.
+
+To limit memory consumption,
+\texttt{SCOTCH\_\lbt dmesh\lbo Build\lbo Adm} does not copy array
+data, but instead references them in the \texttt{SCOTCH\_\lbt Dmesh}
+structure. Therefore, great care should be taken not to modify the
+contents of the arrays passed to
+\texttt{SCOTCH\_\lbt dmesh\lbt Build\lbo Adm} as long as the mesh
+structure is in use. Every update of the arrays should be preceded by
+a call to \texttt{SCOTCH\_\lbt dmesh\lbo Free}, to free internal mesh
+structures, and eventually followed by a new call to
+\texttt{SCOTCH\_\lbt dmesh\lbo Build\lbo Adm} to
+re-build these internal structures so as to be able to use the new
+distributed mesh.
+
+%% To ensure that inconsistencies in user data do not result in an
+%% erroneous behavior of the \libscotch\ routines, it is recommended, at
+%% least in the development stage of your application code, to call the
+%% {\tt SCOTCH\_\lbt dmesh\lbt Check} routine on the newly created
+%% {\tt SCOTCH\_\lbt Dmesh} structure before calling any other
+%% \libscotch\ routine.
+
+\progret
+
+{\tt SCOTCH\_dmeshBuildAdm} returns $0$ if the mesh structure has been
+successfully set with all of the input data, and $1$ else.
+\end{itemize}
+
+\subsubsection{\texttt{SCOTCH\_dmeshData}}
+\label{sec-lib-func-dmeshdata}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+void SCOTCH\_dmeshData ( & const SCOTCH\_Dmesh * & meshptr,    \\
+                         & SCOTCH\_Num *         & baseptr,    \\
+                         & SCOTCH\_Num *         & velmglbptr, \\
+                         & SCOTCH\_Num *         & velmlocptr, \\
+                         & SCOTCH\_Num **        & velmloctab, \\
+                         & SCOTCH\_Num *         & eelmglbnbr, \\
+                         & SCOTCH\_Num *         & eelmlocptr, \\
+                         & SCOTCH\_Num **        & eelmloctab, \\
+                         & SCOTCH\_Num *         & vnodglbptr, \\
+                         & MPI\_Comm *           & commptr)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshdata ( & doubleprecision (*)   & meshdat,    \\
+                   & integer*{\it num} (*) & indxtab,    \\
+                   & integer*{\it num}     & baseval,    \\
+                   & integer*{\it num}     & velmglbnbr, \\
+                   & integer*{\it num}     & velmlocnbr, \\
+                   & integer*{\it idx}     & velmlocidx, \\
+                   & integer*{\it num}     & eelmglbnbr, \\
+                   & integer*{\it num}     & eelmlocnbr, \\
+                   & integer*{\it idx}     & eelmlocidx, \\
+                   & integer*{\it num}     & vnodglbnbr, \\
+                   & integer               & comm)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshData} routine is the dual of the
+\texttt{SCOTCH\_\lbt dmesh\lbo Build\lbo Adm} routine. It is a
+multiple accessor that returns scalar values and array references.
+
+\texttt{baseptr} is the pointer to a location that will hold the mesh
+base value for index arrays (typically $0$ for structures built from C
+and $1$ for structures built from Fortran).
+\texttt{velmglbptr} is the pointer to a location that will hold the
+global number of element vertices.
+\texttt{velmlocptr} is the pointer to a location that will hold the
+number of local element vertices.
+\texttt{vertloctab} is the pointer to a location that will hold the
+reference to the adjacency index array, of size
+$\mbox{\tt *velmlocptr} + 1$.
+\texttt{eelmglbptr} is the pointer to a location that will hold the
+global number of element-to-node arcs, which is also the global number
+of node-to-element arcs.
+\texttt{eelmlocptr} is the pointer to a location that will hold the
+number of local element-to-node arcs.
+\texttt{eelmloctab} is the pointer to a location that will hold the
+reference to the local element-to-node adjacency array of global
+indices, of size \texttt{*eelmlocptr}.
+\texttt{vnodglbptr} is the pointer to a location that will hold the
+global number of node vertices.
+{\tt commptr} is the pointer to a location that will hold the MPI
+communicator of the distributed mesh.
+
+Any of these pointers can be set to {\tt NULL} on input if the
+corresponding information is not needed. Else, the reference to a
+dummy area can be provided, where all unwanted data will be written.
+
+Since there are no pointers in Fortran, a specific mechanism is used
+to allow users to access mesh arrays. The \texttt{scotchf\lbt dmesh\lbt
+data} routine is passed an integer array, the first element of which
+is used as a base address from which all other array indices are
+computed. Therefore, instead of returning references, the routine
+returns integers, which represent the starting index of each of the
+relevant arrays with respect to the base input array, or \texttt{velm\lbt
+loc\lbt idx}, the index of \texttt{velm\lbt loc\lbt tab}, if they do not
+exist. For instance, if some base array \texttt{myarray\lbt (1)} is
+passed as parameter \texttt{indxtab}, then the first cell of array
+\texttt{velm\lbt loc\lbt tab} will be accessible as {\tt myarray\lbt
+(velm\lbt loc\lbt idx)}.
+In order for this feature to behave properly, the {\tt indxtab}
+array must be word-aligned with the mesh arrays. This is
+automatically enforced on most systems, but some care should be
+taken on systems that allow to access data that is not
+word-aligned. On such systems, declaring the array after a
+dummy {\tt double\lbt precision} array can coerce the compiler
+into enforcing the proper alignment. The integer value returned in
+{\tt comm} is the communicator itself, not its index with respect to
+{\tt indxtab}. Also, on 32\_64 architectures,
+such indices can be larger than the size of a regular
+{\tt INTEGER}. This is why the indices to be returned are defined by
+means of a specific integer type. See
+Section~\ref{sec-lib-inttypesize} for more information on this
+issue.
+\end{itemize}
+
+\subsubsection{\texttt{SCOTCH\_dmeshDgraphDual}}
+\label{sec-lib-func-dmeshdgraphdual}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+int SCOTCH\_dmeshDgraphDual ( & const SCOTCH\_Dmesh * & meshptr, \\
+                              & SCOTCH\_Dgraph *      & grafptr, \\
+                              & const SCOTCH\_Num     & nocoval)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshdgraphdual ( & doubleprecision (*) & meshdat, \\
+                         & doubleprecision (*) & grafdat, \\
+                         & integer             & nocoval, \\
+                         & integer             & ierr)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshDgraphDual} routine builds a distributed dual
+graph (\ie, an element graph) from a distributed mesh. It creates, in
+the \texttt{SCOTCH\_\lbt Dgraph} structure pointed to by
+\texttt{grafptr}, a distributed graph having as many vertices as there
+are elements in the \texttt{SCOTCH\_\lbt Dmesh} structure pointed to
+by \texttt{meshptr}, and such that there exists an edge between any
+two graph vertices if there are at least \texttt{nocoval} shared nodes
+between the two corresponding elements in the source mesh.
+
+\progret
+
+\texttt{SCOTCH\_dmeshDgraphDual} returns $0$ if the distributed graph
+structure has been successfully allocated and filled, and $1$ else.
+\end{itemize}
+
+\subsubsection{{\tt SCOTCH\_dmeshExit}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+void SCOTCH\_dmeshExit ( & SCOTCH\_Dmesh * & meshptr)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshexit ( & doubleprecision (*) & meshdat)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshExit} function frees the contents of a
+\texttt{SCOTCH\_\lbt Dmesh} structure previously initialized by
+\texttt{SCOTCH\_\lbt dmeshInit}. All subsequent calls to
+\texttt{SCOTCH\_\lbt mesh} routines other than
+\texttt{SCOTCH\_\lbt dmesh\lbo Init}, using this structure as
+parameter, may yield unpredictable results.
+
+If \texttt{SCOTCH\_\lbt dmesh\lbt Init} was called with a
+communicator that is not a predefined MPI communicator, it is
+the user's responsibility to free this communicator after
+all meshes that use it have been freed by means of the
+\texttt{SCOTCH\_\lbt dmesh\lbt Exit} routine.
+
+\end{itemize}
+
+\subsubsection{{\tt SCOTCH\_dmeshFree}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+void SCOTCH\_dmeshFree ( & SCOTCH\_Dmesh * & meshptr)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshfree ( & doubleprecision (*) & meshdat)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshFree} function frees the mesh data of a
+\texttt{SCOTCH\_\lbt Dmesh} structure previously initialized by
+\texttt{SCOTCH\_\lbt dmesh\lbt Init}, but preserves its internal
+communication data structures. This call is equivalent to
+a call to \texttt{SCOTCH\_\lbt dmesh\lbo Exit} immediately
+followed by a call to \texttt{SCOTCH\_\lbt dmesh\lbt Init} with the
+same communicator as in the previous
+\texttt{SCOTCH\_\lbt dmesh\lbt Init} call. Consequently, the given
+\texttt{SCOTCH\_\lbt Dmesh} structure remains ready for subsequent
+calls to any distributed mesh handling routine of the
+\libscotch\ library.
+\end{itemize}
+
+\subsubsection{\texttt{SCOTCH\_dmeshInit}}
+\label{sec-lib-func-dmeshinit}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+int SCOTCH\_dmeshInit ( & SCOTCH\_Dmesh * & meshptr, \\
+                        & MPI\_Comm       & comm)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshinit ( & doubleprecision (*) & meshdat, \\
+                   & integer             & comm, \\
+                   & integer             & ierr)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshInit} function initializes a
+\texttt{SCOTCH\_\lbt Dmesh} structure so as to make it suitable for
+future parallel operations. It should be the first function to be
+called upon a \texttt{SCOTCH\_\lbt Dmesh} structure. By accessing the
+communicator handle which is passed to it, \texttt{SCOTCH\_dmeshInit}
+can know how many processes will be used to manage the distributed
+mesh and can allocate its private structures accordingly.
+
+\texttt{SCOTCH\_dmeshInit} does not make a duplicate of the communicator
+which is passed to it, but instead keeps a reference to it, so that
+all future communications needed by \libscotch\ to process this mesh
+will be performed using this communicator. Therefore, it is the user's
+responsibility, whenever several \libscotch\ routines might be called
+in parallel, to create appropriate duplicates of communicators so as
+to avoid any potential interferences between concurrent
+communications.
+
+When the distributed mesh is no longer of use, the
+\texttt{SCOTCH\_\lbt dmesh\lbt Exit} function must be called, to free
+its internal data arrays.
+
+If \texttt{SCOTCH\_\lbt dmesh\lbt Init} was called with a
+communicator that is not a predefined MPI communicator (such as
+{\tt MPI\_\tt COMM\_\lbt WORLD} or {\tt MPI\_\tt COMM\_\lbt SELF}), it
+is the user's responsibility to free this communicator after
+all meshes that use it have been freed by means of the
+\texttt{SCOTCH\_\lbt dmesh\lbt Exit} routine.
+
+\progret
+
+{\tt SCOTCH\_dmeshInit} returns $0$ if the gmesh structure has been
+successfully initialized, and $1$ else.
+\end{itemize}
+
+\subsubsection{\texttt{SCOTCH\_dmeshSize}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+void SCOTCH\_dmeshSize ( & const SCOTCH\_Dmesh * & meshptr,    \\
+                         & SCOTCH\_Num *         & velmglbptr, \\
+                         & SCOTCH\_Num *         & velmlocptr, \\
+                         & SCOTCH\_Num *         & eelmglbnbr, \\
+                         & SCOTCH\_Num *         & eelmlocptr, \\
+                         & SCOTCH\_Num *         & vnodglbptr)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshsize ( & doubleprecision (*) & meshdat,    \\
+                   & integer*{\it num}   & velmglbnbr, \\
+                   & integer*{\it num}   & velmlocnbr, \\
+                   & integer*{\it num}   & eelmglbnbr, \\
+                   & integer*{\it num}   & eelmlocnbr, \\
+                   & integer*{\it num}   & vnodglbnbr)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshSize} routine fills the five areas of type
+\texttt{SCOTCH\_\lbt Num} pointed to by \texttt{velmglbptr},
+\texttt{velmlocptr}, \texttt{eelmglbptr}, \texttt{eelmlocptr} and
+\texttt{vnodglbptr} with the number of global element vertices and
+element-to-node arcs of the given mesh pointed to by {\tt meshptr}, as
+well as with the number of local element vertices and element-to-node
+arcs borne by each of the calling processes, and the global number of
+node vertices.
+
+Any of these pointers can be set to {\tt NULL} on input if the
+corresponding information is not needed. Else, the reference to a
+dummy area can be provided, where all unwanted data will be written.
+
+This routine is useful to get the size of a mesh read by means
+of the {\tt SCOTCH\_\lbt dmesh\lbo Load} routine, in order to allocate
+auxiliary arrays of proper sizes. If the whole structure of the
+mesh is wanted, function \texttt{SCOTCH\_dmesh\lbo Data} should be
+preferred.
+
+\end{itemize}
+
+\subsubsection{\texttt{SCOTCH\_dmeshSizeof}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}l}
+int SCOTCH\_dmeshSizeof ( & void)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshsizeof ( & integer & size )
+\end{tabular}}
+
+\progdes
+
+The {\tt SCOTCH\_dmeshSizeof} routine returns the size, in bytes, of a
+{\tt SCOTCH\_\lbt Dmesh} structure. This information is useful to
+export the interface of the {\sc libPTScotch} to interpreted languages,
+without access to the ``{\tt scotch.h}'' include file.
+\end{itemize}
+
+\subsection{Distributed mesh I/O routines}
+
+\subsubsection{{\tt SCOTCH\_dmeshLoad}}
+\label{sec-lib-func-dmeshload}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+int SCOTCH\_dmeshLoad ( & SCOTCH\_Dmesh * & meshptr, \\
+                        & FILE *          & stream, \\
+                        & SCOTCH\_Num     & baseval, \\
+                        & SCOTCH\_Num     & flagval)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshload ( & doubleprecision (*) & meshdat, \\
+                   & integer             & fildes, \\
+                   & integer*{\it num}   & baseval, \\
+                   & integer*{\it num}   & flagval, \\
+                   & integer             & ierr)
+\end{tabular}}
+
+\progdes
+
+The {\tt SCOTCH\_dmeshLoad} routine fills the
+\texttt{SCOTCH\_\lbt Dmesh} structure pointed to by \texttt{meshptr}
+with the distributed source mesh description available from
+multiple streams \texttt{stream} in the \scotch\ distributed mesh
+format (please refer to Section~\ref{sec-file-admesh} for a description
+of the auxiliary distributed mesh format).
+
+To ease the handling of source mesh files by programs written in C as
+well as in Fortran, the base value of the mesh to read can be set
+to \texttt{0} or \texttt{1}, by setting the \texttt{baseval} parameter
+to the proper value. A value of \texttt{-1} indicates that the mesh
+base should be the same as the one provided in the mesh description
+that is read from \texttt{stream}.
+
+The \texttt{flagval} value is currently not used. This value should be
+set to \texttt{0}.
+
+Fortran users must use the \texttt{PXFFILENO} or \texttt{FNUM}
+functions to obtain the number of the Unix file descriptor
+\texttt{fildes} associated with the logical unit of the mesh
+file.
+
+\progret
+
+\texttt{SCOTCH\_dmeshLoad} returns $0$ if the distributed mesh
+structure has been successfully allocated and filled with the data
+read, and $1$ else.
+\end{itemize}
+
 \subsection{Strategy handling routines}
 \label{sec-lib-func-strat}
 
