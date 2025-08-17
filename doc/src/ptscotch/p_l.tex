@@ -36,14 +36,14 @@ and save distributed orderings of distributed source graphs.
 Error handling is performed using the existing sequential routines of
 the \scotch\ distribution, which are described in the
 {\it\scotch\ User's Guide}~\scotchcitesuser. Their use is recalled in
-Section~\ref{sec-lib-error}.
+Section~\ref{sec-lib-func-error}.
 
 A \parmetis\ compatibility library, called {\tt lib\lbo ptscotch\lbo
 parmetis.a}, is also available. It allows users who were previously
 using \parmetis\ in their software to take advantage of the efficieny
 of \ptscotch\ without having to modify their code. The services
 provided by this library are described in
-Section~\ref{sec-lib-parmetis}.
+Section~\ref{sec-lib-func-parmetis}.
 
 \subsection{Using multi-threading}
 \label{sec-lib-thread}
@@ -151,7 +151,7 @@ function succeeds, and a non-zero value in case of error.
 
 For instance, the {\tt SCOTCH\_\lbt dgraph\lbt Init} and {\tt
 SCOTCH\_\lbt dgraph\lbt Load} routines, described in
-section~\ref{sec-lib-dgraph}, can be called from C by using the
+section~\ref{sec-lib-func-dgraph}, can be called from C by using the
 following code.
 {\tt
 \begin{verbatim}
@@ -223,7 +223,7 @@ Fortran, and is called {\tt FNUM}.
 
 For instance, the {\tt SCOTCH\_\lbt dgraph\lbt Init} and
 {\tt SCOTCH\_\lbt dgraph\lbt Load} routines, described in
-sections~\ref{sec-lib-dgraphinit} and~\ref{sec-lib-dgraphload},
+sections~\ref{sec-lib-func-dgraphinit} and~\ref{sec-lib-func-dgraphload},
 respectively, can be called from Fortran by using the following code.
 {\tt
 \begin{verbatim}
@@ -285,7 +285,7 @@ as {\tt mpicc}.
 If you want to handle errors by yourself, you should not link with
 library file {\tt libptscotcherr.a}, but rather provide a
 {\tt SCOTCH\_\lbt error\lbt Print()} routine. Please refer to
-Section~\ref{sec-lib-error} for more information on error handling.
+Section~\ref{sec-lib-func-error} for more information on error handling.
 
 Programs that use both sequential and parallel routines of
 \scotch\ need only be linked against the parallel version of the
@@ -376,7 +376,7 @@ longer be able to link against the service routines of the genuine
 \metis/\parmetis\ v3 library, as they are only available as a 32-bit
 implementation.
 
-\subsection{Data formats}
+\subsection{Data types}
 
 All of the data used in the \libscotch\ interface are of integer type
 {\tt SCOTCH\_Num}. To hide the internals of \ptscotch\ to callers, all
@@ -394,8 +394,8 @@ always labeled as {\tt baseval}, whether {\tt baseval} is set to $0$
 internally manages with base values and array pointers so as to
 process these arrays accordingly.
 
-\subsubsection{Distributed graph format}
-\label{sec-lib-format-dgraph}
+\subsubsection{\texttt{SCOTCH\_Dgraph} distributed graph type}
+\label{sec-lib-type-dgraph}
 
 In \ptscotch, distributed source graphs are represented so as to
 distribute graph data without any information duplication which could
@@ -528,7 +528,7 @@ or can be explicitey asked for by the user by calling function
 This array can serve to index user-defined arrays of quantities borne
 by graph vertices, which can be exchanged between neighboring
 processes thanks to the {\tt SCOTCH\_\lbt dgraph\lbt Halo}
-routine documented in Section~\ref{sec-lib-dgraphhalo}.
+routine documented in Section~\ref{sec-lib-func-dgraphhalo}.
 \iteme[{\tt edloloctab}]
 Optional array, of a size equal at least to $\left(\max_{i}(\mbox{\tt
 vend\lbt loc\lbt tab[} i \mbox{\tt ]}) - \mbox{\tt baseval}\right)$,
@@ -614,18 +614,19 @@ tab}\mbox{\tt [}i\mbox{\tt ]}$ must be updated accordingly. With
 simple housekeeping of free areas of the edge array, dynamic arrays
 can be updated with as little data movement as possible.
 
-\subsubsection{Block ordering format}
-\label{sec-lib-format-order}
+\subsubsection{\texttt{SCOTCH\_Dordering} distributed block ordering type}
+\label{sec-lib-type-dordering}
 
 Block orderings associated with distributed graphs are described by
-means of block and permutation arrays, made of {\tt SCOTCH\_Num}s.  In
-order for all orderings to have the same structure, irrespective of
-whether they are centralized or distributed, or whether they are
-created from graphs or meshes, all ordering data indices start from
-{\tt baseval}. Consequently, row indices are related to vertex
-indices in memory in the following way: row $i$ is associated with
-vertex $i$ of the {\tt SCOTCH\_\lbt Dgraph} structure as if the vertex
-numbering used for the graph was continuous.
+means of block and permutation arrays, made of
+\texttt{SCOTCH\_Num}s. In order for all orderings to have the same
+structure, irrespective of whether they are centralized or
+distributed, or whether they are created from graphs or meshes, all
+ordering data indices start from \texttt{baseval}. Consequently, row
+indices are related to vertex indices in memory in the following way:
+row $i$ is associated with vertex $i$ of the
+\texttt{SCOTCH\_\lbt Dgraph} structure as if the vertex numbering used
+for the graph was continuous.
 
 Block orderings are made of the following data:
 \begin{itemize}
@@ -772,7 +773,7 @@ Order nested dissection separators as cheaply as possible.
 \end{itemize}
 
 \subsubsection{Parallel mapping strategy strings}
-\label{sec-lib-format-pmap}
+\label{sec-lib-format-strat-pmap}
 
 A parallel mapping strategy is made of one or several parallel
 mapping methods, which can be combined by means of strategy
@@ -852,12 +853,12 @@ some subgraph is restricted to one.
 \iteme[{\tt sep=}{\it strat}]
 Set the parallel graph bipartitioning strategy that is used on every
 current job of the recursion tree. Parallel graph bipartitioning
-strategies are described below, in section~\ref{sec-lib-format-pbipart}.
+strategies are described below, in section~\ref{sec-lib-format-strat-pbipart}.
 \end{itemize}
 \end{itemize}
 
 \subsubsection{Parallel graph bipartitioning strategy strings}
-\label{sec-lib-format-pbipart}
+\label{sec-lib-format-strat-pbipart}
 
 A parallel graph bipartitioning strategy is made of one or several
 parallel graph bipartitioning methods, which can be combined by means
@@ -1061,7 +1062,7 @@ bipartitioning process whenever some condition is true.
 \end{itemize}
 
 \subsubsection{Parallel ordering strategy strings}
-\label{sec-lib-format-pord}
+\label{sec-lib-format-strat-pord}
 
 A parallel ordering strategy is made of one or several parallel
 ordering methods, which can be combined by means of strategy
@@ -1149,7 +1150,7 @@ subgraph is restricted to one.
 Set the parallel node separation strategy that is used on every
 current leaf of the separators tree to make it grow. Parallel
 node separation strategies are described below, in
-section~\ref{sec-lib-format-pnsep}.
+section~\ref{sec-lib-format-strat-pnsep}.
 \end{itemize}
 \iteme[{\tt q}]
 Sequential ordering method. The distributed graph is gathered onto a
@@ -1169,7 +1170,7 @@ of extra-diagonal blocks is not relevant
 \end{itemize}
 
 \subsubsection{Parallel node separation strategy strings}
-\label{sec-lib-format-pnsep}
+\label{sec-lib-format-strat-pnsep}
 
 A parallel node separation strategy is made of one or several parallel
 node separation methods, which can be combined by means of strategy
@@ -1326,7 +1327,7 @@ separation process whenever some condition is true.
 \end{itemize}
 
 \subsection{Distributed graph handling routines}
-\label{sec-lib-dgraph}
+\label{sec-lib-func-dgraph}
 
 \subsubsection{{\tt SCOTCH\_dgraphAlloc}}
 
@@ -1818,7 +1819,7 @@ void SCOTCH\_dgraphData ( & const SCOTCH\_Dgraph * & grafptr,    \\
                           & SCOTCH\_Num **         & edgeloctab, \\
                           & SCOTCH\_Num **         & edgegsttab, \\
                           & SCOTCH\_Num **         & edloloctab, \\
-                          & MPI\_Comm *            & comm)
+                          & MPI\_Comm *            & commptr)
 \end{tabular}}
 
 {\tt\begin{tabular}{l@{}ll}
@@ -1890,7 +1891,7 @@ reference to the ghost adjacency array, of size at least
 {\tt vertgstnbr} is non-negative.
 {\tt edloloctab} is the pointer to a location that will hold the
 reference to the arc load array, of size {\tt *edgelocptz}.
-{\tt comm} is the pointer to a location that will hold the MPI
+{\tt commptr} is the pointer to a location that will hold the MPI
 communicator of the distributed graph.
 
 Any of these pointers can be set to {\tt NULL} on input if the
@@ -2161,7 +2162,7 @@ structure has been successfully created, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphInit}}
-\label{sec-lib-dgraphinit}
+\label{sec-lib-func-dgraphinit}
 
 \begin{itemize}
 \progsyn
@@ -2214,7 +2215,7 @@ successfully initialized, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphRedist}}
-\label{sec-lib-dgraphredist}
+\label{sec-lib-func-dgraphredist}
 
 \begin{itemize}
 \progsyn
@@ -2254,7 +2255,7 @@ numbered from $0$ to the number of parts minus $1$.
 Whenever provided, the permutation array {\tt perm\lbt gst\lbt tab}
 must be of a size equal to the number of local and ghost vertices of
 the source graph (that is, {\tt vert\lbt gst\lbt nbr}, see
-Section~\ref{sec-lib-format-dgraph}). Its contents must be based, that
+Section~\ref{sec-lib-type-dgraph}). Its contents must be based, that
 is, permutation global indices start at {\tt baseval}. Both its local
 and ghost contents must be valid. Consequently, it is the user's
 responsibility to call {\tt SCOTCH\_dgraph\lbt Halo} whenever
@@ -2468,7 +2469,7 @@ successfully produced, and $1$ else.
 \subsection{Distributed graph I/O routines}
 
 \subsubsection{{\tt SCOTCH\_dgraphLoad}}
-\label{sec-lib-dgraphload}
+\label{sec-lib-func-dgraphload}
 
 \begin{itemize}
 \progsyn
@@ -2561,7 +2562,7 @@ scotchfdgraphsave ( & doubleprecision (*) & grafdat, \\
 The {\tt SCOTCH\_dgraphSave} routine saves the contents of the {\tt
 SCOTCH\_\lbt Dgraph} structure pointed to by {\tt grafptr} to streams
 {\tt stream}, in the \scotch\ distributed graph format (see
-section~\ref{sec-file-dsgraph}).
+Section~\ref{sec-file-dsgraph}).
 
 Fortran users must use the {\tt PXFFILENO} or {\tt FNUM} functions to
 obtain the number of the Unix file descriptor {\tt fildes} associated
@@ -2598,7 +2599,7 @@ tab} arrays of the distributed graph structure pointed to by {\tt
 grafptr} with the local and ghost vertex indices corresponding to the
 global vertex indices contained in its {\tt edge\lbt loc\lbt tab}
 arrays, according to the semantics described in
-Section~\ref{sec-lib-format-dgraph}.
+Section~\ref{sec-lib-type-dgraph}.
 
 If memory areas had not been previously reserved by the user for the
 {\tt edge\lbt gst\lbt tab} arrays and linked to the distributed graph
@@ -2615,7 +2616,7 @@ successfully computed, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphHalo}}
-\label{sec-lib-dgraphhalo}
+\label{sec-lib-func-dgraphhalo}
 
 \begin{itemize}
 \progsyn
@@ -2675,7 +2676,7 @@ successfully exchanged, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphHaloAsync}}
-\label{sec-lib-dgraphhaloasync}
+\label{sec-lib-func-dgraphhaloasync}
 
 \begin{itemize}
 \progsyn
@@ -2742,7 +2743,7 @@ has been successfully started, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphHaloWait}}
-\label{sec-lib-dgraphhalowait}
+\label{sec-lib-func-dgraphhalowait}
 
 \begin{itemize}
 \progsyn
@@ -2858,7 +2859,7 @@ to by {\tt mappptr} using the parallel mapping strategy pointed to
 by {\tt stratptr}.
 
 On return, every cell of the distributed mapping array (see
-section~\ref{sec-lib-dgraph-map-init}) holds the number of the target
+Section~\ref{sec-lib-func-dgraphmapinit}) holds the number of the target
 vertex to which the corresponding source vertex is mapped. The
 numbering of target values is {\em not\/} based: target vertices are
 numbered from $0$ to the number of target vertices, minus $1$.
@@ -2901,7 +2902,7 @@ as parameter, may yield unpredictable results.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphMapInit}}
-\label{sec-lib-dgraph-map-init}
+\label{sec-lib-func-dgraphmapinit}
 
 \begin{itemize}
 \progsyn
@@ -3267,7 +3268,7 @@ as parameter, may yield unpredictable results.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphOrderInit}}
-\label{sec-lib-dgraphorderinit}
+\label{sec-lib-func-dgraphorderinit}
 
 \begin{itemize}
 \progsyn
@@ -3533,7 +3534,7 @@ successfully filled, and $1$ else.
 \end{itemize}
 
 \subsection{Centralized ordering handling routines}
-\label{sec-lib-corder}
+\label{sec-lib-func-corder}
 
 Since distributed ordering structures maintain scattered information
 which cannot be easily collated, the only practical way to access this
@@ -3571,7 +3572,7 @@ initialized by {\tt SCOTCH\_\lbt dgraph\lbt Corder\lbt Init}.
 
 
 \subsubsection{{\tt SCOTCH\_dgraphCorderInit}}
-\label{sec-lib-graph-corder-init}
+\label{sec-lib-func-dgraphcorderinit}
 
 \begin{itemize}
 \progsyn
@@ -3618,7 +3619,7 @@ column blocks, {\tt rangtab} is the array that holds the column block
 span information, of size $\mbox{\tt vert\lbt glb\lbt nbr} + 1$, and {\tt treetab}
 is the array holding the structure of the separators tree, of size
 ${\tt vert\lbt glb\lbt nbr}$. Please refer to
-Section~\ref{sec-lib-format-order} for an explanation of their semantics.
+Section~\ref{sec-lib-type-dordering} for an explanation of their semantics.
 Any of these five output fields can be set to {\tt NULL} if the
 corresponding information is not needed. Since, in Fortran, there is
 no null reference, passing a reference to {\tt grafptr} will have the
@@ -3638,7 +3639,7 @@ been successfully initialized, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphOrderGather}}
-\label{sec-lib-dgraph-order-gather}
+\label{sec-lib-func-dgraphordergather}
 
 \begin{itemize}
 \progsyn
@@ -3676,7 +3677,7 @@ ordering structure has been successfully updated, and $1$ else.
 \end{itemize}
 
 \subsection{Strategy handling routines}
-\label{sec-lib-strat}
+\label{sec-lib-func-strat}
 
 This section presents basic strategy handling routines which are also
 described in the {\it\scotch\ User's Guide} but which are duplicated
@@ -3772,7 +3773,7 @@ successfully written to {\tt stream}, and $1$ else.
 \end{itemize}
 
 \subsection{Strategy creation routines}
-\label{sec-lib-strat-creation}
+\label{sec-lib-func-strat-creation}
 
 Strategy creation routines parse the user-provided strategy string and
 populate the given opaque strategy object with a tree-shaped structure
@@ -3862,7 +3863,7 @@ scotchfstratdgraphmap ( & doubleprecision (*) & stradat, \\
 The {\tt SCOTCH\_stratDgraphMap} routine fills the strategy
 structure pointed to by {\tt straptr} with the distributed graph
 mapping strategy string pointed to by {\tt string}. The format of this
-strategy string is described in Section~\ref{sec-lib-format-pmap}.
+strategy string is described in Section~\ref{sec-lib-format-strat-pmap}.
 From this point, strategy {\tt strat} can only be used as a
 distributed graph mapping strategy, to be used by functions {\tt
 SCOTCH\_\lbt dgraph\lbt Part}, {\tt SCOTCH\_\lbt dgraph\lbt Map} or
@@ -3939,7 +3940,7 @@ scotchfstratdgraphorder ( & doubleprecision (*) & stradat, \\
 The {\tt SCOTCH\_stratDgraphOrder} routine fills the strategy
 structure pointed to by {\tt straptr} with the distributed graph
 ordering strategy string pointed to by {\tt string}. The format of
-this strategy string is described in Section~\ref{sec-lib-format-pord}.
+this strategy string is described in Section~\ref{sec-lib-format-strat-pord}.
 From this point, strategy {\tt strat} can only be used as a
 distributed graph ordering strategy, to be used by function {\tt
 SCOTCH\_\lbt dgraph\lbt Order\lbt Compute}. This routine must be
@@ -3999,7 +4000,7 @@ has been successfully set, and $1$ else.
 \end{itemize}
 
 \subsection{Other data structure routines}
-\label{sec-lib-other}
+\label{sec-lib-func-other}
 
 \subsubsection{{\tt SCOTCH\_dmapAlloc}}
 
@@ -4088,7 +4089,7 @@ without access to the ``{\tt scotch.h}'' include file.
 \end{itemize}
 
 \subsection{Error handling routines}
-\label{sec-lib-error}
+\label{sec-lib-func-error}
 
 The handling of errors that occur within library routines is
 often difficult, because library routines should be able to issue
@@ -4113,7 +4114,7 @@ programmers who want to take advantage of them have to add
 the {\tt -lptscotch} argument.
 
 \subsubsection{{\tt SCOTCH\_errorPrint}}
-\label{sec-lib-errorprint}
+\label{sec-lib-func-errorprint}
 
 \begin{itemize}
 \progsyn
@@ -4163,7 +4164,7 @@ standalone programs of the \scotch\ distribution.
 \end{itemize}
 
 \subsection{Random generator handling}
-\label{sec-lib-random}
+\label{sec-lib-func-random}
 
 In order not to be influenced by the concurrent execution of third-party
 software and/or library routines, the \libscotch\ library embeds its
@@ -4203,7 +4204,7 @@ race conditions, calling it concurrently from several threads may
 yield unpredictable results. Hence, in this case, users should use a
 different \texttt{SCOTCH\_\lbt Context} for each master thread, that
 will contain its own pseudo-random generator (see
-Section~\ref{sec-lib-context}).
+Section~\ref{sec-lib-func-context}).
 
 \subsubsection{\texttt{SCOTCH\_randomProc}}
 
@@ -4240,7 +4241,7 @@ context by routine \texttt{SCOTCH\_\lbt context\lbt Random\lbt Clone}.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_randomReset}}
-\label{sec-lib-random-reset}
+\label{sec-lib-func-randomreset}
 
 \begin{itemize}
 \progsyn
@@ -4270,7 +4271,7 @@ at different times will yield the same result.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_randomSeed}}
-\label{sec-lib-random-seed}
+\label{sec-lib-func-randomseed}
 
 \begin{itemize}
 \progsyn
@@ -4319,7 +4320,7 @@ $[0;\mbox{textsc{randmax}}[$.
 \end{itemize}
 
 \subsection{Context handling routines}
-\label{sec-lib-context}
+\label{sec-lib-func-context}
 
 By default, \scotch\ uses a global pseudo-random number generator and
 takes advantage of as many threads as it can discover on the
@@ -4381,7 +4382,7 @@ graph structure has been successfully initialized, and $1$ else.
 \end{itemize}
 
 \subsection{Memory management}
-\label{sec-lib-mem}
+\label{sec-lib-func-mem}
 
 \subsubsection{{\tt SCOTCH\_memCur}}
 
@@ -4424,7 +4425,7 @@ While memory occupation is internally recorded in a variable of type
 sake of interface homogeneity, especially for Fortran. It is therefore
 the installer's responsibility to make sure that the support integer
 type of {\tt SCOTCH\_\lbt Idx} is large enough to not overflow. See
-section~\ref{sec-lib-inttypesize} for more information.
+Section~\ref{sec-lib-inttypesize} for more information.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_memMax}}
@@ -4468,11 +4469,11 @@ While memory occupation is internally recorded in a variable of type
 sake of interface homogeneity, especially for Fortran. It is therefore
 the installer's responsibility to make sure that the support integer
 type of {\tt SCOTCH\_\lbt Idx} is large enough to not overflow. See
-section~\ref{sec-lib-inttypesize} for more information.
+Section~\ref{sec-lib-inttypesize} for more information.
 \end{itemize}
 
 \subsection{\parmetis\ compatibility library}
-\label{sec-lib-parmetis}
+\label{sec-lib-func-parmetis}
 
 The \parmetis\ compatibility library provides stubs which redirect some
 calls to \parmetis\ routines to the corresponding \ptscotch\ counterparts.
