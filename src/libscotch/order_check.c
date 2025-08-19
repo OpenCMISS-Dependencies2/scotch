@@ -43,7 +43,7 @@
 /**                # Version 5.0  : from : 26 jul 2007     **/
 /**                                 to   : 26 jul 2007     **/
 /**                # Version 7.0  : from : 20 jan 2023     **/
-/**                                 to   : 17 jan 2025     **/
+/**                                 to   : 19 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -128,12 +128,15 @@ int
 orderCheck (
 const Order * restrict const  ordeptr)
 {
-  Gnum * restrict     permtab;
+  Gnum *              permtab;
   Gnum * restrict     permtax;
   Gnum                treenbr;
   Gnum                cblknbr;
-  Gnum                vertnnd;
   Gnum                vertnum;
+
+  const Gnum                        baseval = ordeptr->baseval;
+  const Gnum                        vertnnd = ordeptr->vnodnbr + ordeptr->baseval;
+  const Gnum * restrict const       peritab = ordeptr->peritab;
 
   if (ordeptr->vnodnbr != ordeptr->rootdat.vnodnbr) {
     errorPrint ("orderCheck: invalid vertex count");
@@ -150,21 +153,20 @@ const Order * restrict const  ordeptr)
   }
   memSet (permtab, ~0, ordeptr->rootdat.vnodnbr * sizeof (Gnum));
   permtax = permtab - ordeptr->baseval;
-  vertnnd = ordeptr->baseval + ordeptr->vnodnbr;
 
   for (vertnum = 0; vertnum < ordeptr->vnodnbr; vertnum ++) {
-    if ((ordeptr->peritab[vertnum] <  ordeptr->baseval) || /* If index not in range */
-        (ordeptr->peritab[vertnum] >= vertnnd)) {
+    if ((peritab[vertnum] <  baseval) ||          /* If index not in range */
+        (peritab[vertnum] >= vertnnd)) {
       errorPrint ("orderCheck: invalid index");
       memFree    (permtab);
       return (1);
     }
-    if (permtax[ordeptr->peritab[vertnum]] != ~0) { /* If index already used */
+    if (permtax[peritab[vertnum]] != ~0) {        /* If index already used */
       errorPrint ("orderCheck: duplicate index");
       memFree    (permtab);
       return (1);
     }
-    permtax[ordeptr->peritab[vertnum]] = vertnum; /* Set who updated index */
+    permtax[peritab[vertnum]] = vertnum;          /* Set who updated index */
   }
   for (vertnum = 0; vertnum < ordeptr->vnodnbr; vertnum ++) {
     if (permtab[vertnum] == ~0) {                 /* If index not used */
