@@ -167,7 +167,7 @@ endif(USE_LZMA)
 # MPI
 if(BUILD_PTSCOTCH)
   set(MPI_DETERMINE_LIBRARY_VERSION ON)
-  find_package(MPI COMPONENTS C)
+  find_package(MPI COMPONENTS ${MPI_COMPONENTS})
   if(NOT MPI_C_FOUND)
     message(FATAL_ERROR "MPI required to compile PT-Scotch\n Rerun cmake with -DBUILD_PTSCOTCH=OFF")
   else()

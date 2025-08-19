@@ -192,7 +192,7 @@ if(BUILD_LIBSCOTCHMETIS)
     target_link_libraries(test_libmetis_dualv${version} scotchmetisv${version} scotch scotcherr)
     add_test(NAME test_libmetis_dualv${version} COMMAND test_libmetis_dualv${version})
 
-    if(CMAKE_Fortran_COMPILER)
+    if(BUILD_FORTRAN)
       add_executable(test_libmetis_dual_f_v${version} ${CMAKE_CURRENT_BINARY_DIR}/test_libmetis_dual_f.f90)
       target_compile_definitions(test_libmetis_dual_f_v${version} PRIVATE SCOTCH_METIS_VERSION=${version})
       target_include_directories(test_libmetis_dual_f_v${version} PRIVATE ${GENERATED_INCLUDE_DIR})

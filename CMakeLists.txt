@@ -48,6 +48,9 @@ project(SCOTCH LANGUAGES C)
 # Use C99 as C standard
 set(CMAKE_C_STANDARD 99)
 
+# Set MPI components depending on language support
+set(MPI_COMPONENTS C)
+
 # Add Fortran support
 option(BUILD_FORTRAN "Enable Fortran" ON)
 if(BUILD_FORTRAN)
@@ -55,6 +58,7 @@ if(BUILD_FORTRAN)
   if(NOT CMAKE_Fortran_COMPILER)
     message(ERROR "Fortran enabled but no compiler detected")
   endif()
+  list(APPEND MPI_COMPONENTS Fortran)
 endif()
 
 # Add module directory
