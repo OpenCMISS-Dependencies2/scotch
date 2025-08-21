@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2008,2010,2011,2013,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2008,2010,2011,2013,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -64,7 +64,7 @@
 /**                # Version 6.0  : from : 14 feb 2011     **/
 /**                                 to   : 27 mar 2015     **/
 /**                # Version 7.0  : from : 17 jan 2023     **/
-/**                                 to   : 17 jan 2023     **/
+/**                                 to   : 21 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -176,22 +176,3 @@ const ArchTorusXDom * const dom1ptr)
 
   return (distval >> 1);
 }
-
-/* This function creates the MPI_Datatype for
-** xD torus domains.
-** It returns:
-** - 0  : if type could be created.
-** - 1  : on error.
-*/
-
-#ifdef SCOTCH_PTSCOTCH
-int
-archTorusXDomMpiType (
-const ArchTorusX * const      archptr,
-MPI_Datatype * const          typeptr)
-{
-  MPI_Type_contiguous (2 * archptr->dimmax, ANUM_MPI, typeptr);
-
-  return (0);
-}
-#endif /* SCOTCH_PTSCOTCH */
