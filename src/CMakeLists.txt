@@ -42,7 +42,7 @@
 ##   DATES      : # Version 6.0  : from : 01 sep 2014     ##
 ##                                 to     01 sep 2021     ##
 ##                # Version 7.0  : from : 01 sep 2021     ##
-##                                 to     10 jun 2025     ##
+##                                 to     28 aug 2025     ##
 ##                                                        ##
 ############################################################
 
@@ -81,15 +81,19 @@ endif()
 # Bison
 find_package(BISON)
 if(NOT BISON_FOUND)
-  message(FATAL_ERROR "Bison required to compile Scotch and PT-Scotch")
+  message(WARNING "Compiling with a default version of parser files. Install Bison >= 3.8.2 if it does not work")
 else()
   message(STATUS "Bison found here: ${BISON_EXECUTABLE}")
 endif()
 
 # Flex
 find_package(FLEX)
+if (FLEX_VERSION VERSION_EQUAL "2.6.1")
+  message(WARNING "Flex 2.6.1 is bogus")
+  set(FLEX_FOUND FALSE)
+endif()
 if(NOT FLEX_FOUND)
-  message(FATAL_ERROR "Flex required to compile Scotch and PT-Scotch")
+  message(WARNING "Compiling with a default version of lexer files. Install Flex >= 2.6.4 if it does not work")
 else()
   message(STATUS "Flex found here: ${FLEX_EXECUTABLE}")
 endif()

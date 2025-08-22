@@ -110,27 +110,39 @@ endif()
 #  parser_yy.c  #
 #################
 
-# Generate parser_yy.c using Bison
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${CMAKE_CURRENT_BINARY_DIR}/parser_ly.h
-  COMMAND ${BISON_EXECUTABLE} "-pscotchyy${SCOTCH_NAME_SUFFIX}" --defines="parser_ly.h" --output="parser_yy.c" ${CMAKE_CURRENT_SOURCE_DIR}/parser_yy.y
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser_yy.y module.h common.h parser.h parser_yy.h
-  COMMENT "Generate parser_yy.c and parser_ly.h using Bison")
+if (BISON_FOUND)
+  # Generate parser_yy.c using Bison
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${CMAKE_CURRENT_BINARY_DIR}/parser_ly.h
+    COMMAND ${BISON_EXECUTABLE} "-p_SCOTCHyy${SCOTCH_NAME_SUFFIX}" --defines="parser_ly.h" --output="parser_yy.c" ${CMAKE_CURRENT_SOURCE_DIR}/parser_yy.y
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser_yy.y module.h common.h parser.h parser_yy.h
+    COMMENT "Generate parser_yy.c and parser_ly.h using Bison")
+else()
+  # use fallback
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${CMAKE_CURRENT_BINARY_DIR}/parser_ly.h
+    COMMAND cp "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_yy.c" "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_ly.h" "${CMAKE_CURRENT_BINARY_DIR}/.")
+endif(BISON_FOUND)
 add_custom_target(parser_yy_c DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${CMAKE_CURRENT_BINARY_DIR}/parser_ly.h)
 
 #################
 #  parser_ll.c  #
 #################
 
-# Generate parser_ll.c using Flex
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c
-  ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h
-  COMMAND ${FLEX_EXECUTABLE} "${FLEX_FLAG}" "-Pscotchyy${SCOTCH_NAME_SUFFIX}"  "-oparser_ll.c"
-  "--header-file=parser_lh.h"
-  ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l
-  module.h common.h parser.h parser_ll.h parser_ly.h
-  COMMENT "Generate parser_ll.c using Flex")
-add_custom_target(parser_ll_c DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c)
+if (FLEX_FOUND)
+  # Generate parser_ll.c using Flex
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c
+    ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h
+    COMMAND ${FLEX_EXECUTABLE} "${FLEX_FLAG}" "-P_SCOTCHyy${SCOTCH_NAME_SUFFIX}"  "-oparser_ll.c"
+    "--header-file=parser_lh.h"
+    ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l
+    module.h common.h parser.h parser_ll.h parser_ly.h
+    COMMENT "Generate parser_ll.c using Flex")
+else()
+  # use fallback
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h
+    COMMAND cp "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_ll.c" "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_lh.h" "${CMAKE_CURRENT_BINARY_DIR}/.")
+endif(FLEX_FOUND)
+add_custom_target(parser_ll_c DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h)
 
 ###############
 #  libScotch  #

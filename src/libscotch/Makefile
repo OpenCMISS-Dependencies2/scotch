@@ -60,6 +60,24 @@ ifneq ($(strip $(SCOTCH_NAME_SUFFIX)),)
   endif
 endif
 
+## Manage Flex 2.6.1 bug
+
+ifneq ($(strip $(FLEX)),)
+  ifneq ($(findstring 2.6.1,$(shell $(FLEX) --version)),)
+    $(warning WARNING: Flex 2.6.1 is bogus)
+    FLEX =
+  endif
+endif
+
+ifeq ($(strip $(FLEX)),)
+  $(warning WARNING: Compiling with a default version of lexer files. Install Flex >= 2.6.4 if it does not work)
+  FLEX = false blockoptions
+endif
+ifeq ($(strip $(BISON)),)
+  $(warning WARNING: Compiling with a default version of parser files. Install Bison >= 3.8.2 if it does not work)
+  BISON = false blockoptions
+endif
+
 ##
 ##  General inference rules.
 ##
@@ -3076,7 +3094,9 @@ parser_ll.c			:	parser_ll.l				\
 					parser.h				\
 					parser_ll.h				\
 					parser_ly.h
-					$(FLEX) "-Pscotchyy$(SCOTCH_NAME_SUFFIX)" "-oparser_ll.c" "--header-file=parser_lh.h" parser_ll.l
+					$(FLEX) "-P_SCOTCHyy$(SCOTCH_NAME_SUFFIX)" "-oparser_ll.c" "--header-file=parser_lh.h" parser_ll.l || \
+					$(CP) last_resort/parser_ll.c last_resort/parser_lh.h .
+
 
 parser_ll$(OBJ)			:	parser_ll.c				\
 					parser_lh.h				\
@@ -3089,7 +3109,8 @@ parser_yy.c			:	parser_yy.y				\
 					common.h				\
 					parser.h				\
 					parser_yy.h
-					$(BISON) "-pscotchyy$(SCOTCH_NAME_SUFFIX)" --defines="parser_ly.h" --output="parser_yy.c" parser_yy.y
+					$(BISON) "-p_SCOTCHyy$(SCOTCH_NAME_SUFFIX)" --defines="parser_ly.h" --output="parser_yy.c" parser_yy.y || \
+					$(CP) last_resort/parser_ly.h last_resort/parser_yy.c .
 
 parser_yy$(OBJ)			:	parser_yy.c				\
 					parser_lh.h				\
