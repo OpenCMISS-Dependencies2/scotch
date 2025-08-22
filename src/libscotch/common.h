@@ -1,4 +1,4 @@
-/* Copyright 2004,2007-2016,2018-2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007-2016,2018-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -58,9 +58,12 @@
 /**                # Version 6.1  : from : 02 apr 2021     **/
 /**                                 to   : 24 jun 2021     **/
 /**                # Version 7.0  : from : 03 jun 2018     **/
-/**                                 to   : 02 dec 2024     **/
+/**                                 to   : 29 aug 2025     **/
 /**                                                        **/
 /************************************************************/
+
+#ifndef COMMON_H
+#define COMMON_H
 
 /*
 ** The includes.
@@ -517,3 +520,5 @@ void nu pl
 
 #define STRINGIFY2(n)               #n
 #define STRINGIFY(n)                STRINGIFY2(n)
+
+#endif /* COMMON_H */

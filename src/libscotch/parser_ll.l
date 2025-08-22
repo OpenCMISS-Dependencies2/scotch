@@ -65,6 +65,8 @@
 
 #define YY_DECL                     int yylex (YYSTYPE * yylval_param, YYLTYPE * yylloc, yyscan_t yyscanner)
 
+#include "common.h"                               /* Early inclusion to handle the inclusion of <stdint.h> */
+
 #if (defined COMMON_OS_WINDOWS || defined HAVE_NOT_UNISTD_H)
 #define YY_NO_UNISTD_H
 #endif /* (defined COMMON_OS_WINDOWS || defined HAVE_NOT_UNISTD_H) */
