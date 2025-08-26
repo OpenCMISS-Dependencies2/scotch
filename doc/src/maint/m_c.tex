@@ -381,3 +381,248 @@ In the latter case, one can see that the pure sender that has been
 interleaved (proc.~3) sufficed to fill-in the first receiver
 (proc.~4), so the first communication of the sender receiver (proc.~7)
 was towards the next receiver (proc.~5).
+
+\subsection{\texttt{dmeshDgraphDual()}}
+
+The \texttt{dmeshDgraphDual()} routine creates a dual distributed
+graph of type \texttt{Dgraph} from a distributed mesh of type
+\texttt{Dmesh}. It can be seen as the distributed-memory version of
+the \texttt{meshGraphDual()} routine. An edge will be created between
+two elements only if these elements have at least \texttt{noconbr}
+nodes in common.
+
+At the time being, the \texttt{Dmesh} data structure only stores the
+adjacency from local element vertices to node vertices, using their
+global, based, numbering. Consequently, building the
+element-to-element connectivity operates in three phases:
+firstly, to redistribute element-to-node edge information so as to
+build the node-to-element adjacency of each node; secondly, to provide
+relevant node adjacencies to processes requiring them (possibly
+duplicating the same adjacency on multiple processes); this will
+allow, in a third phase, to build the element-to-element adjacency of
+each local element.
+
+\subsubsection{Determining the node vertex range}
+
+In a preliminary sweep over every local element-to-node edge array,
+the local maximum global node index \texttt{vnodlocmax} is
+computed. Then, by way of an all-reduce-max operation, the global
+maximum global node index \texttt{vnodglbmax} is obtained. If the node
+global indices are all used, then the global number of vertex nodes,
+\texttt{vnodglbnbr}, is equal to $\mbox{\texttt{vnodglbmax}} -
+\mbox{\texttt{baseval}} + 1$, as valid node vertex global indices
+range from \texttt{baseval} to \texttt{vnodglbmax}, included.
+
+In debug mode, the local minimum global node index \texttt{vnodlocmin} is
+also computed, and all-reduced-min into \texttt{vnodglbmin}, which
+should be equal to \texttt{baseval}.
+
+Knowing the global node vertex index range is necessary to evenly
+distribute node vertex data across all processes, assuming node
+vertices will have an equivalent number of neighbors overall. The
+absence of some node vertex indices in this range will not break the
+algorithm (isolated node vertices will be created in the first phase,
+which will not be propagated anywhere in the second phase), but may
+cause load imbalance when handling the node vertices on each process.
+
+\subsubsection{Creating node adjacencies}
+
+In order to build node vertex adjacencies across all processes, some
+all-to-all communication must take place, in order to send
+element-to-node edge data to the processes that will host the given
+node vertices, turning the gathered data into node-to-element
+data. All-to-all communication of edges will be controlled by four
+arrays of \texttt{int}'s, of size \texttt{procglbnbr} each:
+\texttt{esnd\lbt cnt\lbt tab}, the edge send count array;
+\texttt{esnd\lbt dsp\lbt tab}, the edge send displacement array;
+\texttt{ercv\lbt cnt\lbt tab}, the edge receive count array; and
+\texttt{ercv\lbt dsp\lbt tab}, the edge receive displacement array.
+The edge data to be sent will be placed into \texttt{esnddattab}, the
+edge send data array, while the received edge data will be available
+in \texttt{ercvdattab}, the edge receive data array.
+
+In order to determine how many edges have to be sent to each process,
+per-process singly linked lists are built, by way of two arrays:
+\texttt{prfr\lbt loc\lbt tab} (``\mbox{(per-)}process first (index),
+local array''), of size \texttt{proc\lbt glb\lbt nbr} since there must
+be as many lists as there are destination processes, and
+\texttt{eene\lbt loc\lbt tax} (``element edge next (index), local
+based array''), of size $(2 * \texttt{eelm\lbt loc\lbt nbr})$ since
+each of the local element-to-node edges has to be chained to (only)
+one list, to be sent to the relevant process, and each chaining will
+require two data: the global element number (which could not be
+retrieved in $O(1)$ time else), and the edge index of the next edge in
+the chaining (which will be the sentinel value \texttt{-1} at the end
+of the list).
+
+All the cells of \texttt{prfr\lbt loc\lbt tab} are initialized with
+\texttt{-1}, the end-of-list sentinel, and all cells of
+\texttt{esnd\lbt cnt\lbt tab} are initialized to $0$, as this array
+will be used to count the number of edges to send to each process.
+
+Then, the adjacencies of all local element vertices are traversed. For
+each element-to-node edge of index $e$, the index $p$ of the process
+which will holds the node vertex is computed in $O(1)$ time, using the
+\texttt{dmesh\lbo Dgraph\lbt Dual\lbt Proc\lbo Num\,()} routine.
+The edge data is then chained at the head of the linked list for this
+process: $\texttt{prfr\lbt loc\lbt tab[}p\texttt{]}$ stores the index
+of the edge, while $\texttt{eene\lbt loc\lbt tax[}2 * e\texttt{]}$
+stores the element global index, and $\texttt{eene\lbt loc\lbt tax[}2
+* e + 1 \texttt{]}$ receives the old value of
+$\texttt{prfr\lbt loc\lbt tab[}p\texttt{]}$, to maintain the forward
+chaining. Also, $\texttt{esnd\lbt loc\lbt tab[}p\texttt{]}$ is
+increased by $2$, since two more data will be sent to $p$ in the
+upcoming all-to-all exchange.
+
+Then, the contents of \texttt{esnd\lbt cnt\lbt tab} are all-to-all
+exchanged to fill-in \texttt{ercv\lbt cnt\lbt tab}, which indicates
+the amount of edge data to be received from each process; the sum of
+its cells gives \texttt{ercv\lbt dat\lbt siz}, which amounts to twice
+the number of local node-to-element edges to be created. The
+\texttt{vnod\lbt loc\lbt tax} and \texttt{enod\lbt loc\lbt tax} arrays
+can then be allocated, to hold the node vertex indices and edge
+adjacency, respectively. Then, from \texttt{esnd\lbt cnt\lbt tab} and
+\texttt{ercv\lbt cnt\lbt tab} are derived the displacement arrays
+\texttt{esnd\lbt dsp\lbt tab} and
+\texttt{ercv\lbt dsp\lbt tab}, respectively. Then, the
+\texttt{esnd\lbt dat\lbt tab} and
+\texttt{ercv\lbt dat\lbt tab} temporary arrays can be allocated,
+after those that will remain in memory longer.
+
+Then, the per-process linked lists are traversed, and the
+element-to-node edge data, now turned into node-to-element edge data,
+is copied into the \texttt{esnd\lbt dat\lbt tab} array, after which an
+all-to-allv data exchange makes it available in the
+\texttt{ercv\lbt dat\lbt tab} array of each process.
+
+Then, the received edge array is traversed, to count in
+\texttt{vnod\lbt loc\lbt tax} the number of edges per node
+vertex. Once this counting is done, the
+\texttt{vnod\lbt loc\lbt tax} is turned into a displacement array,
+which will be used to place node-to-element edges at their proper
+place in \texttt{enod\lbt loc\lbt tax}. After this, the the received
+edge array is traversed again to record the node-to-element edges in
+\texttt{enod\lbt loc\lbt tax}, and the contents of
+\texttt{vnod\lbt loc\lbt tax} are restored.
+
+\subsubsection{Making node adjacencies available to concerned elements}
+
+To create element-to-element adjacencies from element-to-node
+adjacencies, the node-to-element adjacencies of all nodes used as
+neighbors of some element vertex have to be copied to the process
+owning this element vertex. Hence, the same node adjacency may have to
+be sent to several processes at the same time. In order to determine
+to which process the adjacency of some node vertex has to be sent, one
+can take advantage of the order in which edge data have been received
+in the \texttt{ercv\lbt dat\lbt tab} array: the adjacency of a node
+has to be sent to some process $p$ if the global node index of this node
+vertex appears in the sub-array of \texttt{ercv\lbt dat\lbt tab}
+starting from index $\texttt{ercv\lbt dsp\lbt tab[}p\texttt{]}$ and
+ending before index $\texttt{ercv\lbt dsp\lbt tab[}p+1\texttt{]}$ (or
+\texttt{ercv\lbt dat\lbt siz} for the last sub-array). However, a
+node vertex adjacency needs only be sent once to any process, even if
+more than one of its local elements need it. To do so, a local node
+vertex flag array, \texttt{vnfl\lbt loc\lbt tax}, of size
+\texttt{vnod\lbt loc\lbt nbr}, will contain the most recent process
+number requesting the node vertex. Hence, a node vertex adjacency will
+only be copied once to the node adjacency send data array for this
+process. All cells of the flag array are initially set to \texttt{-1},
+an invalid process number.
+
+In a first pass across the \texttt{ercv\lbt dat\lbt tab} array, the
+number of node data to be sent to each process is computed, and stored
+in the relevant cell of the \texttt{nsnd\lbt cnt\lbt tab} (``node
+(data) send count'') array. For each concerned node vertex, the number
+of data items to be sent is equal to two (the global number of the
+node, and its degree), plus the number of element neighbors of the
+node vertex. A node vertex $v$ will be accounted for, for a given
+process $p$, only if $\texttt{vnfl\lbt loc\lbt tax[}v\texttt{]} < p$,
+and once the node vertex is accounted for, it is flagged by setting
+$\texttt{vnfl\lbt loc\lbt tax[}v\texttt{]}$ to $p$.
+
+Then, the contents of the \texttt{nsnd\lbt cnt\lbt tab} array are
+all-to-all exchanged, to produce the \texttt{nrcv\lbt cnt\lbt tab}
+array. From these two can be derived the \texttt{nsnd\lbt dsp\lbt tab}
+and \texttt{nrcv\lbt dsp\lbt tab} send and receive displacement arrays,
+respectively, and \texttt{nsnd\lbt dat\lbt siz} and
+\texttt{nrcv\lbt dat\lbt siz}, the overall number of data to be sent
+and received, respectively. The two node data send and receive arrays,
+\texttt{nsnd\lbt dat\lbt tab} and \texttt{nrcv\lbt dat\lbt tab}, can be
+allocated with these prescribed sizes. The send array will be
+allocated last, since it will be freed first, as soon as the
+data exchange completes.
+
+In a second pass across the \texttt{ercv\lbt dat\lbt tab} array, the
+adjacencies of the nodes that are encountered for the first time in
+this pass are copied to the \texttt{nsnd\lbt dat\lbt tab} array, one
+process after the other, using the start indices contained in the
+\texttt{nsnd\lbt dsp\lbt tab} array. In order not to have to reset the
+flag array between the two passes, a node vertex $v$ will be accounted
+for, for a given process $p$, only if
+$\texttt{vnfl\lbt loc\lbt tax[}v\texttt{]} <
+(\texttt{proc\lbt glb\lbt nbr} + p)$, and once the node vertex is
+accounted for, it is flagged by setting
+$\texttt{vnfl\lbt loc\lbt tax[}v\texttt{]}$ to
+$(\texttt{proc\lbt glb\lbt nbr} + p)$.
+
+Then, an all-to-allv data exchange makes the node adjacency data
+available in the \texttt{nrcv\lbt dat\lbt tab} array of each process.
+
+It is now necessary to make node adjacency available in $O(1)$
+time. This is made possible through a hash table \texttt{hnodtab} of
+type \texttt{Dmesh\lbo Dgraph\lbt Dual\lbt Hash\lbo Node}, which, for
+each concerned node vertex, will point to the start of this node data
+(that is, the node degree and node-to-element adjacency) in the
+\texttt{nrcv\lbt dat\lbt tab} array. Since this hash table will be
+static (that is, read-only and of immutable size) and must contain all
+the local nodes, its maximum load capacity is set to $50\,\%$
+(and not $25\,\%$ as usually done in \scotch\ degree-related hash
+tables). Once this hash table array is allocated, the
+\texttt{nrcv\lbt dat\lbt tab} is traversed to populate it.
+
+\subsubsection{Creating the element-to-element adjacencies}
+
+The last phase of the algorithm is the building of element-to-element
+adjacencies. This is performed through a second hash table,
+\texttt{helmtab}, of type
+\texttt{Dmesh\lbo Dgraph\lbt Dual\lbt Hash\lbo Edge}. Since the
+maximum degree of element-to-element adjacencies cannot be known in
+advance, this hash table may be resized dynamically, and will be
+loaded at $25\,\%$ capacity to minimize collisions. Its functioning,
+including resizing, is described in Section~\ref{sec-type-hash-table}
+of this manual.
+
+The local distributed adjacency data for the dual graph will be placed
+into the \texttt{vert\lbt loc\lbt tax} and \texttt{edge\lbt loc\lbt tax}
+arrays. Hence, prior to building the element-to-element adjacency,
+these arrays are allocated. Since the distributed graph will be
+compact, \texttt{vert\lbt loc\lbt tax} is of size
+$(\texttt{velm\lbt loc\lbt nbr} + 1)$. Since the number of
+edges cannot be estimated in advance, the size of the 
+\texttt{edge\lbt loc\lbt tax} array, starting from a plausible size,
+may have to be dynamically increased during its filling-in, each time
+by $25\,\%$ more.
+
+For each local element, the preexisting element-to-node adjacency is
+traversed and, for each of the neighbor nodes, the node-to-element
+adjacency is traversed in turn, being read from
+\texttt{nrcv\lbt dat\lbt tab} from the index provided by
+\texttt{hnodtab}.
+
+If the neighbor element is not yet present in \texttt{helmtab} for the
+current local element, it is added to the element hash table, with a
+neighbor count in the hash table equal to $(\texttt{noconbr} - 1)$,
+since one common node has already been found. If the neighbor element
+is already present in \texttt{helmtab} for the current local element,
+and its neighbor count in the hash table is strictly greater than
+zero, the neighbor count is decremented. If, in any of the two above
+cases, the neighbor count reaches zero, the neighbor element is added
+to the adjacency list of the current element in
+\texttt{edge\lbt loc\lbt tax}; this latter array is enlarged whenever
+full. It will be downsized to its exact final size once all the edges
+have been created.
+
+Once the \texttt{vert\lbt loc\lbt tax} and
+\texttt{edge\lbt loc\lbt tax} arrays are complete, the
+\texttt{dgraphBuild2\,()} routine is called, to finalize the
+construction of the distributed dual graph.
