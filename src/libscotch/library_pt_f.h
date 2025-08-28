@@ -51,7 +51,7 @@
 !*                # Version 6.0  : from : 22 oct 2011     **
 !*                                 to   : 27 nov 2012     **
 !*                # Version 7.0  : from : 28 jul 2024     **
-!*                                 to   : 16 aug 2025     **
+!*                                 to   : 29 aug 2025     **
 !*                                                        **
 !***********************************************************
 
@@ -116,6 +116,8 @@
 !* program "dummysizes".
 
         INTEGER SCOTCH_ARCHDIM
+        INTEGER SCOTCH_ARCHDOMDIM
+        INTEGER SCOTCH_CONTEXTDIM
         INTEGER SCOTCH_DGRAPHDIM
         INTEGER SCOTCH_DGRAPHHALOREQDIM
         INTEGER SCOTCH_DMAPDIM
@@ -128,6 +130,8 @@
         INTEGER SCOTCH_ORDERDIM
         INTEGER SCOTCH_STRATDIM
         PARAMETER (SCOTCH_ARCHDIM          = DUMMYSIZEARCH)
+        PARAMETER (SCOTCH_ARCHDOMDIM       = DUMMYSIZEARCHDOM)
+        PARAMETER (SCOTCH_CONTEXTDIM       = DUMMYSIZECONTEXT)
         PARAMETER (SCOTCH_DGRAPHDIM        = DUMMYSIZEDGRAPH)
         PARAMETER (SCOTCH_DGRAPHHALOREQDIM = DUMMYSIZEDGRAPHHALOREQ)
         PARAMETER (SCOTCH_DMAPDIM          = DUMMYSIZEDMAP)
