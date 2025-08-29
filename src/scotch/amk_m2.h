@@ -55,7 +55,7 @@
 /**                # Version 6.0  : from : 12 nov 2014     **/
 /**                                 to   : 16 apr 2019     **/
 /**                # Version 7.0  : from : 10 sep 2024     **/
-/**                                 to   : 11 mar 2025     **/
+/**                                 to   : 29 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -85,7 +85,7 @@ typedef enum C_MethType_ {
 
 /** The bipartitioning routine type. **/
 
-typedef int (* DomnBipartFunc) (const ArchMesh2 * const, const ArchMesh2Dom * const, ArchMesh2Dom * const, ArchMesh2Dom * const);
+typedef int (* DomnBipartFunc) (const ArchMesh2 * const, const ArchMesh2Dom * const, ArchMesh2Dom * restrict const, ArchMesh2Dom * restrict const);
 
 /*
 **  The function prototypes.
