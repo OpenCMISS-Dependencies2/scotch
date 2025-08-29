@@ -1,4 +1,4 @@
-/* Copyright 2007-2009,2011,2014,2020,2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007-2009,2011,2014,2020,2021,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -56,7 +56,7 @@
 /**                # Version 6.1  : from : 05 apr 2021     **/
 /**                                 to   : 18 dec 2021     **/
 /**                # Version 7.0  : from : 03 sep 2020     **/
-/**                                 to   : 09 aug 2024     **/
+/**                                 to   : 29 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -266,18 +266,13 @@ const MPI_Datatype            attrglbtype)        /* Attribute datatype       */
     MPI_Aint              attrglbtmp;             /* Lower bound of attribute datatype (not used) */
 #endif /* ((defined MPI_VERSION) && (MPI_VERSION >= 3)) */
     MPI_Aint              attrglbsiz;             /* Extent of attribute datatype                 */
-    const int * restrict  procrcvtab;
-    const int * restrict  procsndtab;
-    const int * restrict  procngbtab;
     int                   procngbnbr;
     int                   procngbnum;
     MPI_Comm              proccomm;
     int                   requnbr;
 
     proccomm   = grafptr->proccomm;
-    procngbtab = grafptr->procngbtab;
     procngbnbr = grafptr->procngbnbr;
-    procrcvtab = grafptr->procrcvtab;
 #if ((defined MPI_VERSION) && (MPI_VERSION >= 3))
     MPI_Type_get_extent (attrglbtype, &attrglbtmp, &attrglbsiz); /* Get type extent */
 #else /* ((defined MPI_VERSION) && (MPI_VERSION >= 3)) */
@@ -286,8 +281,8 @@ const MPI_Datatype            attrglbtype)        /* Attribute datatype       */
     for (procngbnum = procngbnbr - 1, requnbr = 0; procngbnum >= 0; procngbnum --, requnbr ++) { /* Post receives first */
       int                 procglbnum;
 
-      procglbnum = procngbtab[procngbnum];
-      if (MPI_Irecv ((byte *) attrgsttab + recvdsptab[procglbnum] * attrglbsiz, procrcvtab[procglbnum],
+      procglbnum = grafptr->procngbtab[procngbnum];
+      if (MPI_Irecv ((byte *) attrgsttab + recvdsptab[procglbnum] * attrglbsiz, grafptr->procrcvtab[procglbnum],
                      attrglbtype, procglbnum, TAGHALO, proccomm, requtab + requnbr) != MPI_SUCCESS) {
         errorPrint ("dgraphHaloSync: communication error (1)");
         o = 1;
@@ -295,12 +290,11 @@ const MPI_Datatype            attrglbtype)        /* Attribute datatype       */
       }
     }
 
-    procsndtab = grafptr->procsndtab;
     for (procngbnum = 0; procngbnum < procngbnbr; procngbnum ++, requnbr ++) { /* Post sends afterwards */
       int                 procglbnum;
 
-      procglbnum = procngbtab[procngbnum];
-      if (MPI_Isend (attrsndtab + senddsptab[procglbnum] * attrglbsiz, procsndtab[procglbnum],
+      procglbnum = grafptr->procngbtab[procngbnum];
+      if (MPI_Isend (attrsndtab + senddsptab[procglbnum] * attrglbsiz, grafptr->procsndtab[procglbnum],
                      attrglbtype, procglbnum, TAGHALO, proccomm, requtab + requnbr) != MPI_SUCCESS) {
         errorPrint ("dgraphHaloSync: communication error (2)");
         o = 1;
