@@ -54,6 +54,7 @@ stages:
   stage: build
   script:
     - ./ci/build_makefile.sh
+  interruptible: true
 
 scotch_build_32:
   <<: *build_makefile
@@ -82,6 +83,7 @@ scotch_build_64:
     expire_in: 15 days
   script:
     - ./ci/test_makefile.sh
+  interruptible: true
 
 scotch_test_32:
   <<: *test_makefile
@@ -142,6 +144,7 @@ scotch_sonar:
   tags: ['cmake']
   script:
     - ./ci/build_cmake.sh
+  interruptible: true
 
 build_cmake_gcc:
   <<: *build_cmake
@@ -198,6 +201,7 @@ build_cmake_pgi:
     reports:
       junit: report.xml
     expire_in: 15 days
+  interruptible: true
 
 test_cmake_gcc:
   <<: *test_cmake
