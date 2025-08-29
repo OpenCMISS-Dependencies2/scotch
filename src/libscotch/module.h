@@ -55,7 +55,7 @@
 /**                # Version 6.1  : from : 24 aug 2020     **/
 /**                                 to   : 30 dec 2021     **/
 /**                # Version 7.0  : from : 19 feb 2018     **/
-/**                                 to   : 10 aug 2025     **/
+/**                                 to   : 29 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -1049,6 +1049,7 @@
 #define stratParserInput            SCOTCH_NAME_INTERN (stratParserInput)
 #define stratParserLex              SCOTCH_NAME_INTERN (stratParserLex)
 #define stratParserLexBegin         SCOTCH_NAME_INTERN (stratParserLexBegin)
+#define stratParserLexBufDelete     SCOTCH_NAME_INTERN (stratParserLexBufDelete)
 #define stratParserLexBufDestroy    SCOTCH_NAME_INTERN (stratParserLexBufDestroy)
 #define stratParserLexBufSwitch     SCOTCH_NAME_INTERN (stratParserLexBufSwitch)
 #define stratParserLexDestroy       SCOTCH_NAME_INTERN (stratParserLexDestroy)
