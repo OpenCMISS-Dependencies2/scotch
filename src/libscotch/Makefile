@@ -95,7 +95,7 @@ endif
 .PHONY				:	ptscotch	scotch	ptinstall	install	clean	realclean
 
 scotch				:
-					$(MAKE) 					\
+					$(MAKE)						\
 					CC="$(CCS)"					\
 					CCD="$(CCS)"					\
 					scotch.h					\
@@ -105,7 +105,7 @@ scotch				:
 					libscotcherrexit$(LIB)
 
 ptscotch			:	scotch
-					$(MAKE) 					\
+					$(MAKE)						\
 					CC="$(CCP)"					\
 					CFLAGS="$(CFLAGS) -DSCOTCH_PTSCOTCH"		\
 					CCDFLAGS="$(CCDFLAGS) -DSCOTCH_PTSCOTCH"	\
@@ -526,12 +526,12 @@ LIBSCOTCHDEPS	=	arch$(OBJ)				\
 			vmesh_store$(OBJ)			\
 			wgraph$(OBJ)				\
 			wgraph_check$(OBJ)			\
-			wgraph_part_es$(OBJ)  			\
-			wgraph_part_fm$(OBJ)  			\
-			wgraph_part_ml$(OBJ)   			\
-			wgraph_part_rb$(OBJ)  			\
-			wgraph_part_st$(OBJ)  			\
-			wgraph_part_zr$(OBJ)  			\
+			wgraph_part_es$(OBJ)			\
+			wgraph_part_fm$(OBJ)			\
+			wgraph_part_ml$(OBJ)			\
+			wgraph_part_rb$(OBJ)			\
+			wgraph_part_st$(OBJ)			\
+			wgraph_part_zr$(OBJ)			\
 			wgraph_store$(OBJ)
 
 ##
@@ -1205,7 +1205,7 @@ dgraph_match_sync_coll$(OBJ)	:	dgraph_match_sync_coll.c		\
 					module.h				\
 					common.h				\
 					dgraph.h				\
-					dgraph_coarsen.h                        \
+					dgraph_coarsen.h			\
 					dgraph_match.h
 
 dgraph_match_sync_ptop$(OBJ)	:	dgraph_match_sync_ptop.c		\
@@ -1213,7 +1213,7 @@ dgraph_match_sync_ptop$(OBJ)	:	dgraph_match_sync_ptop.c		\
 					common.h				\
 					context.h				\
 					dgraph.h				\
-					dgraph_coarsen.h                        \
+					dgraph_coarsen.h			\
 					dgraph_match.h
 
 dgraph_redist$(OBJ)		:	dgraph_redist.c				\
@@ -1957,11 +1957,11 @@ kgraph$(OBJ)			:	kgraph.c				\
 					mapping.h				\
 					kgraph.h
 
-kgraph_band$(OBJ)		:	kgraph_band.c		   		\
+kgraph_band$(OBJ)		:	kgraph_band.c				\
 					module.h				\
 					common.h				\
 					arch.h					\
-					graph.h			        	\
+					graph.h					\
 					mapping.h				\
 					kgraph.h
 
@@ -2028,7 +2028,7 @@ kgraph_map_fm$(OBJ)		:	kgraph_map_fm.c				\
 					arch.h					\
 					mapping.h				\
 					kgraph.h				\
-					kgraph_map_fm.h                         \
+					kgraph_map_fm.h				\
 					kgraph_map_rb.h
 
 kgraph_map_ml$(OBJ)		:	kgraph_map_ml.c				\
@@ -3453,7 +3453,7 @@ wgraph_part_fm$(OBJ)		:	wgraph_part_fm.c			\
 					wgraph_part_rb.h			\
 					wgraph_part_fm.h
 
-wgraph_part_ml$(OBJ)		: 	wgraph_part_ml.c			\
+wgraph_part_ml$(OBJ)		:	wgraph_part_ml.c			\
 					module.h				\
 					common.h				\
 					parser.h				\
@@ -3467,14 +3467,14 @@ wgraph_part_ml$(OBJ)		: 	wgraph_part_ml.c			\
 
 wgraph_part_rb$(OBJ)		:	wgraph_part_rb.c			\
 					module.h				\
-					common.h                                \
-					parser.h                                \
-					graph.h                                 \
-					arch.h                                  \
-					vgraph.h                                \
-					vgraph_separate_st.h                    \
-					vgraph_separate_zr.h                    \
-					wgraph.h                                \
+					common.h				\
+					parser.h				\
+					graph.h					\
+					arch.h					\
+					vgraph.h				\
+					vgraph_separate_st.h			\
+					vgraph_separate_zr.h			\
+					wgraph.h				\
 					wgraph_part_rb.h
 
 wgraph_part_st$(OBJ)		:	wgraph_part_st.c			\
@@ -3498,7 +3498,7 @@ wgraph_part_st$(OBJ)		:	wgraph_part_st.c			\
 					wgraph_part_zr.h			\
 					wgraph_part_st.h
 
-wgraph_part_zr$(OBJ)		: 	wgraph_part_zr.c			\
+wgraph_part_zr$(OBJ)		:	wgraph_part_zr.c			\
 					module.h				\
 					common.h				\
 					graph.h					\
@@ -3523,20 +3523,20 @@ dummysizes$(EXE)		:	dummysizes.c				\
 					mapping.h				\
 					order.h					\
 					parser.h
-			 		$(CCD) $(CCDFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
+					$(CCD) $(CCDFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
 
 ptdummysizes$(EXE)		:	dummysizes.c				\
 					module.h				\
 					common.h				\
 					dgraph.h				\
 					dorder.h
-			 		$(CCD) $(CCDFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
+					$(CCD) $(CCDFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
 
 scotch.h			:	dummysizes$(EXE)			\
 					library.h
 					./dummysizes$(EXE) -s$(SCOTCH_NAME_SUFFIX) library.h scotch.h
 
-scotchf.h			:	dummysizes$(EXE) 			\
+scotchf.h			:	dummysizes$(EXE)			\
 					library_f.h
 					./dummysizes$(EXE) -s$(SCOTCH_NAME_SUFFIX) library_f.h scotchf.h
 
