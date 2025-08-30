@@ -55,7 +55,7 @@
 /**                # Version 6.1  : from : 24 aug 2020     **/
 /**                                 to   : 30 dec 2021     **/
 /**                # Version 7.0  : from : 19 feb 2018     **/
-/**                                 to   : 29 aug 2025     **/
+/**                                 to   : 30 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -1017,7 +1017,7 @@
 #define meshGeomLoadHabo            SCOTCH_NAME_INTERN (meshGeomLoadHabo)
 #define meshGeomLoadScot            SCOTCH_NAME_INTERN (meshGeomLoadScot)
 #define meshGeomSaveScot            SCOTCH_NAME_INTERN (meshGeomSaveScot)
-#define meshGraph                   SCOTCH_NAME_INTERN (meshGraph)
+#define meshGraphNodal              SCOTCH_NAME_INTERN (meshGraphNodal)
 #define meshGraphDual               SCOTCH_NAME_INTERN (meshGraphDual)
 #define meshInduceList              SCOTCH_NAME_INTERN (meshInduceList)
 #define meshInducePart              SCOTCH_NAME_INTERN (meshInducePart)

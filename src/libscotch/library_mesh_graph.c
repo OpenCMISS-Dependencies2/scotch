@@ -44,7 +44,7 @@
 /**                # Version 6.1  : from : 28 feb 2021     **/
 /**                                 to   : 28 feb 2021     **/
 /**                # Version 7.0  : from : 21 jan 2023     **/
-/**                                 to   : 28 jul 2025     **/
+/**                                 to   : 30 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -79,7 +79,7 @@ SCOTCH_meshGraph (
 const SCOTCH_Mesh * restrict const  meshptr,
 SCOTCH_Graph * restrict const       grafptr)
 {
-  return (meshGraph ((Mesh *) meshptr, (Graph *) grafptr));
+  return (meshGraphNodal ((Mesh *) meshptr, (Graph *) grafptr));
 }
 
 /*+ This routine builds an opaque dual graph structure

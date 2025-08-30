@@ -48,7 +48,7 @@
 /**                # Version 6.1  : from : 20 nov 2020     **/
 /**                                 to   : 07 jun 2021     **/
 /**                # Version 7.0  : from : 20 jan 2023     **/
-/**                                 to   : 04 jul 2025     **/
+/**                                 to   : 30 aug 2025     **/
 /**                                                        **/
 /**   NOTES      : # From a given mesh is created a graph, **/
 /**                  such that all vertices of the graph   **/
@@ -90,7 +90,7 @@
 +*/
 
 int
-meshGraph (
+meshGraphNodal (
 const Mesh * restrict const   meshptr,            /*+ Original mesh  +*/
 Graph * restrict const        grafptr)            /*+ Graph to build +*/
 {
@@ -115,7 +115,7 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
 
   if (((grafptr->verttax = memAlloc ((meshptr->vnodnbr + 1) * sizeof (Gnum)))          == NULL) ||
       ((hashtab          = memAlloc (hashsiz                * sizeof (MeshGraphHash))) == NULL)) {
-    errorPrint ("meshGraph: out of memory (1)");
+    errorPrint ("meshGraphNodal: out of memory (1)");
     if (grafptr->verttax != NULL)
       memFree (grafptr->verttax);
     return (1);
@@ -137,7 +137,7 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
 #endif /* SCOTCH_DEBUG_MESH2 */
 
   if ((grafptr->edgetax = memAlloc (edgemax * sizeof (Gnum))) == NULL) {
-    errorPrint ("meshGraph: out of memory (2)");
+    errorPrint ("meshGraphNodal: out of memory (2)");
     graphFree  (grafptr);
     return (1);
   }
@@ -181,7 +181,7 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
               edgemax = edgemax + (edgemax >> 2);
 
               if ((edgetmp = memRealloc (grafptr->edgetax + grafptr->baseval, edgemax * sizeof (Gnum))) == NULL) {
-                errorPrint ("meshGraph: out of memory (3)");
+                errorPrint ("meshGraphNodal: out of memory (3)");
                 graphFree  (grafptr);
                 memFree    (hashtab);
                 return (1);
@@ -215,7 +215,7 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
 
 #ifdef SCOTCH_DEBUG_MESH2
   if (graphCheck (grafptr) != 0) {
-    errorPrint ("meshGraph: internal error");
+    errorPrint ("meshGraphNodal: internal error");
     return (1);
   }
 #endif /* SCOTCH_DEBUG_MESH2 */

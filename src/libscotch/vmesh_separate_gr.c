@@ -42,7 +42,7 @@
 /**   DATES      : # Version 4.0  : from : 13 oct 2003     **/
 /**                                 to   : 13 oct 2003     **/
 /**                # Version 7.0  : from : 13 sep 2019     **/
-/**                                 to   : 04 jul 2025     **/
+/**                                 to   : 30 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -82,7 +82,7 @@ const VmeshSeparateGrParam * restrict const paraptr) /*+ Method parameters    +*
   Gnum                              velmnum;
   Gnum                              ecmpsize1;
 
-  if (meshGraph (&meshptr->m, &grafdat.s) != 0) {
+  if (meshGraphNodal (&meshptr->m, &grafdat.s) != 0) {
     errorPrint ("vmeshSeparateGr: cannot build graph");
     return (1);
   }
