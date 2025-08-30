@@ -30,7 +30,7 @@
 ## knowledge of the CeCILL-C license and that you accept its terms.
 ##
 
-VERSION	= 7
+VERSION = 7
 RELEASE = 0
 PATCHLEVEL = 9
 CODENAME = "Sankara"
