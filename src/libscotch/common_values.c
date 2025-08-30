@@ -1,4 +1,4 @@
-/* Copyright 2021,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2021,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -39,7 +39,7 @@
 /**                management routines.                    **/
 /**                                                        **/
 /**   DATES      : # Version 7.0  : from : 09 sep 2021     **/
-/**                                 to   : 19 jan 2023     **/
+/**                                 to   : 30 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -149,7 +149,7 @@ int
 contextValuesAllocate (
 Context * const             contptr)
 {
-  ValuesContext * restrict const  valuptr = contptr->valuptr;
+  ValuesContext * restrict const    valuptr = contptr->valuptr;
 
   if (valuptr->dataptr == valuptr->dainptr) {     /* If current value array is default array, allocate a new one */
     void *              dataptr;
@@ -170,19 +170,17 @@ Context * const             contptr,
 const int                   valunum,
 const double                vdblval)
 {
-  ValuesContext * restrict const  valuptr = contptr->valuptr;
-
   if ((valunum <  0) ||                           /* If invalid value number */
-      (valunum >= valuptr->vdblnbr))
+      (valunum >= contptr->valuptr->vdblnbr))
     return (1);
 
-  if (((double *) ((byte *) valuptr->dataptr + valuptr->odblval))[valunum] == vdblval) /* If nothing to do */
+  if (((double *) ((byte *) contptr->valuptr->dataptr + contptr->valuptr->odblval))[valunum] == vdblval) /* If nothing to do */
     return (0);
 
   if (contextValuesAllocate (contptr) != 0)       /* If current value array is default array, allocate a new one */
     return (1);
 
-  ((double *) ((byte *) valuptr->dataptr + valuptr->odblval))[valunum] = vdblval;
+  ((double *) ((byte *) contptr->valuptr->dataptr + contptr->valuptr->odblval))[valunum] = vdblval;
 
   return (0);
 }
@@ -193,19 +191,17 @@ Context * const             contptr,
 const int                   valunum,
 const INT                   vintval)
 {
-  ValuesContext * restrict const  valuptr = contptr->valuptr;
-
   if ((valunum <  0) ||                           /* If invalid value number */
-      (valunum >= valuptr->vintnbr))
+      (valunum >= contptr->valuptr->vintnbr))
     return (1);
 
-  if (((INT *) ((byte *) valuptr->dataptr + valuptr->ointval))[valunum] == vintval) /* If nothing to do */
+  if (((INT *) ((byte *) contptr->valuptr->dataptr + contptr->valuptr->ointval))[valunum] == vintval) /* If nothing to do */
     return (0);
 
   if (contextValuesAllocate (contptr) != 0)       /* If current value array is default array, allocate a new one */
     return (1);
 
-  ((INT *) ((byte *) valuptr->dataptr + valuptr->ointval))[valunum] = vintval;
+  ((INT *) ((byte *) contptr->valuptr->dataptr + contptr->valuptr->ointval))[valunum] = vintval;
 
   return (0);
 }
