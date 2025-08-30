@@ -139,6 +139,8 @@ The following people contribute(d) to the development of **Scotch**:
 
 * Selmane LEBDAOUI
 
+* Connor Alexander MAYON
+
 * Tetsuya MISHIMA
 
 * Xavier MULLER
