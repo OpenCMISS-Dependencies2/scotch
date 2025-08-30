@@ -75,18 +75,19 @@
 #include "mesh.h"
 #include "mesh_graph.h"
 
-/*******************************/
-/*                             */
-/* The graph building routine. */
-/*                             */
-/*******************************/
+/********************************/
+/*                              */
+/* The graph building routines. */
+/*                              */
+/********************************/
 
-/* This routine builds a graph from the
-** given mesh.
-** It returns:
-** - 0  : if the graph has been successfully built.
-** - 1  : on error.
-*/
+/*+ This routine builds an opaque nodal graph structure
+*** from an opaque mesh structure. The nodal graph
+*** adjacency is defined such that two nodes are adjacent
+*** if both share at least one element.
+*** - 0   : if building has succeeded.
+*** - !0  : on error.
++*/
 
 int
 meshGraph (
@@ -223,7 +224,7 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
 }
 
 /* This routine builds a dual graph (that is, an
-** elements graph) from the given mesh. An edge is
+** element graph) from the given mesh. An edge is
 ** built between two element vertices if these two
 ** elements e1 and e2 have at least min (noconbr,
 ** degr (e1) - 1, degr (e2) - 1) nodes in common.

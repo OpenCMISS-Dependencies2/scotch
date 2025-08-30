@@ -61,14 +61,16 @@
 /*************************************/
 /*                                   */
 /* These routines are the C API for  */
-/* the Scotch graph and geometry     */
+/* the Scotch mesh and graph         */
 /* handling routines.                */
 /*                                   */
 /*************************************/
 
-/*+ This routine loads the given opaque graph
-*** structure with the data of the given stream.
-*** - 0   : if loading succeeded.
+/*+ This routine builds an opaque nodal graph structure
+*** from an opaque mesh structure. The nodal graph
+*** adjacency is defined such that two nodes are adjacent
+*** if both share at least one element.
+*** - 0   : if building has succeeded.
 *** - !0  : on error.
 +*/
 
