@@ -34,6 +34,9 @@ SCOTCHBINDIR		?= ../../bin
 SCOTCHINCLUDEDIR	?= ../../include
 SCOTCHLIBDIR		?= ../../lib
 
+LIBPTSCOTCH		= -lptscotch -lscotch -lptscotcherrexit
+LIBSCOTCH		= -lscotch -lscotcherrexit
+
 ifeq ($(strip $(CODENAME)),)
 CODENAMEDEF	=
 else
@@ -47,13 +50,13 @@ endif
 include ../Makefile.inc
 
 %$(EXE)	:	%$(OBJ)
-		 		$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -I../libscotch $(<) -o $(@) -L$(SCOTCHLIBDIR) -l$(SCOTCHLIB) -lscotch -l$(SCOTCHLIB)errexit $(LDFLAGS)
+		 		$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -I../libscotch $(<) -o $(@) -L$(SCOTCHLIBDIR) $(SCOTCHLIBS) $(LDFLAGS)
 
 %$(OBJ)	:	%.c
 				$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -I../libscotch $(CODENAMEDEF) -c $(<) -o $(@)
 
 %$(EXE)	:	%.c
-				$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -I../libscotch $(CODENAMEDEF) $(<) -o $(@) -L$(SCOTCHLIBDIR) -l$(SCOTCHLIB) -lscotch -l$(SCOTCHLIB)errexit $(LDFLAGS)
+				$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -I../libscotch $(CODENAMEDEF) $(<) -o $(@) -L$(SCOTCHLIBDIR) $(SCOTCHLIBS) $(LDFLAGS)
 
 ##
 ##  Project rules.
@@ -62,45 +65,10 @@ include ../Makefile.inc
 .PHONY				:	ptscotch	scotch	ptinstall	install	clean	realclean
 
 scotch				:
-					$(MAKE) CC="$(CCS)" SCOTCHLIB=scotch	\
-					acpl$(EXE)				\
-					amk_ccc$(EXE)				\
-					amk_fft2$(EXE)				\
-					amk_grf$(EXE)				\
-					amk_hy$(EXE)				\
-					amk_m2$(EXE)				\
-					amk_p2$(EXE)				\
-					atst$(EXE)				\
-					gbase$(EXE)				\
-					gcv$(EXE)				\
-					gdump$(EXE)				\
-					gmap$(EXE)				\
-					gmk_hy$(EXE)				\
-					gmk_m2$(EXE)				\
-					gmk_m3$(EXE)				\
-					gmk_msh$(EXE)				\
-					gmk_ub2$(EXE)				\
-					gmtst$(EXE)				\
-					gord$(EXE)				\
-					gotst$(EXE)				\
-					gout$(EXE)				\
-					gpart$(EXE)				\
-					gscat$(EXE)				\
-					gtst$(EXE)				\
-					mcv$(EXE)				\
-					mmk_m2$(EXE)				\
-					mmk_m3$(EXE)				\
-					mord$(EXE)				\
-					mtst$(EXE)
+					$(MAKE) CC="$(CCS)" SCOTCHLIBS="$(LIBSCOTCH)" $(BUILDSCOTCH)
 
 ptscotch			:
-					$(MAKE) CC="$(CCP)" SCOTCHLIB=ptscotch	\
-					dggath$(EXE)				\
-					dgmap$(EXE)				\
-					dgord$(EXE)				\
-					dgpart$(EXE)				\
-					dgscat$(EXE)				\
-					dgtst$(EXE)
+					$(MAKE) CC="$(CCP)" SCOTCHLIBS="$(LIBPTSCOTCH)" $(BUILDPTSCOTCH)
 
 install				:	scotch
 					-$(CP) acpl$(EXE) amk_ccc$(EXE) amk_fft2$(EXE) amk_grf$(EXE) amk_hy$(EXE) amk_m2$(EXE) amk_p2$(EXE) atst$(EXE) gbase$(EXE) gcv$(EXE) gdump$(EXE) gmap$(EXE) gmk_hy$(EXE) gmk_m2$(EXE) gmk_m3$(EXE) gmk_msh$(EXE) gmk_ub2$(EXE) gmtst$(EXE) gord$(EXE) gotst$(EXE) gout$(EXE) gpart$(EXE) *gtst$(EXE) gscat$(EXE) mcv$(EXE) mmk_m2$(EXE) mmk_m3$(EXE) mord$(EXE) mtst$(EXE) $(SCOTCHBINDIR)
@@ -112,6 +80,47 @@ clean				:
 					-$(RM) *~ *$(OBJ) acpl$(EXE) amk_ccc$(EXE) amk_fft2$(EXE) amk_grf$(EXE) amk_hy$(EXE) amk_m2$(EXE) amk_p2$(EXE) atst$(EXE) gbase$(EXE) gcv$(EXE) gdump$(EXE) *ggath$(EXE) *gmap$(EXE) gmk_hy$(EXE) gmk_m2$(EXE) gmk_m3$(EXE) gmk_msh$(EXE) gmk_ub2$(EXE) gmtst$(EXE) *gord$(EXE) gotst$(EXE) gout$(EXE) *gpart$(EXE) *gscat$(EXE) *gtst$(EXE) mcv$(EXE) mmk_m2$(EXE) mmk_m3$(EXE) mord$(EXE) mtst$(EXE)
 
 realclean			:	clean
+
+##
+##  Binary dependencies.
+##
+
+BUILDSCOTCH = 		acpl$(EXE)				\
+			amk_ccc$(EXE)				\
+			amk_fft2$(EXE)				\
+			amk_grf$(EXE)				\
+			amk_hy$(EXE)				\
+			amk_m2$(EXE)				\
+			amk_p2$(EXE)				\
+			atst$(EXE)				\
+			gbase$(EXE)				\
+			gcv$(EXE)				\
+			gdump$(EXE)				\
+			gmap$(EXE)				\
+			gmk_hy$(EXE)				\
+			gmk_m2$(EXE)				\
+			gmk_m3$(EXE)				\
+			gmk_msh$(EXE)				\
+			gmk_ub2$(EXE)				\
+			gmtst$(EXE)				\
+			gord$(EXE)				\
+			gotst$(EXE)				\
+			gout$(EXE)				\
+			gpart$(EXE)				\
+			gscat$(EXE)				\
+			gtst$(EXE)				\
+			mcv$(EXE)				\
+			mmk_m2$(EXE)				\
+			mmk_m3$(EXE)				\
+			mord$(EXE)				\
+			mtst$(EXE)
+
+BUILDPTSCOTCH = 	dggath$(EXE)				\
+			dgmap$(EXE)				\
+			dgord$(EXE)				\
+			dgpart$(EXE)				\
+			dgscat$(EXE)				\
+			dgtst$(EXE)
 
 ##
 ##  Todo list.

@@ -41,10 +41,6 @@ LIBESMUMPS		= -lesmumps -lscotch -lscotcherr
 LIBPTSCOTCH		= -lptscotch -lscotch -lptscotcherr
 LIBSCOTCH		= -lscotch -lscotcherr
 
-DEPESMUMPS		= $(SCOTCHLIBDIR)/libesmumps$(LIB)
-DEPPTSCOTCH		= $(SCOTCHLIBDIR)/libptscotch$(LIB)
-DEPSCOTCH		= $(SCOTCHLIBDIR)/libscotch$(LIB)
-
 include ../Makefile.inc
 
 ifeq ($(strip $(SCOTCH_NAME_SUFFIX)),)
