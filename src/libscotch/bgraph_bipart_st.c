@@ -55,7 +55,7 @@
 /**                # Version 6.0  : from : 23 feb 2011     **/
 /**                                 to   : 02 jan 2017     **/
 /**                # Version 7.0  : from : 17 jan 2023     **/
-/**                                 to   : 07 nov 2024     **/
+/**                                 to   : 04 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -374,18 +374,13 @@ const Strat * restrict const  straptr)            /*+ Bipartitioning strategy   
       bgraphStoreExit (&savetab[0]);              /* Free both save areas */
       bgraphStoreExit (&savetab[1]);
       break;
-#ifdef SCOTCH_DEBUG_BGRAPH2
     case STRATNODEMETHOD :
-#else /* SCOTCH_DEBUG_BGRAPH2 */
-    default :
-#endif /* SCOTCH_DEBUG_BGRAPH2 */
       return (((BgraphBipartFunc) (straptr->tablptr->methtab[straptr->data.methdat.methnum].funcptr))
               (grafptr, (const void * const) &straptr->data.methdat.datadat));
-#ifdef SCOTCH_DEBUG_BGRAPH2
     default :
       errorPrint ("bgraphBipartSt: invalid parameter (2)");
       return (1);
-#endif /* SCOTCH_DEBUG_BGRAPH2 */
   }
+
   return (o);
 }
