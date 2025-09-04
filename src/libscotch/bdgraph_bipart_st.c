@@ -1,4 +1,4 @@
-/* Copyright 2007-2011,2014,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007-2011,2014,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -45,7 +45,7 @@
 /**                # Version 6.0  : from : 11 sep 2011     **/
 /**                                 to   : 28 sep 2014     **/
 /**                # Version 7.0  : from : 17 jan 2023     **/
-/**                                 to   : 07 nov 2024     **/
+/**                                 to   : 04 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -365,11 +365,7 @@ const Strat * restrict const  straptr)            /*+ Bipartitioning strategy   
       bdgraphStoreExit (&savetab[0]);             /* Free both save areas */
       bdgraphStoreExit (&savetab[1]);
       break;
-#ifdef SCOTCH_DEBUG_BDGRAPH1
     case STRATNODEMETHOD :
-#else /* SCOTCH_DEBUG_BDGRAPH1 */
-    default :
-#endif /* SCOTCH_DEBUG_BDGRAPH1 */
 #ifdef SCOTCH_DEBUG_BDGRAPH2
       proccommold = grafptr->s.proccomm;          /* Create new communicator to isolate method communications */
       MPI_Comm_dup (proccommold, &grafptr->s.proccomm);
@@ -380,12 +376,10 @@ const Strat * restrict const  straptr)            /*+ Bipartitioning strategy   
       MPI_Comm_free (&grafptr->s.proccomm);       /* Restore old communicator */
       grafptr->s.proccomm = proccommold;
 #endif /* SCOTCH_DEBUG_BDGRAPH2 */
-#ifdef SCOTCH_DEBUG_BDGRAPH1
       break;
     default :
       errorPrint ("bdgraphBipartSt: invalid parameter (2)");
       return (1);
-#endif /* SCOTCH_DEBUG_BDGRAPH1 */
   }
   return (o);
 }
