@@ -271,8 +271,10 @@ const Strat * restrict const  straptr)            /*+ Bipartitioning strategy   
 {
   StratTest           testdat;                    /* Result of condition evaluation */
   BgraphStore         savetab[2];                 /* Results of the two strategies  */
+  Gnum                compload0;
   int                 o;
-  int                 o2;
+  int                 o0;
+  int                 o1;
 
 #ifdef SCOTCH_DEBUG_BGRAPH2
   if (sizeof (Gnum) != sizeof (INT)) {
@@ -330,49 +332,52 @@ const Strat * restrict const  straptr)            /*+ Bipartitioning strategy   
       }
 
       bgraphStoreSave     (grafptr, &savetab[1]); /* Save initial bipartition                   */
-      o = bgraphBipartSt  (grafptr, straptr->data.seledat.stratab[0]); /* Apply first strategy  */
+      o0 = bgraphBipartSt (grafptr, straptr->data.seledat.stratab[0]); /* Apply first strategy  */
       bgraphStoreSave     (grafptr, &savetab[0]); /* Save its result                            */
       bgraphStoreUpdt     (grafptr, &savetab[1]); /* Restore initial bipartition                */
-      o2 = bgraphBipartSt (grafptr, straptr->data.seledat.stratab[1]); /* Apply second strategy */
+      o1 = bgraphBipartSt (grafptr, straptr->data.seledat.stratab[1]); /* Apply second strategy */
 
-      if ((o == 0) || (o2 == 0)) {                /* If at least one method did bipartition */
-        Gnum                compload0;
-	int                 b0;
-        int                 b1;
-
-        compload0 = grafptr->compload0avg + savetab[0].compload0dlt;
-        b0 = ((compload0 < grafptr->compload0min) ||
-              (compload0 > grafptr->compload0max)) ? 1 : o;
-        compload0 = grafptr->compload0avg + grafptr->compload0dlt;
-        b1 = ((compload0 < grafptr->compload0min) ||
-              (compload0 > grafptr->compload0max)) ? 1 : o2;
-
-        do {                                      /* Do we want to restore partition 0 ? */
-          if (b0 > b1)
-            break;
-          if (b0 == b1) {                         /* If both are valid or invalid  */
-            if (b0 == 0) {                        /* If both are valid             */
-              if ( (savetab[0].commload >  grafptr->commload) || /* Compare on cut */
-                  ((savetab[0].commload == grafptr->commload) &&
-                   (abs (savetab[0].compload0dlt) > abs (grafptr->compload0dlt))))
-                break;
-            }
-            else {                                /* If both are invalid */
-              if ( (abs (savetab[0].compload0dlt) >  abs (grafptr->compload0dlt)) || /* Compare on imbalance */
-                  ((abs (savetab[0].compload0dlt) == abs (grafptr->compload0dlt)) &&
-                   (savetab[0].commload > grafptr->commload)))
-                break;
-            }
-          }
-
-          bgraphStoreUpdt (grafptr, &savetab[0]); /* Restore its result */
-        }  while (0);
+      if ((o0 | o1) != 0) {                       /* If at least one method failed */
+        if (o0 == 0)                              /* If first succeeded, take it   */
+          goto take0;
+        if (o1 != 0) {                            /* If none succeeded           */
+          bgraphStoreUpdt (grafptr, &savetab[1]); /* Restore initial bipartition */
+          o = 1;                                  /* Indicate error              */
+        }
+        goto take1;                               /* If second succeeded, keep it; anyway, go freeing data structures */
       }
-      if (o2 < o)                                 /* o = min(o,o2): if one biparts, then bipart */
-        o = o2;                                   /* Else if one stops, then stop, else error   */
 
-      bgraphStoreExit (&savetab[0]);              /* Free both save areas */
-      bgraphStoreExit (&savetab[1]);
+      compload0 = grafptr->compload0avg + savetab[0].compload0dlt;
+      o0 = ((compload0 < grafptr->compload0min) ||
+            (compload0 > grafptr->compload0max)) ? 1 : 0;
+      compload0 = grafptr->compload0avg + grafptr->compload0dlt;
+      o1 = ((compload0 < grafptr->compload0min) ||
+            (compload0 > grafptr->compload0max)) ? 1 : 0;
+
+      if (o1 > o0)                                /* If first is balanced and second is not, take first */
+        goto take0;
+      if (o1 < o0)                                /* If second is balanced and first is not, take second */
+        goto take1;
+      if (o0 == 0) {                              /* If both are balanced    */
+        if ( (savetab[0].commload >  grafptr->commload) || /* Compare on cut */
+            ((savetab[0].commload == grafptr->commload) &&
+             (abs (savetab[0].compload0dlt) > abs (grafptr->compload0dlt))))
+          goto take1;
+        else
+          goto take0;
+      }
+      else {                                      /* If both are imbalanced */
+        if ( (abs (savetab[0].compload0dlt) >  abs (grafptr->compload0dlt)) || /* Compare on imbalance */
+            ((abs (savetab[0].compload0dlt) == abs (grafptr->compload0dlt)) &&
+             (savetab[0].commload > grafptr->commload)))
+          goto take1;
+      }
+
+take0:
+      bgraphStoreUpdt (grafptr, &savetab[0]);     /* Restore first partition          */
+take1:                                            /* Keep second partition by default */
+      bgraphStoreExit (&savetab[1]);              /* Free both save areas             */
+      bgraphStoreExit (&savetab[0]);
       break;
     case STRATNODEMETHOD :
       return (((BgraphBipartFunc) (straptr->tablptr->methtab[straptr->data.methdat.methnum].funcptr))
