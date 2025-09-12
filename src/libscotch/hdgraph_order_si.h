@@ -1,4 +1,4 @@
-/* Copyright 2007,2018,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2018,2024,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -34,6 +34,7 @@
 /**   NAME       : hdgraph_order_si.h                      **/
 /**                                                        **/
 /**   AUTHOR     : Francois PELLEGRINI                     **/
+/**                Clement BARTHELEMY                      **/
 /**                                                        **/
 /**   FUNCTION   : This module contains the data declara-  **/
 /**                tions for the simple halo graph         **/
@@ -44,7 +45,7 @@
 /**                # Version 6.0  : from : 07 jun 2018     **/
 /**                                 to   : 07 jun 2018     **/
 /**                # Version 7.0  : from : 11 sep 2024     **/
-/**                                 to   : 11 sep 2024     **/
+/**                                 to   : 12 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -53,3 +54,4 @@
 */
 
 int                         hdgraphOrderSi      (Hdgraph * const, DorderCblk * const);
+int                         hdgraphOrderSi2     (DorderCblk * const, const Gnum, const Gnum, const Gnum * const, const Gnum, MPI_Comm);

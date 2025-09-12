@@ -55,7 +55,7 @@
 /**                # Version 6.1  : from : 24 aug 2020     **/
 /**                                 to   : 30 dec 2021     **/
 /**                # Version 7.0  : from : 19 feb 2018     **/
-/**                                 to   : 30 aug 2025     **/
+/**                                 to   : 12 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -900,6 +900,7 @@
 #define hdgraphOrderNd              SCOTCH_NAME_INTERN (hdgraphOrderNd)
 #define hdgraphOrderNd2             SCOTCH_NAME_INTERN (hdgraphOrderNd2)
 #define hdgraphOrderSi              SCOTCH_NAME_INTERN (hdgraphOrderSi)
+#define hdgraphOrderSi2             SCOTCH_NAME_INTERN (hdgraphOrderSi2)
 #define hdgraphOrderSq              SCOTCH_NAME_INTERN (hdgraphOrderSq)
 #define hdgraphOrderSq2             SCOTCH_NAME_INTERN (hdgraphOrderSq2)
 #define hdgraphOrderSt              SCOTCH_NAME_INTERN (hdgraphOrderSt)
