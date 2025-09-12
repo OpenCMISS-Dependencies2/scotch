@@ -40,6 +40,10 @@ debugging level for assessing issues is obtained by compiling
 \item
 Check whether the \scotch\ test programs run without errors.
 \item
+Check that your execution environment does not fall into the
+categories listed in Section~\ref{sec-execution-issues}; if yes, apply
+the provided workarounds, if they exist.
+\item
 Check integer size match between your code and the \libscotch, using
 the library function \texttt{SCOTCH\_\lbt numSizeof()}. This general
 sanity check may be beneficially included in all software linked

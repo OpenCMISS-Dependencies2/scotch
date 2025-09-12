@@ -103,6 +103,26 @@ cmake -DLIBSCOTCHERR=scotcherr
 CMake installation is easy and straightforward. It allows one to compile and install **Scotch** and **PT-Scotch**, depending on flags such as the use of multi-threading and/or MPI. The traditional Makefile installation provides additional freedom to perform (cross-)compilation for non-standard systems and configurations. Please refer to the `[INSTALL.txt](https://gitlab.inria.fr/scotch/scotch/blob/master/INSTALL.txt)` file at the root of the package tree for more information on the use of traditional `Makefile`s.
 
 
+Execution
+---------
+
+### Intel MPI
+
+Some hanging issues have been reported when running PT-Scotch in
+multi-threaded mode on Intel MPI. Until Intel fixes this issue, a
+workaround, available since Intel MPI version 2021.17, is to run
+Intel's `mpiexec` command with some variables set as follows:
+
+```
+I_MPI_THREAD_SPLIT=1, I_MPI_THREAD_SPLIT_MODE=implicit, I_MPI_THREAD_MAX=x
+```
+
+where the `x` integer value is the maximum number of threads that Scotch will use, which must be set explicitly at compile time, or at execution time as an environment variable:
+
+```
+export SCOTCH_PTHREAD_NUMBER=x
+```
+
 Consortium
 ----------
 

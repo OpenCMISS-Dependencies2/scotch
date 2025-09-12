@@ -199,6 +199,7 @@ using \ptscotch\ routines within a MPI program.
 \end{center}
 
 \subsection{Multi-threading}
+\label{sec-execution-multithreading}
 
 Since version \textsc{v7.0}, \scotch\ benefits from dynamic
 multi-threading: most compute-intensive algorithms will use several
@@ -260,3 +261,28 @@ likely to speed-up computations.
 possible.
 \end{minipage}}
 \end{center}
+
+\subsection{Execution issues}
+\label{sec-execution-issues}
+
+\subsubsection{Intel MPI}
+
+Some hanging issues have been reported when running \ptscotch\ in
+multi-threaded mode on Intel MPI. Until Intel fixes this issue, a
+workaround, available since Intel MPI version 2021.17, is to run
+Intel's \texttt{mpiexec} command with some configuration variables set
+as follows:
+
+\begin{lstlisting}[style=language-b]
+I_MPI_THREAD_SPLIT=1 I_MPI_THREAD_SPLIT_MODE=implicit I_MPI_THREAD_MAX=x
+\end{lstlisting}
+
+\noi
+where the \texttt{x} integer value is the maximum number of threads
+that Scotch will use, which must be set explicitly at compile time
+(see Section~\ref{sec-execution-multithreading}), or
+at execution time as an environment variable:
+
+\begin{lstlisting}[style=language-b]
+export SCOTCH_PTHREAD_NUMBER=x
+\end{lstlisting}
