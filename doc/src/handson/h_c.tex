@@ -249,14 +249,27 @@ file of your version of \scotch.
 Additionnally, environment variables may be set to dynamically
 change the behavior of the \libscotch\ and all the executables
 that rely on it (including the \scotch\ standalone programs
-themselves).
+themselves). These variables take precedence over the compilation
+flags with same purpose.
 \begin{itemize}
 \item
-\texttt{SCOTCH\_PTHREAD\_NUMBER}: this environment variable mirrors
-and takes precedence over the compilation flag with same name.
-It sets the prescribed maximum number of threads that \scotch\ may use
-in the course of its computations. A value of \texttt{-1} indicates to
-use as many threads as provided by the system at launch time.
+\texttt{SCOTCH\_PTHREAD\_NUMBER}: this environment variable sets the
+prescribed maximum number of threads that \scotch\ may use in the
+course of its computations. A value of \texttt{-1} indicates to use as
+many threads as provided by the system at launch time. Setting this
+number to \texttt{1} will coerce \scotch\ into using only purely
+sequential algorithms (which may differ in nature from their
+multi-threaded counterparts).
+\item
+\texttt{SCOTCH\_DETERMINISTIC}: when set to \texttt{0}, faster,
+non-deterministic, multi-threaded algorithms may be used; when set to
+\texttt{1}, fully deterministic, albeit sometimes slower,
+multi-threaded algorithms are always used.
+\item
+\texttt{SCOTCH\_RANDOM\_FIXED\_SEED}: when set to \texttt{1}, the same
+pseudo-random seed is used for each run, allowing for reproducibility
+in case only deterministic algorithms are used; when set to
+\texttt{0}, a new pseudo-random seed is used for each run.
 \end{itemize}
 
 \begin{center}

@@ -108,7 +108,11 @@ Execution
 
 The behavior of the **libScotch** library and of the **Scotch** programs that use it can be conditioned at run time by way of environment variables:
 
-* `SCOTCH_PTHREAD_NUMBER`: the prescribed maximum number of threads that **Scotch** may use in the course of its computations, or `-1` to use as many threads as provided by the system at launch time.
+* `SCOTCH_PTHREAD_NUMBER`: the prescribed maximum number of threads that **Scotch** may use in the course of its computations, or `-1` to use as many threads as provided by the system at launch time;
+
+* `SCOTCH_DETERMINISTIC`: `0` for allowing for the use of faster, non-deterministic, multi-threaded algorithms, and `1` for a fully, albeit sometimes slower, deterministic multi-threaded behavior;
+
+* `SCOTCH_RANDOM_FIXED_SEED`: `0` for setting a new, dynamically-changing pseudo-random seed at every run, and `1` for a fixed pseudo-random seed.
 
 ### Intel MPI
 

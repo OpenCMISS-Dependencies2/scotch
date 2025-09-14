@@ -720,7 +720,7 @@ mechanism is absolutely NOT thread-safe at the time being.
 ---------------
 
 Many algorithms in Scotch and PT-Scotch are based on the random
-selection of vertices (e.g. seed vertices for graph growing
+selection of vertices (e.g., seed vertices for graph growing
 algorithms, vertices to be mated for coarsening algorithms,
 etc.). This selection is performed by using integer pseudo-random
 generators to produce seemingly uncorrelated vertex indices.
@@ -743,6 +743,14 @@ pseudo-random generator for its own purposes. In order to avoid this
 problem, Scotch now uses its own pseudo-random generator. The use of
 operating system-dependent pseudo-random generators has been
 deprecated since version 7.0.
+
+From version v7.0, Scotch allows to parameterize the behavior of the
+libScotch library (and of the Scotch programs that use it) at run
+time, by way of environment variables which, when set, supersede
+compile-time definitions. The "SCOTCH_RANDOM_FIXED_SEED" environment
+variable may be set to 0 for setting a new, dynamically-changing
+pseudo-random seed at every run, and 1 for a fixed pseudo-random
+seed.
 
 
 3.10) Deterministic behavior
@@ -776,6 +784,14 @@ on a first-come, first-serve basis.
 
 Setting this flag automatically results in setting the
 "-DCOMMON_RANDOM_FIXED_SEED" flag.
+
+From version v7.0, Scotch allows to parameterize the behavior of the
+libScotch library (and of the Scotch programs that use it) at run
+time, by way of environment variables which, when set, supersede
+compile-time definitions. The "SCOTCH_DETERMINISTIC" environment
+variable may be set to 0 to allow for the use of faster,
+non-deterministic, multi-threaded algorithms, and 1 for a fully,
+albeit sometimes slower, deterministic multi-threaded behavior.
 
 
 3.11) Point-to-point or collective communications

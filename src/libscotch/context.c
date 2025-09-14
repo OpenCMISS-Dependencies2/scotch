@@ -1,4 +1,4 @@
-/* Copyright 2021,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2021,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -39,7 +39,7 @@
 /**                the libScotch routines.                 **/
 /**                                                        **/
 /**   DATES      : # Version 7.0  : from : 03 oct 2021     **/
-/**                                 to   : 30 oct 2023     **/
+/**                                 to   : 14 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -88,7 +88,22 @@ int
 contextOptionsInit (
 Context * const             contptr)
 {
-  return (contextValuesInit (contptr, &contextvaluesdat, sizeof (contextvaluesdat),
-                             CONTEXTOPTIONNUMNBR, (byte *) &contextvaluesdat.vinttab - (byte *) &contextvaluesdat,
-                             CONTEXTOPTIONDBLNBR, (byte *) &contextvaluesdat.vdbltab - (byte *) &contextvaluesdat));
+  int                 o;
+
+  o = contextValuesInit (contptr, &contextvaluesdat, sizeof (contextvaluesdat),
+                         CONTEXTOPTIONNUMNBR, (byte *) &contextvaluesdat.vinttab - (byte *) &contextvaluesdat,
+                         CONTEXTOPTIONDBLNBR, (byte *) &contextvaluesdat.vdbltab - (byte *) &contextvaluesdat);
+
+  if (o == 0) {                                   /* If values array allocated, update it with existing environment variables */
+    INT                 deteval;
+    INT                 rafival;
+
+    contextValuesGetInt (contptr, CONTEXTOPTIONNUMDETERMINISTIC, &deteval);
+    contextValuesSetInt (contptr, CONTEXTOPTIONNUMDETERMINISTIC, envGetInt ("SCOTCH_DETERMINISTIC", deteval));
+
+    contextValuesGetInt (contptr, CONTEXTOPTIONNUMRANDOMFIXEDSEED, &rafival);
+    contextValuesSetInt (contptr, CONTEXTOPTIONNUMRANDOMFIXEDSEED, envGetInt ("SCOTCH_RANDOM_FIXED_SEED", rafival));
+  }
+
+  return (o);
 }
