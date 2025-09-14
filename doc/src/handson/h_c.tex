@@ -244,6 +244,20 @@ features and algorithms (e.g.,
 have different names. Please refer to the
 \href{https://gitlab.inria.fr/scotch/scotch/-/blob/master/INSTALL.txt}{\texttt{INSTALL.txt}}
 file of your version of \scotch.
+\\
+
+Additionnally, environment variables may be set to dynamically
+change the behavior of the \libscotch\ and all the executables
+that rely on it (including the \scotch\ standalone programs
+themselves).
+\begin{itemize}
+\item
+\texttt{SCOTCH\_PTHREAD\_NUMBER}: this environment variable mirrors
+and takes precedence over the compilation flag with same name.
+It sets the prescribed maximum number of threads that \scotch\ may use
+in the course of its computations. A value of \texttt{-1} indicates to
+use as many threads as provided by the system at launch time.
+\end{itemize}
 
 \begin{center}
 \framebox{\begin{minipage}[t]{0.9\textwidth}%

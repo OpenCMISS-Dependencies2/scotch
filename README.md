@@ -106,6 +106,10 @@ CMake installation is easy and straightforward. It allows one to compile and ins
 Execution
 ---------
 
+The behavior of the **libScotch** library and of the **Scotch** programs that use it can be conditioned at run time by way of environment variables:
+
+* `SCOTCH_PTHREAD_NUMBER`: the prescribed maximum number of threads that **Scotch** may use in the course of its computations, or `-1` to use as many threads as provided by the system at launch time.
+
 ### Intel MPI
 
 Some hanging issues have been reported when running PT-Scotch in
