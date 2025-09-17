@@ -45,7 +45,7 @@
 /**                # Version 6.0  : from : 10 oct 2013     **/
 /**                                 to   : 10 oct 2013     **/
 /**                # Version 7.0  : from : 18 jan 2023     **/
-/**                                 to   : 17 jan 2025     **/
+/**                                 to   : 17 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -111,7 +111,8 @@ Order * restrict const        cordptr)
       vnodlocnbr += cblklocptr->data.leaf.vnodlocnbr; /* And more node vertices */
     }
 #ifdef SCOTCH_DEBUG_DORDER2
-    else if (cblklocptr->typeval != DORDERCBLKNEDI) {
+    else if ((cblklocptr->typeval != DORDERCBLKNEDI) &&
+             (cblklocptr->typeval != DORDERCBLKDICO)) {
       errorPrint ("dorderGather: invalid parameters");
       return (1);
     }
@@ -440,7 +441,8 @@ const int                     protnum)
       }
     }
 #ifdef SCOTCH_DEBUG_DORDER2
-    else if (cblklocptr->typeval != DORDERCBLKNEDI) {
+    else if ((cblklocptr->typeval != DORDERCBLKNEDI) &&
+             (cblklocptr->typeval != DORDERCBLKDICO)) {
       errorPrint ("dorderGatherTree: invalid column block type");
       return (1);
     }
