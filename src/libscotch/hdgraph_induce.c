@@ -111,7 +111,7 @@ Hdgraph * restrict const    indgrafptr)
 
   if (dgraphGhst (&orggrafptr->s) != 0) {         /* Compute ghost edge array if not already present */
     errorPrint ("hdgraphInduceList: cannot compute ghost edge array");
-    return     (1);
+    return (1);
   }
 
   memSet (indgrafptr, 0, sizeof (Hdgraph));       /* Pre-initialize graph fields */
@@ -203,7 +203,7 @@ Hdgraph * restrict const    indgrafptr)
   }
   if (chekglbval != 0) {                          /* If something went wrong in all of the above */
     hdgraphExit (indgrafptr);
-    return      (1);
+    return (1);
   }
 
   memSet (orgindxgsttax, ~0, orggrafptr->s.vertgstnbr * sizeof (Gnum)); /* Preset index arrays */
@@ -220,7 +220,7 @@ Hdgraph * restrict const    indgrafptr)
   if (dgraphHaloSync (&orggrafptr->s, (byte *) (orgindxgsttax + orggrafptr->s.baseval), GNUM_MPI) != 0) { /* Share global indexing of subgraph vertices */
     errorPrint  ("hdgraphInduceList: cannot perform halo exchange");
     hdgraphExit (indgrafptr);
-    return      (1);
+    return (1);
   }
 
   orgvertloctax = orggrafptr->s.vertloctax;
@@ -253,7 +253,7 @@ Hdgraph * restrict const    indgrafptr)
 #ifdef SCOTCH_DEBUG_HDGRAPH2
     if (indedgelocnnd > (indedgelocmax + orggrafptr->s.baseval)) {
       errorPrint  ("hdgraphInduceList: internal error (1)");
-      return      (1);
+      return (1);
     }
 #endif /* SCOTCH_DEBUG_HDGRAPH2 */
     for (orgedgelocnum = orgvertloctax[orgvertlocnum]; /* Process local and ghost non-halo vertices */
@@ -265,7 +265,7 @@ Hdgraph * restrict const    indgrafptr)
 #ifdef SCOTCH_DEBUG_HDGRAPH2
       if ((orgvertlocend < orggrafptr->s.baseval) || (orgvertlocend > orggrafptr->s.vertgstnnd)) {
         errorPrint  ("hdgraphInduceList: internal error (2)");
-        return      (1);
+        return (1);
       }
 #endif /* SCOTCH_DEBUG_HDGRAPH2 */
       indvertgstend = orgindxgsttax[orgvertlocend];
@@ -280,7 +280,7 @@ Hdgraph * restrict const    indgrafptr)
 #ifdef SCOTCH_DEBUG_HDGRAPH2
     if (indedgelocnnd != indedgelocnum) {
       errorPrint  ("hdgraphInduceList: internal error (3)");
-      return      (1);
+      return (1);
     }
 #endif /* SCOTCH_DEBUG_HDGRAPH2 */
     indvendloctax[indvertlocnum] = indedgelocnum;
@@ -299,11 +299,11 @@ Hdgraph * restrict const    indgrafptr)
       if ((orgvhallocend < orggrafptr->s.baseval) || (orgvhallocend >= (orggrafptr->vhallocnbr + orggrafptr->s.baseval))) {
         errorPrint  ("hdgraphInduceList: inconsistent halo vertex numbers");
         hdgraphExit (indgrafptr);
-        return      (1);
+        return (1);
       }
       if (indedgelocnum >= (indedgelocmax + orggrafptr->s.baseval)) {
         errorPrint  ("hdgraphInduceList: internal error (4)");
-        return      (1);
+        return (1);
       }
 #endif /* SCOTCH_DEBUG_HDGRAPH2 */
       indvhallocend = orgindxhaltax[orgvhallocend];
@@ -345,13 +345,13 @@ Hdgraph * restrict const    indgrafptr)
   indgrafptr->s.degrglbmax = orggrafptr->s.degrglbmax;
   if (dgraphBuild4 (&indgrafptr->s) != 0) {
     errorPrint ("hdgraphInduceList: cannot build induced graph");
-    return     (1);
+    return (1);
   }
 #ifdef SCOTCH_DEBUG_HDGRAPH2
   if (hdgraphCheck (indgrafptr) != 0) {           /* Check graph consistency */
     errorPrint  ("hdgraphInduceList: internal error (5)");
     hdgraphExit (indgrafptr);
-    return      (1);
+    return (1);
   }
 #endif /* SCOTCH_DEBUG_HDGRAPH2 */
 
