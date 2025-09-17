@@ -365,6 +365,16 @@ if(BUILD_PTSCOTCH)
 
   add_test_ptscotch(test_scotch_dgraph_coarsen ${dat}/m4x4_b1.grf)
 
+  # test_scotch_dgraph_order
+
+  add_exec_ptscotch(test_scotch_dgraph_order)
+
+  add_test_ptscotch(test_scotch_dgraph_order ${dat}/bump.grf)
+
+  add_test_ptscotch(test_scotch_dgraph_order ${dat}/bump_b100000.grf)
+
+  add_test_ptscotch(test_scotch_dgraph_order ${dat}/m4x4_b1.grf)
+
   # test_scotch_dgraph_check
 
   add_exec_ptscotch(test_scotch_dgraph_check)

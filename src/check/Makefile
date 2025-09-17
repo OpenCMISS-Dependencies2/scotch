@@ -173,6 +173,7 @@ realclean			:	clean
 					test_scotch_dgraph_band		\
 					test_scotch_dgraph_check	\
 					test_scotch_dgraph_coarsen	\
+					test_scotch_dgraph_order	\
 					test_scotch_dgraph_grow		\
 					test_scotch_dgraph_induce	\
 					test_scotch_dgraph_redist	\
@@ -237,6 +238,7 @@ CHECKPTSCOTCH = 	check_strat_par				\
 			check_scotch_dgraph_check		\
 			check_scotch_dgraph_band		\
 			check_scotch_dgraph_coarsen		\
+			check_scotch_dgraph_order		\
 			check_scotch_dgraph_grow		\
 			check_scotch_dgraph_induce     		\
 			check_scotch_dgraph_redist		\
@@ -526,6 +528,16 @@ check_scotch_dgraph_coarsen	:	test_scotch_dgraph_coarsen
 					$(EXECP3) ./test_scotch_dgraph_coarsen data/m4x4_b1.grf
 
 test_scotch_dgraph_coarsen	:	test_scotch_dgraph_coarsen.c	\
+					$(SCOTCHLIBDIR)/libptscotch$(LIB)
+
+##
+
+check_scotch_dgraph_order	:	test_scotch_dgraph_order
+					$(EXECP3) ./test_scotch_dgraph_order data/bump.grf
+					$(EXECP3) ./test_scotch_dgraph_order data/bump_b100000.grf
+					$(EXECP3) ./test_scotch_dgraph_order data/m4x4_b1.grf
+
+test_scotch_dgraph_order	:	test_scotch_dgraph_order.c	\
 					$(SCOTCHLIBDIR)/libptscotch$(LIB)
 
 ##
