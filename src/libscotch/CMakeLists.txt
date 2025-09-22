@@ -119,7 +119,7 @@ if (BISON_FOUND)
 else()
   # use fallback
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${CMAKE_CURRENT_BINARY_DIR}/parser_ly.h
-    COMMAND cp "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_yy.c" "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_ly.h" "${CMAKE_CURRENT_BINARY_DIR}/.")
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_yy.c" "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_ly.h" "${CMAKE_CURRENT_BINARY_DIR}/.")
 endif(BISON_FOUND)
 add_custom_target(parser_yy_c DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${CMAKE_CURRENT_BINARY_DIR}/parser_ly.h)
 
@@ -140,7 +140,7 @@ if (FLEX_FOUND)
 else()
   # use fallback
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h
-    COMMAND cp "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_ll.c" "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_lh.h" "${CMAKE_CURRENT_BINARY_DIR}/.")
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_ll.c" "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_lh.h" "${CMAKE_CURRENT_BINARY_DIR}/.")
 endif(FLEX_FOUND)
 add_custom_target(parser_ll_c DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h)
 
