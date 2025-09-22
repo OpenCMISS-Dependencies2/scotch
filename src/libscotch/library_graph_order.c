@@ -52,7 +52,7 @@
 /**                # Version 6.0  : from : 08 jan 2012     **/
 /**                                 to   : 29 sep 2019     **/
 /**                # Version 7.0  : from : 07 may 2019     **/
-/**                                 to   : 11 sep 2025     **/
+/**                                 to   : 22 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -276,7 +276,8 @@ SCOTCH_Strat * const        stratptr)             /*+ Ordering strategy         
 
   if (listnbr == 0) {                             /* If empty list, return identity permutation */
     intAscn (libordeptr->o.peritab, srcgrafptr->vertnbr, srcgrafptr->baseval);
-    goto abort;
+    o = 0;                                        /* Not an error */
+    goto skip;
   }
 
   if (*((Strat **) stratptr) == NULL)             /* Set default ordering strategy if necessary */
@@ -363,9 +364,12 @@ SCOTCH_Strat * const        stratptr)             /*+ Ordering strategy         
   if (o != 0)
     goto abort;
 
+skip:
 #ifdef SCOTCH_DEBUG_LIBRARY2
-  if (orderCheck (&libordeptr->o) != 0)
+  if (orderCheck (&libordeptr->o) != 0) {
+    o = 1;
     goto abort;
+  }
 #endif /* SCOTCH_DEBUG_LIBRARY2 */
 
   if (libordeptr->permtab != NULL)                /* Build direct permutation if wanted */
