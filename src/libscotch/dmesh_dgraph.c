@@ -349,7 +349,7 @@ const Gnum                    noconbr)            /*+ Number of common points to
 
   if (MPI_Alltoallv (esnddattab, esndcnttab, esnddsptab, GNUM_MPI,
                      ercvdattab, ercvcnttab, ercvdsptab, GNUM_MPI, meshptr->proccomm) != MPI_SUCCESS) {
-    errorPrint (" dmeshDgraphDual : communication error (4)");
+    errorPrint ("dmeshDgraphDual: communication error (4)");
     return (1);
   }
 
@@ -486,7 +486,7 @@ const Gnum                    noconbr)            /*+ Number of common points to
 
   if (MPI_Alltoallv (nsnddattab, nsndcnttab, nsnddsptab, GNUM_MPI,
                      nrcvdattab, nrcvcnttab, nrcvdsptab, GNUM_MPI, meshptr->proccomm) != MPI_SUCCESS) {
-    errorPrint (" dmeshDgraphDual : communication error (6)");
+    errorPrint ("dmeshDgraphDual: communication error (6)");
     return (1);
   }
 
@@ -650,7 +650,7 @@ test:         if (nghbnbr <= 0) {                 /* If new instance allows us t
     errorPrint ("dmeshDgraphDual: cannot build dual graph");
     memFree    (edgeloctax + baseval);
     memFree    (vertloctax + velmlocbas);
-    return  (1);
+    return (1);
   }
   grafptr->flagval |= DGRAPHFREETABS;
 
