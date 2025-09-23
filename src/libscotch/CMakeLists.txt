@@ -86,8 +86,8 @@ add_custom_target(scotchf_h
 #  ptscotch.h  #
 ################
 
-# Generate ptscotch.h
 if(BUILD_PTSCOTCH)
+  # Generate ptscotch.h
   add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/ptscotch.h
     COMMAND $<TARGET_FILE:ptdummysizes> "-s${SCOTCH_NAME_SUFFIX}"
     ${CMAKE_CURRENT_SOURCE_DIR}/library_pt.h ${GENERATED_INCLUDE_DIR}/ptscotch.h DEPENDS ptdummysizes
@@ -96,14 +96,14 @@ if(BUILD_PTSCOTCH)
   add_custom_target(ptscotch_h
     DEPENDS ${GENERATED_INCLUDE_DIR}/ptscotch.h)
 
-# Generate ptscotchf.h
-add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/ptscotchf.h
-  COMMAND $<TARGET_FILE:ptdummysizes> "-s${SCOTCH_NAME_SUFFIX}"
-  ${CMAKE_CURRENT_SOURCE_DIR}/library_pt_f.h ${GENERATED_INCLUDE_DIR}/ptscotchf.h DEPENDS ptdummysizes
-  DEPENDS library.h
-  COMMENT "Generate ptscotchf.h")
-add_custom_target(ptscotchf_h
-  DEPENDS "${GENERATED_INCLUDE_DIR}/ptscotchf.h")
+  # Generate ptscotchf.h
+  add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/ptscotchf.h
+    COMMAND $<TARGET_FILE:ptdummysizes> "-s${SCOTCH_NAME_SUFFIX}"
+    ${CMAKE_CURRENT_SOURCE_DIR}/library_pt_f.h ${GENERATED_INCLUDE_DIR}/ptscotchf.h DEPENDS ptdummysizes
+    DEPENDS library.h
+    COMMENT "Generate ptscotchf.h")
+  add_custom_target(ptscotchf_h
+    DEPENDS "${GENERATED_INCLUDE_DIR}/ptscotchf.h")
 endif()
 
 #################
