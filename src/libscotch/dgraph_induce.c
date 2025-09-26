@@ -98,7 +98,7 @@ Dgraph * restrict const       indgrafptr)
 
   if (dgraphGhst (orggrafptr) != 0) {             /* Compute ghost edge array if not already present */
     errorPrint ("dgraphInduce2: cannot compute ghost edge array");
-    return     (1);
+    return (1);
   }
 
   baseval                = orggrafptr->baseval;
@@ -190,7 +190,7 @@ Dgraph * restrict const       indgrafptr)
   }
   if (chekglbval != 0) {                          /* If something went wrong in all of the above */
     dgraphFree (indgrafptr);
-    return     (1);
+    return (1);
   }
 
   memSet (orgindxgsttax, ~0, orggrafptr->vertlocnbr * sizeof (Gnum)); /* Preset index array */
@@ -201,7 +201,7 @@ Dgraph * restrict const       indgrafptr)
   if (dgraphHaloSync (orggrafptr, (byte *) (orgindxgsttax + baseval), GNUM_MPI) != 0) { /* Share global indexing of subgraph vertices */
     errorPrint ("dgraphInduce2: cannot perform halo exchange");
     dgraphFree (indgrafptr);
-    return     (1);
+    return (1);
   }
 
   if (indvnumloctmp == NULL)                      /* indgrafptr->vnumloctax did not exist when function was called */
@@ -278,13 +278,13 @@ Dgraph * restrict const       indgrafptr)
   indgrafptr->degrglbmax = inddegrlocmax;         /* Local maximum degree will be turned into global maximum degree */
   if (dgraphBuild4 (indgrafptr) != 0) {
     errorPrint ("dgraphInduce2: cannot build induced graph");
-    return     (1);
+    return (1);
   }
 #ifdef SCOTCH_DEBUG_DGRAPH2
   if (dgraphCheck (indgrafptr) != 0) {            /* Check graph consistency */
     errorPrint ("dgraphInduce2: inconsistent graph data");
     dgraphFree (indgrafptr);
-    return     (1);
+    return (1);
   }
 #endif /* SCOTCH_DEBUG_DGRAPH2 */
 
@@ -398,7 +398,7 @@ Gnum * restrict const       orgindxgsttax)
   if ((indvertlocnum - orggrafptr->baseval) != indgrafptr->vertlocnbr) {
     errorPrint ("dgraphInducePart2: inconsistent data");
     dgraphFree (indgrafptr);
-    return     (1);
+    return (1);
   }
 #endif /* SCOTCH_DEBUG_DGRAPH2 */
 
