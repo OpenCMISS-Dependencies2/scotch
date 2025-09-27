@@ -316,7 +316,7 @@ routines in a parallel program, both options can be used.
 
 Graph indices are represented in \scotch\ as integer values of type
 {\tt SCOTCH\_\lbt Num}. By default, this type equates to the {\tt int}
-C type, that is, an integer type of size equal to the one of
+C type, that is, an integer type of size equal to that of
 the machine word. However, it can represent any other integer
 type. Indeed, the size of the {\tt SCOTCH\_\lbt Num} integer type can
 be coerced to 32 or 64 bits by using the ``{\tt -DINTSIZE32}'' or
@@ -350,7 +350,7 @@ should be used for all graph-related values, in accordance to the size
 of the {\tt SCOTCH\_\lbt Num} type, as set by the
 ``{\tt -DINTSIZE}{\it x}'' compilation flags. Also, the
 {\tt INTEGER*}{\it idx} type represents an integer type of a size
-equivalent to the one of a {\tt SCOTCH\_\lbt Idx}, as set by the
+equivalent to that of a {\tt SCOTCH\_\lbt Idx}, as set by the
 ``{\tt -DIDXSIZE}{\it x}'' compilation flags. Values of this type are
 used in the Fortran interface to represent arbitrary array indices
 which can span across the whole address space, and consequently
@@ -1970,8 +1970,8 @@ $(\mbox{\tt proc\lbt vrt\lbt tab[}p + 1\mbox{\tt]} -
 rank of the local process.
 {\tt vertgstptr} is the pointer to a location that will hold the
 number of local and ghost vertices if it has already been computed
-by a prior call to {\tt SCOTCH\_\lbt dgraph\lbo Ghst}, and $-1$ else.
-{\tt vertloctab} is the pointer to a location that will hold the
+by a prior call to {\tt SCOTCH\_\lbt dgraph\lbo Ghst}, and $-1$
+else. {\tt vertloctab} is the pointer to a location that will hold the
 reference to the adjacency index array, of size
 $\mbox{\tt *vertlocptr} + 1$ if the adjacency array is compact,
 or of size {\tt *vertlocptr} else.
@@ -2817,7 +2817,7 @@ $({\tt vert\lbt gst\lbt nbr} - {\tt vert\lbt loc\lbt nbr})$ remaining
 slots are filled with copies of the corresponding remote data obtained
 from the local parts of the data arrays of neighboring processes.
 
-The semantics of {\tt SCOTCH\_dgraphHaloAsync} is similar to the one
+The semantics of {\tt SCOTCH\_dgraphHaloAsync} is similar to that
 of {\tt SCOTCH\_dgraph\lbt Halo}, except that it returns as soon as
 possible, while effective communication may not have started nor
 completed. Also, it possesses an additional parameter, {\tt requptr},
@@ -2963,7 +2963,7 @@ scotchfdgraphmapcompute ( & doubleprecision (*) & grafdat, \\
 The {\tt SCOTCH\_dgraphMapCompute} routine computes a mapping
 on the given {\tt SCOTCH\_\lbt Dmapping} structure pointed
 to by {\tt mappptr} using the parallel mapping strategy pointed to
-by {\tt stratptr}.
+by {\tt straptr}.
 
 On return, every cell of the distributed mapping array (see
 Section~\ref{sec-lib-func-dgraphmapinit}) holds the number of the target
@@ -3257,7 +3257,7 @@ scotchfdgraphpart ( & doubleprecision (*)   & grafdat,    \\
 The {\tt SCOTCH\_dgraphPart} routine computes a partition into {\tt
 partnbr} parts of the distributed source graph structure pointed to
 by {\tt grafptr}, using the graph partitioning strategy pointed to by
-{\tt stratptr}, and returns distributed fragments of the partition
+{\tt straptr}, and returns distributed fragments of the partition
 data in the array pointed to by {\tt partloctab}.
 
 The {\tt partloctab} array should have been previously allocated, of a
@@ -3321,9 +3321,9 @@ computed, and a negative value else.
 \progsyn
 
 {\tt\begin{tabular}{l@{}ll}
-int SCOTCH\_dgraphOrderCompute ( & const SCOTCH\_Dgraph * & grafptr, \\
-                                 & SCOTCH\_Dordering *    & ordeptr, \\
-                                 & const SCOTCH\_Strat *  & straptr)
+int SCOTCH\_dgraphOrderCompute ( & SCOTCH\_Dgraph * const    & grafptr, \\
+                                 & SCOTCH\_Dordering * const & ordeptr, \\
+                                 & SCOTCH\_Strat * const     & straptr)
 \end{tabular}}
 
 {\tt\begin{tabular}{l@{}ll}
@@ -3338,7 +3338,7 @@ scotchfdgraphordercompute ( & doubleprecision (*) & grafdat, \\
 The {\tt SCOTCH\_dgraphOrderCompute} routine computes in parallel a
 distributed block ordering of the distributed graph structure pointed
 to by {\tt grafptr}, using the distributed ordering strategy pointed to
-by {\tt stratptr}, and stores its result in the distributed ordering
+by {\tt straptr}, and stores its result in the distributed ordering
 structure pointed to by {\tt ordeptr}.
 
 \progret
@@ -3524,7 +3524,7 @@ The {\tt SCOTCH\_dgraphOrderSaveTree} routine saves the tree
 hierarchy information associated with the {\tt SCOTCH\_\lbt Dordering}
 structure pointed to by {\tt ordeptr} to stream {\tt stream}.
 
-The format of the tree output file resembles the one of a mapping or
+The format of the tree output file resembles that of a mapping or
 ordering file: it is made up of as many lines as there are vertices in
 the ordering. Each of these lines holds two integer numbers. The first
 one is the index or the label of the vertex, and the second one is the
@@ -5108,7 +5108,7 @@ arrays \texttt{elmdist}, \texttt{eptr} and \texttt{eind}. The arrays
 which describe the adjacency of the dual graph are returned in the
 pointers pointed to by \texttt{xadj} and \texttt{adjncy}. It is the
 user's responsibility to free these two arrays after use, by way of
-plain \texttt{free\,()} calls.
+plain \texttt{free} calls.
 \end{itemize}
 
 \subsubsection{{\tt ParMETIS\_V3\_NodeND}}
