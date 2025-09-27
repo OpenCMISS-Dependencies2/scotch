@@ -488,8 +488,8 @@ set_tests_properties(mmk_m2_5_1 mmk_m2_5_4 mmk_m3_5_4_3 PROPERTIES FIXTURES_SETU
 
 # check_prog_gmk_msh
 
-foreach(mmk_msh m2_5_1 m2_5_4 m3_5_4_3) 
-  add_test(NAME gmk_msh_${mmk_msh} COMMAND ${BASH} -c 
+foreach(mmk_msh m2_5_1 m2_5_4 m3_5_4_3)
+  add_test(NAME gmk_msh_${mmk_msh} COMMAND ${BASH} -c
     "'$<TARGET_FILE:gmk_msh>' ${mmk_msh}.msh ${mmk_msh}.grf && '$<TARGET_FILE:gtst>' ${mmk_msh}.grf")
   set_tests_properties(gmk_msh_${mmk_msh} PROPERTIES FIXTURES_REQUIRED MMK_MESHES FIXTURES_SETUP GMK_GRAPHS)
 endforeach()
@@ -510,7 +510,7 @@ set_tests_properties(gmk_msh_dual_3 PROPERTIES FIXTURES_SETUP GMK_GRAPHS)
 # check_prog_mcv
 
 foreach(mmk_msh m2_5_1 m2_5_4 m3_5_4_3)
-  add_test(NAME mcv_msh_${mmk_msh} COMMAND ${BASH} -c 
+  add_test(NAME mcv_msh_${mmk_msh} COMMAND ${BASH} -c
     "'$<TARGET_FILE:mcv>' ${mmk_msh}.msh output_${mmk_msh}.msh -is -os && \
     '${CMAKE_COMMAND}' -E compare_files ${mmk_msh}.msh output_${mmk_msh}.msh")
   set_tests_properties(mcv_msh_${mmk_msh} PROPERTIES FIXTURES_REQUIRED MMK_MESHES)
