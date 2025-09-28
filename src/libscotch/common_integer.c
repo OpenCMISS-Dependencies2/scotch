@@ -326,7 +326,7 @@ FILE * restrict const         stream)             /*+ Stream to read from  +*/
               &statptr->randtab[0],
               &statptr->randtab[1]) != 2) {
     errorPrint ("intRandLoad2: bad input");
-    return     (2);
+    return (2);
   }
 
   return (0);
@@ -377,7 +377,7 @@ FILE * restrict const         stream)             /*+ Stream to read from  +*/
                statptr->randtab[0],
                statptr->randtab[1]) < 0) {
     errorPrint ("intRandSave2: bad output");
-    return     (2);
+    return (2);
   }
 
   return (0);
@@ -451,7 +451,7 @@ UINT                        randmax)
 #ifdef COMMON_DEBUG
   if (contptr->flagval == 0) {
     errorPrint ("intRandVal: random generator not initialized");
-    return     (~0);
+    return (~0);
   }
 #endif /* COMMON_DEBUG */
 
