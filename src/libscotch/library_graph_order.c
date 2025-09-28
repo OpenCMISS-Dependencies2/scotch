@@ -52,7 +52,7 @@
 /**                # Version 6.0  : from : 08 jan 2012     **/
 /**                                 to   : 29 sep 2019     **/
 /**                # Version 7.0  : from : 07 may 2019     **/
-/**                                 to   : 22 sep 2025     **/
+/**                                 to   : 29 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -289,11 +289,12 @@ SCOTCH_Strat * const        stratptr)             /*+ Ordering strategy         
     goto abort;
   }
 
-  memCpy (&halgrafdat.s, srcgrafptr, sizeof (Graph)); /* Copy non-halo graph data */
-  halgrafdat.s.flagval &= ~GRAPHFREETABS;         /* Do not allow to free arrays  */
-  halgrafdat.s.edlotax  = NULL;                   /* Don't mind about edge loads  */
-  hgraphUnhalo2 (&halgrafdat);                    /* Set default halo members     */
-  halgrafdat.levlnum = 0;                         /* No nested dissection yet     */
+  memCpy (&halgrafdat.s, srcgrafptr, sizeof (Graph)); /* Copy non-halo graph data   */
+  halgrafdat.s.flagval &= ~GRAPHFREETABS;         /* Do not allow to free arrays    */
+  halgrafdat.s.edlotax  = NULL;                   /* Never mind about edge loads    */
+  halgrafdat.s.vlbltax  = NULL;                   /* Do not propagate vertex labels */
+  hgraphUnhalo2 (&halgrafdat);                    /* Set default halo members       */
+  halgrafdat.levlnum = 0;                         /* No nested dissection yet       */
   halgrafdat.contptr = CONTEXTGETDATA (libgrafptr);
 
   if (listnbr == srcgrafptr->vertnbr) {           /* If work on full graph */
