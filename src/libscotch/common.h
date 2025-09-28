@@ -58,7 +58,7 @@
 /**                # Version 6.1  : from : 02 apr 2021     **/
 /**                                 to   : 24 jun 2021     **/
 /**                # Version 7.0  : from : 03 jun 2018     **/
-/**                                 to   : 29 aug 2025     **/
+/**                                 to   : 28 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -82,6 +82,12 @@
 #define COMMON_TIMING_OLD
 #endif /* COMMON_TIMING_OLD */
 #endif /* COMMON_OS_MACOS */
+
+#ifdef COMMON_PTHREAD
+#ifdef COMMON_PTHREAD_AFFINITY_LINUX
+#define _GNU_SOURCE                               /* Must define this before any include */
+#endif /* COMMON_PTHREAD_AFFINITY_LINUX */
+#endif /* COMMON_PTHREAD */
 
 #ifdef COMMON_OS_WINDOWS
 #include            <io.h>                        /* For _pipe ()              */
@@ -157,6 +163,10 @@
 #else /* COMMON_THREAD_WIN32 */
 #include            <pthread.h>
 #endif /* COMMON_THREAD_WIN32 */
+
+#ifdef COMMON_PTHREAD_AFFINITY_LINUX
+#include <sched.h>
+#endif /* COMMON_PTHREAD_AFFINITY_LINUX */
 #endif /* COMMON_PTHREAD */
 
 /*
