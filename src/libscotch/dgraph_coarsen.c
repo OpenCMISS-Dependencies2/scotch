@@ -805,7 +805,7 @@ abort2:
 ** with respect to the coarmulttax array computed
 ** by dgraphMatch. All data must be available when
 ** running (all receptions done). This function is
-** inspired by libscotch/src/graph_coarsen_edge.c.
+** inspired by src/libscotch/graph_coarsen_edge.c.
 */
 
 DGRAPHALLREDUCEMAXSUMOP (4, 1)
