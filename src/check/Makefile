@@ -107,7 +107,7 @@ PROGSED			?= sed
 
 %.f90	:	%.f90.in
 				../libscotch/dummysizes$(EXE) -s$(SCOTCH_NAME_SUFFIX) $(<) $(@).tmp
-				$(PROGSED) -e 's/SCOTCHMETISNAMEFU\s*(\([A-Za-z0-9_]*\))/'"$(SCOTCH_METIS_PREFIXFU)"'\1/g' $(@).tmp > $(@)
+				$(PROGSED) -e 's/SCOTCHMETISNAMEFU[[:space:]]*(\([A-Za-z0-9_]*\))/'"$(SCOTCH_METIS_PREFIXFU)"'\1/g' $(@).tmp > $(@)
 
 %_v3$(EXE):	%.f90
 				$(FC) $(FFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv3 $(SCOTCHLIBS) $(LDFLAGS)
