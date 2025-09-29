@@ -1,4 +1,4 @@
-/* Copyright 2007-2010,2012,2015,2019,2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007-2010,2012,2015,2019,2021,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -61,7 +61,7 @@
 /**                # Version 6.1  : from : 19 jun 2021     **/
 /**                                 to   : 19 jun 2021     **/
 /**                # Version 7.0  : from : 03 may 2019     **/
-/**                                 to   : 16 aug 2025     **/
+/**                                 to   : 29 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -91,9 +91,10 @@
 #define DGRAPHEDGEGROUP             0x0080        /* All edge arrays grouped             */
 #define DGRAPHFREEALL               (DGRAPHFREEPRIV | DGRAPHFREECOMM | DGRAPHFREETABS | DGRAPHFREEPSID | DGRAPHFREEEDGEGST)
 #define DGRAPHCOMMPTOP              0x0100        /* Use point-to-point collective communication */
+#define DGRAPHHASVENDLOC            0x0200        /* Graph is not compact                        */
 
-#define DGRAPHBITSUSED              0x01FF        /* Significant bits for plain distributed graph routines               */
-#define DGRAPHBITSNOTUSED           0x0200        /* Value above which bits not used by plain distributed graph routines */
+#define DGRAPHBITSUSED              0x03FF        /* Significant bits for plain distributed graph routines               */
+#define DGRAPHBITSNOTUSED           0x0400        /* Value above which bits not used by plain distributed graph routines */
 
 /* Used in algorithms */
 

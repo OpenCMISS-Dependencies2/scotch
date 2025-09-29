@@ -1,4 +1,4 @@
-/* Copyright 2007,2008,2010,2019,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2008,2010,2019,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -43,7 +43,7 @@
 /**                # Version 5.1  : from : 27 jun 2008     **/
 /**                                 to   : 22 oct 2010     **/
 /**                # Version 7.0  : from : 28 aug 2019     **/
-/**                                 to   : 30 aug 2023     **/
+/**                                 to   : 29 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -119,7 +119,7 @@ Hdgraph * restrict const    indgrafptr)
   indgrafptr->s.proccomm   = orggrafptr->s.proccomm;
   indgrafptr->s.procglbnbr = orggrafptr->s.procglbnbr;
   indgrafptr->s.proclocnum = orggrafptr->s.proclocnum;
-  indgrafptr->s.flagval    = (DGRAPHFREEALL ^ DGRAPHFREECOMM) | DGRAPHVERTGROUP | DGRAPHEDGEGROUP; /* For premature freeing on error; do not free vhndloctab as it is grouped with vertloctab */
+  indgrafptr->s.flagval    = (DGRAPHFREEALL ^ DGRAPHFREECOMM) | DGRAPHVERTGROUP | DGRAPHEDGEGROUP | DGRAPHHASVENDLOC; /* For premature freeing on error; do not free vhndloctab as it is grouped with vertloctab */
 
   if (orggrafptr->s.veloloctax != NULL) {
     indvelolocnbr = indlistnbr;

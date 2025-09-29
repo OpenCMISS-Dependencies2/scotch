@@ -1113,7 +1113,8 @@ dgraph_build_hcub$(OBJ)		:	dgraph_build_hcub.c			\
 dgraph_check$(OBJ)		:	dgraph_check.c				\
 					module.h				\
 					common.h				\
-					dgraph.h
+					dgraph.h				\
+					dgraph_allreduce.h
 
 dgraph_coarsen$(OBJ)		:	dgraph_coarsen.c			\
 					module.h				\

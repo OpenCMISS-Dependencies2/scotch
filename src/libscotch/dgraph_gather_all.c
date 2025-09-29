@@ -179,8 +179,8 @@ const int                     protnum)            /* -1 means allgather */
     }
   }
 
-  if (dgrfptr->vendloctax == (dgrfptr->vertloctax + 1)) { /* If distributed graph is compact */
-    vertlocnbr =                                  /* No need to recompact arrays             */
+  if ((dgrfptr->flagval & DGRAPHHASVENDLOC) == 0) { /* If distributed graph is compact */
+    vertlocnbr =                                  /* No need to recompact arrays       */
     edgelocnbr = 0;
   }
   else {                                          /* Need extra space to compact vertex and edge arrays before sending */
@@ -253,7 +253,7 @@ const int                     protnum)            /* -1 means allgather */
   }
 #endif /* SCOTCH_DEBUG_DGRAPH2 */
 
-  if (dgrfptr->vendloctax == (dgrfptr->vertloctax + 1)) { /* If distributed graph is compact                                                */
+  if ((dgrfptr->flagval & DGRAPHHASVENDLOC) == 0) { /* If distributed graph is compact                                                      */
     if (dgraphGatherAll3 (dgrfptr->vertloctax + baseval + 1, dgrfptr->vertlocnbr, /* Do not send first index, it is always equal to baseval */
                           vendtax,                /* First index will always be equal to baseval too, and procdsptab holds based values     */
                           dgrfptr->proccnttab, dgrfptr->procdsptab, protnum, dgrfptr->proccomm) != MPI_SUCCESS) {
@@ -366,7 +366,7 @@ const int                     protnum)            /* -1 means allgather */
 #endif /* SCOTCH_DEBUG_DGRAPH2 */
   }
 
-  if (dgrfptr->vendloctax == (dgrfptr->vertloctax + 1)) { /* If distributed graph is compact         */
+  if ((dgrfptr->flagval & DGRAPHHASVENDLOC) == 0) { /* If distributed graph is compact               */
     if (dgraphGatherAll3 (dgrfptr->edgeloctax + baseval, dgrfptr->edgelocnbr, /* Send global indices */
                           edgetax,                /* Based array as recvdsptab holds based values    */
                           recvcnttab, recvdsptab, protnum, dgrfptr->proccomm) != MPI_SUCCESS) {

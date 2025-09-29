@@ -13,6 +13,27 @@
 This section explains some of the data structures implemented in
 \scotch\ and \ptscotch.
 
+\subsection{\texttt{Dgraph}}
+\label{sec-data-dgraph}
+
+\subsubsection{Compactness}
+
+Like centralized \texttt{Graph}s, distributed graphs can be compact,
+that is, have their \texttt{vend\lbt loc\lbt tab} array merged with
+their \texttt{vert\lbt loc\lbt tab} array. In this case, on all
+processing elements, $\mathtt{vendloctax} = \mathtt{vertloctax} + 1$.
+However, there may be situations when this expression holds on at
+least one processing element, while the distributed graph is not
+compact. It is for instance the case when a processing element holds
+only one local vertex, and the \texttt{vend\lbt loc\lbt tab} array is
+allocated just after the \texttt{vert\lbt loc\lbt tab} array, in the
+same memory group. In order to eliminate such an ambiguity, the
+\texttt{flagval} field of the \texttt{Dgraph} structure possesses a
+\texttt{DGRAPH\lbt HAS\lbt VEND\lbo LOC} flag which, when set,
+indicates that the distributed flag is not compact. Only in the case
+when this flag is not set can it be considered that the distributed
+graph is compact.
+
 \subsection{\texttt{Dorder}}
 \label{sec-data-dorder}
 

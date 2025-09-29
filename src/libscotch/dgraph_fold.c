@@ -1,4 +1,4 @@
-/* Copyright 2007-2011,2014,2021,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007-2011,2014,2021,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -47,7 +47,7 @@
 /**                # Version 6.1  : from : 18 jun 2021     **/
 /**                                 to   : 19 jun 2021     **/
 /**                # Version 7.0  : from : 14 sep 2021     **/
-/**                                 to   : 17 aug 2023     **/
+/**                                 to   : 29 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -150,7 +150,7 @@ MPI_Datatype                  datatype)
 
   const Gnum                    orgprocvrtbas = orggrafptr->procvrttab[orggrafptr->proclocnum];
 
-  if (orggrafptr->vendloctax != (orggrafptr->vertloctax + 1)) { /* If graph is not compact */
+  if ((orggrafptr->flagval & DGRAPHHASVENDLOC) != 0) { /* If graph is not compact */
     if (dgraphCompact2 (orggrafptr, &orgvertloctax, &orgedgeloctax, &orgedloloctax) != 0) {
       errorPrint ("dgraphFold2: cannot compact graph");
       return (1);

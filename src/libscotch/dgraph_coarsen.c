@@ -52,7 +52,7 @@
 /**                # Version 6.1  : from : 17 jun 2021     **/
 /**                                 to   : 27 dec 2021     **/
 /**                # Version 7.0  : from : 14 jan 2020     **/
-/**                                 to   : 02 aug 2025     **/
+/**                                 to   : 29 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -1062,8 +1062,10 @@ DgraphCoarsenData * restrict const  coarptr)
   coarptr->coarprvptr = NULL;                     /* Transfer ownership of private arrays to coarse graph    */
   esndcnttab = NULL;                              /* In case of memory allocation error                      */
 #if (defined SCOTCH_PTHREAD) && (! defined DGRAPHCOARSENNOTHREAD)
-  if (thrdmin > 1)                                /* If more than one thread    */
+  if (thrdmin > 1) {                              /* If more than one thread    */
     vendlocsiz = coarptr->multlocnbr;             /* Create a non-compact graph */
+    coargrafptr->flagval |= DGRAPHHASVENDLOC;     /* Flag graph as not compact  */
+  }
   else
 #endif /* (defined SCOTCH_PTHREAD) && (! defined DGRAPHCOARSENNOTHREAD) */
     vendlocsiz = 1;                               /* Else create a compact graph */
