@@ -1,4 +1,4 @@
-/* Copyright 2007,2008,2010,2012,2018,2021,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2008,2010,2012,2018,2021,2023,2025 Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -49,7 +49,7 @@
 /**                # Version 6.1  : from : 18 jun 2021     **/
 /**                                 to   : 04 dec 2021     **/
 /**                # Version 7.0  : from : 04 aug 2018     **/
-/**                                 to   : 17 jan 2023     **/
+/**                                 to   : 29 sep 2025     **/
 /**                                                        **/
 /**   NOTES      : # The definitions of MPI_Gather and     **/
 /**                  MPI_Gatherv indicate that elements in **/
@@ -109,11 +109,11 @@ const Gnum                    edlosum,            /* -1 means recompute */
 const int                     protnum)            /* -1 means allgather */
 {
   Gnum                baseval;
-  Gnum * restrict     verttax;                    /* Target vertex array for root, dummy for non-roots                  */
+  Gnum *              verttax;                    /* Target vertex array for root, dummy for non-roots [norestrict]     */
   Gnum *              vendtax;                    /* Target end vertex array for root, dummy for non-roots              */
-  Gnum * restrict     velotax;                    /* Target vertex load array for root, dummy for non-roots             */
-  Gnum * restrict     vnumtax;                    /* Target vertex index array for root, dummy for non-roots            */
-  Gnum * restrict     vlbltax;                    /* Target vertex label array for root, dummy for non-roots            */
+  Gnum *              velotax;                    /* Target vertex load array for root, dummy for non-roots             */
+  Gnum *              vnumtax;                    /* Target vertex index array for root, dummy for non-roots            */
+  Gnum *              vlbltax;                    /* Target vertex label array for root, dummy for non-roots            */
   Gnum * restrict     edgetax;                    /* Target edge array for root, dummy for non-roots                    */
   Gnum * restrict     edlotax;                    /* Target edge load array for root, dummy for non-roots               */
   Gnum                vertlocnbr;                 /* Size of temporary distributed vertex array                         */
@@ -164,7 +164,7 @@ const int                     protnum)            /* -1 means allgather */
     edlonbr = (dgrfptr->edloloctax != NULL) ? dgrfptr->edgeglbnbr : 0;
 
     if (memAllocGroup ((void **) (void *)
-                       &cgrfptr->verttax, (size_t) ((dgrfptr->vertglbnbr + 1) * sizeof (Gnum)),
+                       &cgrfptr->verttax, (size_t) ((dgrfptr->vertglbnbr + 1) * sizeof (Gnum)), /* Gathered graph will be compact */
                        &cgrfptr->velotax, (size_t) (velonbr                   * sizeof (Gnum)),
                        &cgrfptr->vnumtax, (size_t) (vnumnbr                   * sizeof (Gnum)),
                        &cgrfptr->vlbltax, (size_t) (vlblnbr                   * sizeof (Gnum)), NULL) == NULL) {
@@ -219,7 +219,7 @@ const int                     protnum)            /* -1 means allgather */
 
   if (cgrfptr != NULL) {
     verttax = cgrfptr->verttax - baseval;
-    vendtax = verttax + 1;
+    vendtax = verttax + 1;                        /* TRICK: used for gather operations, omitting first vertloctax cell */
     velotax = (dgrfptr->veloloctax != NULL) ? (cgrfptr->velotax - baseval) : NULL;
     vnumtax = (dgrfptr->vnumloctax != NULL) ? (cgrfptr->vnumtax - baseval) : NULL;
     vlbltax = (dgrfptr->vlblloctax != NULL) ? (cgrfptr->vlbltax - baseval) : NULL;
@@ -262,7 +262,7 @@ const int                     protnum)            /* -1 means allgather */
     }
 
     if (cgrfptr != NULL) {
-      Gnum                procnum;
+      int                 procnum;
 
       verttax[baseval] = baseval;
       for (procnum = 1; procnum < dgrfptr->procglbnbr; procnum ++) { /* Adjust index sub-arrays for all processes except the first one */
@@ -286,11 +286,14 @@ const int                     protnum)            /* -1 means allgather */
     for (vertlocnum = baseval, edgelocptr = edgeloctab; /* Build vertex send array */
          vertlocnum < dgrfptr->vertlocnnd; vertlocnum ++) {
       Gnum                edgelocnum;
+      Gnum                edgelocnnd;
 
-      vertloctax[vertlocnum] = dgrfptr->vendloctax[vertlocnum] - dgrfptr->vertloctax[vertlocnum]; /* Get edge counts */
+      edgelocnum = dgrfptr->vertloctax[vertlocnum];
+      edgelocnnd = dgrfptr->vendloctax[vertlocnum];
+      vertloctax[vertlocnum] = edgelocnnd - edgelocnum; /* Get vertex degree */
 
-      for (edgelocnum = dgrfptr->vertloctax[vertlocnum]; edgelocnum < dgrfptr->vendloctax[vertlocnum]; edgelocnum ++)
-        *edgelocptr ++ = edgeloctax[edgelocnum];
+      for ( ; edgelocnum < edgelocnnd; edgelocnum ++) /* Create compact edge sub-array */
+        *(edgelocptr ++) = edgeloctax[edgelocnum];
     }
 
     if (dgraphGatherAll3 (vertloctax + baseval, dgrfptr->vertlocnbr,
@@ -345,7 +348,7 @@ const int                     protnum)            /* -1 means allgather */
   }
 
   if (cgrfptr != NULL) {
-    Gnum                procnum;
+    int                 procnum;
     Gnum                edgenum;
 
     for (procnum = 0, edgenum = baseval;          /* Build arrays for MPI_Gatherv on edge arrays */
@@ -395,9 +398,12 @@ const int                     protnum)            /* -1 means allgather */
       for (vertlocnum = baseval, edlolocptr = edgeloctab; /* Recycle edge send array to build edge load send array */
            vertlocnum < dgrfptr->vertlocnnd; vertlocnum ++) {
         Gnum                edgelocnum;
+        Gnum                edgelocnnd;
 
-        for (edgelocnum = dgrfptr->vertloctax[vertlocnum]; edgelocnum < dgrfptr->vendloctax[vertlocnum]; edgelocnum ++)
-          *edlolocptr ++ = dgrfptr->edloloctax[edgelocnum];
+        edgelocnum = dgrfptr->vertloctax[vertlocnum];
+        edgelocnnd = dgrfptr->vendloctax[vertlocnum];
+        for ( ; edgelocnum < edgelocnnd; edgelocnum ++)
+          *(edlolocptr ++) = dgrfptr->edloloctax[edgelocnum];
       }
 
       if (dgraphGatherAll3 (edgeloctab, dgrfptr->edgelocnbr, /* Send compacted edge load array    */
@@ -412,7 +418,7 @@ const int                     protnum)            /* -1 means allgather */
   if (cgrfptr != NULL) {
     if ((dgrfptr->procdsptab[dgrfptr->procglbnbr] != /* If graph has holes, relabel end vertices */
          dgrfptr->procvrttab[dgrfptr->procglbnbr])) {
-      Gnum                procnum;
+      int                 procnum;
 
       for (procnum = 0; procnum < dgrfptr->procglbnbr; procnum ++) { /* Accelerate search per sender process */
         Gnum                vertlocmin;
@@ -429,11 +435,11 @@ const int                     protnum)            /* -1 means allgather */
              edgelocnum < edgelocnnd; edgelocnum ++) {
           Gnum                vertlocend;
 
-          vertlocend = cgrfptr->edgetax[edgelocnum];
+          vertlocend = edgetax[edgelocnum];
 
           if ((vertlocend >= vertlocmin) &&       /* If end vertex is local with respect to current process */
               (vertlocend <  vertlocmax))
-            cgrfptr->edgetax[edgelocnum] = vertlocend + vertlocadj;
+            edgetax[edgelocnum] = vertlocend + vertlocadj;
           else {                                  /* End vertex is not local */
             int                 procngbmin;
             int                 procngbmax;
@@ -448,13 +454,13 @@ const int                     protnum)            /* -1 means allgather */
               else
                 procngbmax = procngbnum;
             }
-            cgrfptr->edgetax[edgelocnum] = vertlocend + dgrfptr->procdsptab[procngbmin] - dgrfptr->procvrttab[procngbmin];
+            edgetax[edgelocnum] = vertlocend + dgrfptr->procdsptab[procngbmin] - dgrfptr->procvrttab[procngbmin];
           }
         }
       }
     }
 
-    if (cgrfptr->edlotax == NULL)                 /* If no edge loads         */
+    if (edlotax == NULL)                          /* If no edge loads         */
       cgrfptr->edlosum = cgrfptr->edgenbr;        /* Edge load sum is trivial */
     else {
       if (edlosum >= 0)                           /* If edge load sum already computed by library call */
@@ -466,7 +472,7 @@ const int                     protnum)            /* -1 means allgather */
 
         for (edgenum = cgrfptr->baseval, edgennd = edgenum + cgrfptr->edgenbr, edlotmp = 0; /* Edge load array is always compact */
              edgenum < edgennd; edgenum ++)
-          edlotmp += cgrfptr->edlotax[edgenum];
+          edlotmp += edlotax[edgenum];
 
         cgrfptr->edlosum = edlotmp;
       }
