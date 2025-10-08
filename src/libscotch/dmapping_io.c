@@ -110,19 +110,19 @@ FILE * restrict const           stream)
 
   if (dgraphAllreduceMaxSum (reduloctab, reduglbtab, 1, 5, grafptr->proccomm) != 0) {
     errorPrint ("dmapSave: communication error (1)");
-    return     (1);
+    return (1);
   }
   if (reduglbtab[3] != 1) {
     errorPrint ("dmapSave: should have only one root");
-    return     (1);
+    return (1);
   }
   if ((reduglbtab[5] != 0) && (reduglbtab[5] != grafptr->procglbnbr)) {
     errorPrint ("dmapSave: inconsistent parameters");
-    return     (1);
+    return (1);
   }
   if ((reduglbtab[1] < 0) && (reduglbtab[1] > grafptr->procglbnbr)) {
     errorPrint ("dmapSave: invalid mapping (1)");
-    return     (1);
+    return (1);
   }
   vertrcvmax = reduglbtab[0];                     /* Size of largest fragment to receive */
   vertglbnbr = reduglbtab[1];
@@ -131,12 +131,12 @@ FILE * restrict const           stream)
 
   reduloctab[0] = 0;
   if (protnum == grafptr->proclocnum) {
-    Gnum                  vlblnbr;
+    Gnum                vlblsiz;
 
-    vlblnbr = (grafptr->vlblloctax != NULL) ? grafptr->vertglbnbr : 0;
+    vlblsiz = (grafptr->vlblloctax != NULL) ? grafptr->vertglbnbr : 0;
     if ((termloctab = memAllocGroup ((void **) (void *) /* termloctab not used on root processor, but used only for freeing the block              */
                                      &termrcvtab, (size_t) (vertrcvmax * 2 * sizeof (Gnum)), /* TRICK: "*2" as vnumrcvtab is sent after termrcvtab */
-                                     &vlbltax,    (size_t) (vlblnbr        * sizeof (Gnum)), NULL)) == NULL) {
+                                     &vlbltax,    (size_t) (vlblsiz        * sizeof (Gnum)), NULL)) == NULL) {
       errorPrint ("dmapSave: out of memory (1)");
       reduloctab[0] = 1;
     }
@@ -170,28 +170,28 @@ FILE * restrict const           stream)
     if (commGatherv (grafptr->vlblloctax + grafptr->baseval, grafptr->vertlocnbr, GNUM_MPI,
                      vlbltax, grafptr->proccnttab, grafptr->procdsptab, GNUM_MPI, protnum, grafptr->proccomm) != MPI_SUCCESS) {
       errorPrint ("dmapSave: communication error (3)");
-      return     (1);
+      return (1);
     }
     vlbltax -= grafptr->baseval;                  /* Base label array */
   }
 
   if (protnum == grafptr->proclocnum) {
-    Gnum                  vertrcvnbr;
-    Gnum * restrict       vnumrcvptr;
-    Gnum * restrict       termrcvptr;
+    Gnum                vertrcvnbr;
+    Gnum * restrict     vnumrcvptr;
+    Gnum * restrict     termrcvptr;
 
     for (fragptr = dmapptr->fragptr; fragptr != NULL; fragptr = fragptr->nextptr) { /* Output local fragments */
-      Gnum                  fraglocnum;
+      Gnum                fraglocnum;
 
       for (fraglocnum = 0; fraglocnum < fragptr->vertnbr; fraglocnum ++) {
-        Gnum                  vnumnum;
-        Gnum                  termnum;
+        Gnum                vnumnum;
+        Gnum                termnum;
 
         vnumnum = fragptr->vnumtab[fraglocnum];
 #ifdef SCOTCH_DEBUG_DMAP2
         if ((vnumnum < 0) || (vnumnum >= (grafptr->vertglbnbr + grafptr->baseval))) {
           errorPrint ("dmapSave: invalid mapping (2)");
-          return     (1);
+          return (1);
         }
 #endif /* SCOTCH_DEBUG_DMAP2 */
         termnum = archDomNum (&dmapptr->archdat, &fragptr->domntab[fragptr->parttab[fraglocnum]]);
@@ -213,7 +213,7 @@ FILE * restrict const           stream)
 
       if (MPI_Recv (termrcvtab, (int) (vertrcvmax * 2), GNUM_MPI, MPI_ANY_SOURCE, MPI_ANY_TAG, grafptr->proccomm, &statdat) != MPI_SUCCESS) {
         errorPrint ("dmapSave: communication error (4)"); /* TRICK: "*2" as vnumrcvtab is sent after termrcvtab */
-        return     (1);
+        return (1);
       }
 
       if (reduloctab[0] != 0)
@@ -249,7 +249,7 @@ FILE * restrict const           stream)
         vnumnum = fragptr->vnumtab[fraglocnum];
         if ((vnumnum < 0) || (vnumnum >= (grafptr->vertglbnbr + grafptr->baseval))) {
           errorPrint ("dmapSave: invalid mapping (3)");
-          return     (1);
+          return (1);
         }
 #endif /* SCOTCH_DEBUG_DMAP2 */
         termloctab[fraglocnum] = archDomNum (&dmapptr->archdat, &fragptr->domntab[fragptr->parttab[fraglocnum]]);
@@ -275,7 +275,7 @@ FILE * restrict const           stream)
 
       if (MPI_Send (termloctab, 1, typedat, protnum, 0, grafptr->proccomm) != MPI_SUCCESS) {
         errorPrint ("dmapSave: communication error (5)");
-        return     (1);
+        return (1);
       }
 
       MPI_Type_free (&typedat);
@@ -293,5 +293,5 @@ FILE * restrict const           stream)
   reduglbtab[0] = reduloctab[0];
 #endif /* SCOTCH_DEBUG_DMAP1 */
 
-  return  ((int) reduglbtab[0]);
+  return ((int) reduglbtab[0]);
 }
