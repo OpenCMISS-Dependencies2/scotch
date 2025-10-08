@@ -753,8 +753,14 @@ check_prog_dgscat-dggath	:
 					$(EXECP3) $(SCOTCHBINDIR)/dggath -c "$(TMP)3-%r.grf" "$(TMP)3.grf"
 					$(PROGDIFF) data/m4x4_b1_elv.grf "$(TMP)3.grf"
 
+check_prog_dgtst		:	TMP := $(shell mktemp -u)
 check_prog_dgtst		:
 					$(EXECP4) $(SCOTCHBINDIR)/dgtst data/small1-%r.grf
+					$(EXECP3) $(SCOTCHBINDIR)/dgscat data/m4x4_b1_elv.grf "$(TMP)1-%r.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dgtst "$(TMP)1-%r.grf" "$(TMP)1.txt"
+					$(EXECS) $(SCOTCHBINDIR)/gtst data/m4x4_b1_elv.grf "$(TMP)2.txt"
+					$(PROGDIFF) "$(TMP)1.txt" "$(TMP)2.txt"
+
 ##
 
 check_prog_dfull		:
