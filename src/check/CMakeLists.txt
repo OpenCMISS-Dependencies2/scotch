@@ -90,7 +90,7 @@ function(suffix_fortran_file src)
     "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/cmake_sed_${file_we}.cmake"
 "
 file(READ \"${file_we}.tmp\" FILE_CONTENTS)
-string(REGEX REPLACE \"SCOTCHMETISNAMEFU[ \\t\\r\\n]*\\\\(([A-Za-z0-9_]*)\\\\)\" \"\${SCOTCH_METIS_PREFIXFU}\\\\1\" FILE_CONTENTS \"\${FILE_CONTENTS}\")
+string(REGEX REPLACE \"SCOTCHMETISNAMEFU[ \\t\\r\\n]*\\\\(([A-Za-z0-9_]*)\\\\)\" \"${SCOTCH_METIS_PREFIXFU}\\\\1\" FILE_CONTENTS \"\${FILE_CONTENTS}\")
 file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/${file_we}\" \"\${FILE_CONTENTS}\")
 "
 )
