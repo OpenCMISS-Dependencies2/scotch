@@ -689,12 +689,19 @@ if(BUILD_PTSCOTCH)
       -r1 -c out_dgscat-%r.grf out_dggat.grf ; \
       '${CMAKE_COMMAND}' -E compare_files '${dat}/m16x16.grf' out_dggat.grf")
 
+  add_test(NAME test_dgscat_b100000 COMMAND
+    ${BASH} -c "'${MPIEXEC_EXECUTABLE}' ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 '$<TARGET_FILE:dgscat>' \
+      -c '${dat}/m16x16_b100000.grf' out_b100000_dgscat-%r.grf ; \
+      '${MPIEXEC_EXECUTABLE}' ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 '$<TARGET_FILE:dggath>' \
+      -c out_b100000_dgscat-%r.grf out_b100000_ddgat.grf ; \
+      '${CMAKE_COMMAND}' -E compare_files '${dat}/m16x16_b100000.grf' out_b100000_ddgat.grf")
+
   add_test(NAME test_dgscat_b1 COMMAND
     ${BASH} -c "'${MPIEXEC_EXECUTABLE}' ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 '$<TARGET_FILE:dgscat>' \
-      -c '${dat}/m16x16_b1.grf' out_b1_dgscat-%r.grf ; \
+      -c '${dat}/m4x4_b1_elv.grf' out_m1elv_dgscat-%r.grf ; \
       '${MPIEXEC_EXECUTABLE}' ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} 3 '$<TARGET_FILE:dggath>' \
-      -c out_b1_dgscat-%r.grf out_b1_ddgat.grf ; \
-      '${CMAKE_COMMAND}' -E compare_files '${dat}/m16x16_b1.grf' out_b1_ddgat.grf")
+      -c out_m1elv_dgscat-%r.grf out_m1elv_ddgat.grf ; \
+      '${CMAKE_COMMAND}' -E compare_files '${dat}/m4x4_b1_elv.grf' out_m1elv_ddgat.grf")
 
   # check_prog_dgtst
 
