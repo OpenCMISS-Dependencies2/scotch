@@ -1,4 +1,4 @@
-/* Copyright 2008,2010,2014,2021,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2008,2010,2014,2021,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -45,7 +45,7 @@
 /**                # Version 6.1  : from : 05 apr 2021     **/
 /**                                 to   : 05 apr 2021     **/
 /**                # Version 7.0  : from : 18 jan 2023     **/
-/**                                 to   : 18 jan 2023     **/
+/**                                 to   : 09 oct 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -86,8 +86,8 @@ FILE * restrict const           stream)
 {
   const DmappingFrag * restrict fragptr;
   Gnum                          fragglbnbr;
-  Gnum * restrict               termloctab;
-  Gnum * restrict               termrcvtab;
+  Gnum *                        termloctab;
+  Gnum *                        termrcvtab;
   Gnum                          vertrcvmax;
   Gnum                          vertglbnbr;
   Gnum * restrict               vlbltax;
@@ -145,7 +145,7 @@ FILE * restrict const           stream)
       reduloctab[0] = 1;
     }
   }
-  else {
+  else {                                          /* Process is not the root       */
     vlbltax = NULL;                               /* Prevent Valgrind from yelling */
     if ((termloctab = memAlloc (dmapptr->vertlocmax * sizeof (Gnum))) == NULL) {
       errorPrint ("dmapSave: out of memory (2)");
@@ -167,18 +167,17 @@ FILE * restrict const           stream)
   }
 
   if (grafptr->vlblloctax != NULL) {
+    vlbltax -= grafptr->baseval;                  /* Base label array since displacement array is based */
+
     if (commGatherv (grafptr->vlblloctax + grafptr->baseval, grafptr->vertlocnbr, GNUM_MPI,
                      vlbltax, grafptr->proccnttab, grafptr->procdsptab, GNUM_MPI, protnum, grafptr->proccomm) != MPI_SUCCESS) {
       errorPrint ("dmapSave: communication error (3)");
       return (1);
     }
-    vlbltax -= grafptr->baseval;                  /* Base label array */
   }
 
   if (protnum == grafptr->proclocnum) {
     Gnum                vertrcvnbr;
-    Gnum * restrict     vnumrcvptr;
-    Gnum * restrict     termrcvptr;
 
     for (fragptr = dmapptr->fragptr; fragptr != NULL; fragptr = fragptr->nextptr) { /* Output local fragments */
       Gnum                fraglocnum;
@@ -207,7 +206,9 @@ FILE * restrict const           stream)
     }
 
     for (fragglbnbr -= dmapptr->fragnbr; fragglbnbr > 0; fragglbnbr --) { /* For all non-local fragments */
-      Gnum * restrict     termrcvnnd;
+      Gnum *              termrcvnnd;
+      Gnum * restrict     termrcvptr;
+      Gnum * restrict     vnumrcvptr;
       MPI_Status          statdat;
       int                 recvnbr;
 
