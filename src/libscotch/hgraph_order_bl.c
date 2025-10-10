@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2020,2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2020,2021,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -48,7 +48,7 @@
 /**                # Version 6.1  : from : 18 jan 2020     **/
 /**                                 to   : 18 jan 2020     **/
 /**                # Version 7.0  : from : 26 apr 2021     **/
-/**                                 to   : 11 sep 2024     **/
+/**                                 to   : 10 oct 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -137,7 +137,7 @@ const HgraphOrderBlParam * restrict const paraptr)
       vnlomax =
       vnlosum = 0;
       vnodbas =
-      vnodnum = 0;
+      vnodnum = grafptr->s.baseval;
       cblknum =
       cblkidx = 0;
       do {                                        /* Go on filling column blocks    */
@@ -159,7 +159,7 @@ const HgraphOrderBlParam * restrict const paraptr)
         } while (vnlomax <= vnlosum);             /* Next bound must be higher than current state */
 
         do {                                      /* Accumulate weights until bound is reached */
-          vnlosum += grafptr->s.velotax[ordeptr->peritab[vnodnum]];
+          vnlosum += grafptr->s.velotax[vnodnum];
           vnodnum ++;
         } while (vnlosum < vnlomax);
 
