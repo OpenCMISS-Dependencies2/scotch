@@ -55,7 +55,7 @@
 /**                # Version 6.1  : from : 24 aug 2020     **/
 /**                                 to   : 30 dec 2021     **/
 /**                # Version 7.0  : from : 19 feb 2018     **/
-/**                                 to   : 11 nov 2025     **/
+/**                                 to   : 12 dec 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -808,6 +808,7 @@
 #define dmeshInit                   SCOTCH_NAME_INTERN (dmeshInit)
 #define dmeshLoad                   SCOTCH_NAME_INTERN (dmeshLoad)
 
+#define dorderCheck                 SCOTCH_NAME_INTERN (dorderCheck)
 #define dorderDispose               SCOTCH_NAME_INTERN (dorderDispose)
 #define dorderExit                  SCOTCH_NAME_INTERN (dorderExit)
 #define dorderFree                  SCOTCH_NAME_INTERN (dorderFree)

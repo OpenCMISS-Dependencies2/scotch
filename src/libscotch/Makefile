@@ -213,6 +213,7 @@ LIBPTSCOTCHDEPS =	arch_mpi$(OBJ)				\
 			dmesh_dgraph$(OBJ)			\
 			dmesh_io_load$(OBJ)			\
 			dorder$(OBJ)				\
+			dorder_check$(OBJ)			\
 			dorder_gather$(OBJ)			\
 			dorder_io$(OBJ)				\
 			dorder_io_block$(OBJ)			\
@@ -1293,6 +1294,14 @@ dorder$(OBJ)			:	dorder.c				\
 					dgraph.h				\
 					order.h					\
 					dorder.h
+
+dorder_check$(OBJ)		:	dorder_check.c				\
+					module.h				\
+					common.h				\
+					dgraph.h				\
+					dgraph_allreduce.h			\
+					order.h					\
+					dorder.h				\
 
 dorder_gather$(OBJ)		:	dorder_gather.c				\
 					module.h				\
