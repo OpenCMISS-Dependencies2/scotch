@@ -113,7 +113,7 @@ check				:	scotch
 check_full			:	scotch
 					(cd check ; $(MAKE) check_full)
 
-ptcheck				:	ptscotch
+ptcheck				:	scotch	ptscotch
 					(cd check ; $(MAKE) ptcheck)
 
 ptcheck_full			:	ptscotch
