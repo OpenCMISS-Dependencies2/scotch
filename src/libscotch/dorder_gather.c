@@ -45,7 +45,7 @@
 /**                # Version 6.0  : from : 10 oct 2013     **/
 /**                                 to   : 10 oct 2013     **/
 /**                # Version 7.0  : from : 18 jan 2023     **/
-/**                                 to   : 17 sep 2025     **/
+/**                                 to   : 26 nov 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -100,6 +100,13 @@ Order * restrict const        cordptr)
   Gnum                        reduglbtab[2];
   int                         cheklocval;
   int                         chekglbval;
+
+#ifdef SCOTCH_DEBUG_DORDER2
+  if (dorderCheck (dordptr) != 0) {
+    errorPrint ("dorderGather: invalid distributed ordering");
+    return (1);
+  }
+#endif /* SCOTCH_DEBUG_DORDER2 */
 
   for (linklocptr = dordptr->linkdat.nextptr, leaflocnbr = vnodlocnbr = 0; /* For all nodes in local ordering structure */
        linklocptr != &dordptr->linkdat; linklocptr = linklocptr->nextptr) {
