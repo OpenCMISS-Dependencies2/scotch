@@ -83,7 +83,7 @@
     existence in distributed graphs, they are simply
     numbered from baseval. They are converted into real
     vertices when a distributed halo graph is turned into
-    a sequential halo graph.                                */
+    a sequential halo graph.                                +*/
 
 typedef struct Hdgraph_ {
   Dgraph                    s;                    /*+ Source distributed graph                       +*/
