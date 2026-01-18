@@ -1024,6 +1024,8 @@ bgraph_bipart_st$(OBJ)		:	bgraph_bipart_st.c			\
 					parser.h				\
 					graph.h					\
 					arch.h					\
+					mapping.h				\
+					graph_coarsen.h				\
 					bgraph.h				\
 					bgraph_bipart_bd.h			\
 					bgraph_bipart_df.h			\
