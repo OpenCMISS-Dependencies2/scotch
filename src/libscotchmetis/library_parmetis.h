@@ -9,7 +9,7 @@
 **  the libPTScotchMeTiS library.                       **
 **                                                      **
 *********************************************************/
-/* Copyright 2007,2008,2010,2012,2018,2019,2021,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2008,2010,2012,2018,2019,2021,2024,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -59,7 +59,7 @@
 /**                # Version 6.1  : from : 09 feb 2021     **/
 /**                                 to   : 09 feb 2021     **/
 /**                # Version 7.0  : from : 11 aug 2024     **/
-/**                                 to   : 11 aug 2024     **/
+/**                                 to   : 09 jan 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -135,9 +135,14 @@ typedef enum {
 **  The type and structure definitions.
 */
 
-#ifndef SCOTCH_H                                  /* In case "scotch.h" not included before */
+#ifndef LIB_SCOTCH_H                              /* In case "scotch.h" not included before */
 typedef DUMMYINT SCOTCH_Num;
-#endif /* SCOTCH_H */
+#endif /* LIB_SCOTCH_H */
+
+#ifndef SCOTCH_PARMETIS_DATATYPES
+#define SCOTCH_PARMETIS_DATATYPES
+typedef SCOTCH_Num          idxtype;
+#endif /* SCOTCH_PARMETIS_DATATYPES */
 
 /*
 **  The function prototypes.
@@ -150,6 +155,7 @@ extern "C" {
 int                         SCOTCHMETISNAMES (ParMETIS_V3_NodeND) (const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, MPI_Comm * const);
 int                         SCOTCHMETISNAMES (ParMETIS_V3_PartGeomKway) (const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const float * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const float * const, const float * const, const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, MPI_Comm * const);
 int                         SCOTCHMETISNAMES (ParMETIS_V3_PartKway) (const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const float * const, const float * const, const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, MPI_Comm * const);
+int                         SCOTCHMETISNAMES (ParMETIS_V3_Mesh2Dual) (const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, SCOTCH_Num ** const, SCOTCH_Num ** const, MPI_Comm * const);
 
 #ifndef SCOTCH_PARMETIS_VERSION
 #define SCOTCH_PARMETIS_VERSION     3             /* ParMeTiS API version is 3 by default */
@@ -157,9 +163,9 @@ int                         SCOTCHMETISNAMES (ParMETIS_V3_PartKway) (const SCOTC
 
 #if (SCOTCH_PARMETIS_VERSION == 3)
 int                         SCOTCHMETISNAMEC (ParMETIS_V3_NodeND) (const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, MPI_Comm * const);
-
 int                         SCOTCHMETISNAMEC (ParMETIS_V3_PartGeomKway) (const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const float * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const float * const, const float * const, const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, MPI_Comm * const);
 int                         SCOTCHMETISNAMEC (ParMETIS_V3_PartKway) (const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const float * const, const float * const, const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, MPI_Comm * const);
+int                         SCOTCHMETISNAMEC (ParMETIS_V3_Mesh2Dual) (const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, SCOTCH_Num ** const, SCOTCH_Num ** const, MPI_Comm * const);
 #endif /* (SCOTCH_PARMETIS_VERSION == 3) */
 
 #ifdef __cplusplus

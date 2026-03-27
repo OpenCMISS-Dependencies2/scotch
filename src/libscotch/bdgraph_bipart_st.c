@@ -1,4 +1,4 @@
-/* Copyright 2007-2011,2014,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007-2011,2014,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -45,7 +45,7 @@
 /**                # Version 6.0  : from : 11 sep 2011     **/
 /**                                 to   : 28 sep 2014     **/
 /**                # Version 7.0  : from : 17 jan 2023     **/
-/**                                 to   : 07 nov 2024     **/
+/**                                 to   : 04 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -258,8 +258,10 @@ const Strat * restrict const  straptr)            /*+ Bipartitioning strategy   
 {
   StratTest           testdat;                    /* Result of condition evaluation */
   BdgraphStore        savetab[2];                 /* Results of the two strategies  */
+  Gnum                compglbload0;
   int                 o;
-  int                 o2;
+  int                 o0;
+  int                 o1;
 #ifdef SCOTCH_DEBUG_BDGRAPH2
   MPI_Comm            proccommold;                /*Save area for old communicator */
 #endif /* SCOTCH_DEBUG_BDGRAPH2 */
@@ -321,55 +323,54 @@ const Strat * restrict const  straptr)            /*+ Bipartitioning strategy   
       }
 
       bdgraphStoreSave     (grafptr, &savetab[1]); /* Save initial bipartition                   */
-      o = bdgraphBipartSt  (grafptr, straptr->data.seledat.stratab[0]); /* Apply first strategy  */
+      o0 = bdgraphBipartSt (grafptr, straptr->data.seledat.stratab[0]); /* Apply first strategy  */
       bdgraphStoreSave     (grafptr, &savetab[0]); /* Save its result                            */
       bdgraphStoreUpdt     (grafptr, &savetab[1]); /* Restore initial bipartition                */
-      o2 = bdgraphBipartSt (grafptr, straptr->data.seledat.stratab[1]); /* Apply second strategy */
+      o1 = bdgraphBipartSt (grafptr, straptr->data.seledat.stratab[1]); /* Apply second strategy */
 
-      if ((o == 0) || (o2 == 0)) {                /* If at least one method did bipartition */
-        Gnum                compglbload0;
-	int                 b0;
-        int                 b1;
-
-        compglbload0 = grafptr->compglbload0avg + savetab[0].compglbload0dlt;
-        b0 = ((compglbload0 < grafptr->compglbload0min) ||
-              (compglbload0 > grafptr->compglbload0max)) ? 1 : o;
-        compglbload0 = grafptr->compglbload0avg + savetab[1].compglbload0dlt;
-        b1 = ((compglbload0 < grafptr->compglbload0min) ||
-              (compglbload0 > grafptr->compglbload0max)) ? 1 : o2;
-
-        do {                                      /* Do we want to restore partition 0 ? */
-          if (b0 > b1)
-            break;
-          if (b0 == b1) {                         /* If both are valid or invalid        */
-            if (b0 == 0) {                        /* If both are valid                   */
-              if ( (savetab[0].commglbload >  grafptr->commglbload) || /* Compare on cut */
-                  ((savetab[0].commglbload == grafptr->commglbload) &&
-                   (abs (savetab[0].compglbload0dlt) > abs (grafptr->compglbload0dlt))))
-                break;
-            }
-            else {                                /* If both are invalid */
-              if ( (abs (savetab[0].compglbload0dlt) >  abs (grafptr->compglbload0dlt)) || /* Compare on imbalance */
-                  ((abs (savetab[0].compglbload0dlt) == abs (grafptr->compglbload0dlt)) &&
-                   (savetab[0].commglbload > grafptr->commglbload)))
-                break;
-            }
-          }
-
-          bdgraphStoreUpdt (grafptr, &savetab[0]); /* Restore its result */
-        }  while (0);
+      if ((o0 | o1) != 0) {                       /* If at least one method failed */
+        if (o0 == 0)                              /* If first succeeded, take it   */
+          goto take0;
+        if (o1 != 0) {                            /* If none succeeded            */
+          bdgraphStoreUpdt (grafptr, &savetab[1]); /* Restore initial bipartition */
+          o = 1;                                  /* Indicate error               */
+        }
+        goto take1;                               /* If second succeeded, keep it; anyway, go freeing data structures */
       }
-      if (o2 < o)                                 /* o = min(o,o2): if one biparts, then bipart */
-        o = o2;                                   /* Else if one stops, then stop, else error   */
 
-      bdgraphStoreExit (&savetab[0]);             /* Free both save areas */
-      bdgraphStoreExit (&savetab[1]);
+      compglbload0 = grafptr->compglbload0avg + savetab[0].compglbload0dlt; /* Check if balance criterion enforced */
+      o0 = ((compglbload0 < grafptr->compglbload0min) ||
+            (compglbload0 > grafptr->compglbload0max)) ? 1 : 0;
+      compglbload0 = grafptr->compglbload0avg + grafptr->compglbload0dlt;
+      o1 = ((compglbload0 < grafptr->compglbload0min) ||
+            (compglbload0 > grafptr->compglbload0max)) ? 1 : 0;
+
+      if (o1 > o0)                                /* If first is balanced and second is not, take first */
+        goto take0;
+      if (o1 < o0)                                /* If second is balanced and first is not, take second */
+        goto take1;
+      if (o0 == 0) {                              /* If both are balanced          */
+        if ( (savetab[0].commglbload >  grafptr->commglbload) || /* Compare on cut */
+            ((savetab[0].commglbload == grafptr->commglbload) &&
+             (abs (savetab[0].compglbload0dlt) > abs (grafptr->compglbload0dlt))))
+          goto take1;
+        else
+          goto take0;
+      }
+      else {                                      /* If both are imbalanced */
+        if ( (abs (savetab[0].compglbload0dlt) >  abs (grafptr->compglbload0dlt)) || /* Compare on imbalance */
+            ((abs (savetab[0].compglbload0dlt) == abs (grafptr->compglbload0dlt)) &&
+             (savetab[0].commglbload > grafptr->commglbload)))
+          goto take1;
+      }
+
+take0:
+      bdgraphStoreUpdt (grafptr, &savetab[0]);    /* Restore first partition          */
+take1:                                            /* Keep second partition by default */
+      bdgraphStoreExit (&savetab[1]);             /* Free both save areas             */
+      bdgraphStoreExit (&savetab[0]);
       break;
-#ifdef SCOTCH_DEBUG_BDGRAPH1
     case STRATNODEMETHOD :
-#else /* SCOTCH_DEBUG_BDGRAPH1 */
-    default :
-#endif /* SCOTCH_DEBUG_BDGRAPH1 */
 #ifdef SCOTCH_DEBUG_BDGRAPH2
       proccommold = grafptr->s.proccomm;          /* Create new communicator to isolate method communications */
       MPI_Comm_dup (proccommold, &grafptr->s.proccomm);
@@ -380,12 +381,11 @@ const Strat * restrict const  straptr)            /*+ Bipartitioning strategy   
       MPI_Comm_free (&grafptr->s.proccomm);       /* Restore old communicator */
       grafptr->s.proccomm = proccommold;
 #endif /* SCOTCH_DEBUG_BDGRAPH2 */
-#ifdef SCOTCH_DEBUG_BDGRAPH1
       break;
     default :
       errorPrint ("bdgraphBipartSt: invalid parameter (2)");
       return (1);
-#endif /* SCOTCH_DEBUG_BDGRAPH1 */
   }
+
   return (o);
 }

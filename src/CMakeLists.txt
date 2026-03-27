@@ -1,4 +1,4 @@
-## Copyright 2014-2016,2021-2024 IPB, Universite de Bordeaux, INRIA & CNRS
+## Copyright 2014-2016,2021-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,
 ## graph partitioning and sparse matrix ordering.
@@ -42,12 +42,14 @@
 ##   DATES      : # Version 6.0  : from : 01 sep 2014     ##
 ##                                 to     01 sep 2021     ##
 ##                # Version 7.0  : from : 01 sep 2021     ##
-##                                 to     30 jul 2024     ##
+##                                 to     28 aug 2025     ##
 ##                                                        ##
 ############################################################
 
 # Add general compiler options
-add_definitions(-Drestrict=__restrict -DCOMMON_RANDOM_FIXED_SEED -DSCOTCH_RENAME)
+add_definitions(-Drestrict=__restrict -DSCOTCH_RENAME)
+
+set(dev_null /dev/null)
 
 # Add OS-specific compiler options
 if(APPLE)
@@ -55,6 +57,7 @@ if(APPLE)
 endif(APPLE)
 if(MINGW OR MSYS OR WIN32)
   add_definitions(-DCOMMON_OS_WINDOWS)
+  set(dev_null NUL)
 endif(MINGW OR MSYS OR WIN32)
 if(MSVC)
   add_definitions(-D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
@@ -66,6 +69,11 @@ if(${CMAKE_HOST_SYSTEM_NAME}} MATCHES "^.*FreeBSD.*$")
   message(STATUS "OS is FreeBSD")
 endif()
 
+# Manage suffixes
+if (USE_SUFFIX)
+  add_definitions(-DSCOTCH_RENAME_ALL -DSCOTCH_NAME_SUFFIX=${SCOTCH_NAME_SUFFIX})
+endif()
+
 ###################
 #  Prerequisites  #
 ###################
@@ -73,15 +81,19 @@ endif()
 # Bison
 find_package(BISON)
 if(NOT BISON_FOUND)
-  message(FATAL_ERROR "Bison required to compile Scotch and PT-Scotch")
+  message(WARNING "Compiling with a default version of parser files. Install Bison >= 3.8.2 if it does not work")
 else()
   message(STATUS "Bison found here: ${BISON_EXECUTABLE}")
 endif()
 
 # Flex
 find_package(FLEX)
+if (FLEX_VERSION VERSION_EQUAL "2.6.1")
+  message(WARNING "Flex 2.6.1 is bogus")
+  set(FLEX_FOUND FALSE)
+endif()
 if(NOT FLEX_FOUND)
-  message(FATAL_ERROR "Flex required to compile Scotch and PT-Scotch")
+  message(WARNING "Compiling with a default version of lexer files. Install Flex >= 2.6.4 if it does not work")
 else()
   message(STATUS "Flex found here: ${FLEX_EXECUTABLE}")
 endif()
@@ -103,6 +115,19 @@ if(NOT INTSIZE STREQUAL "")
   endif()
 endif()
 
+# Set index size
+if(NOT IDXSIZE STREQUAL "")
+  if(IDXSIZE STREQUAL "32")
+    message(STATUS "Index size is 32 bits")
+    add_definitions(-DIDXSIZE32)
+  elseif(IDXSIZE STREQUAL "64")
+    message(STATUS "Index size is 64 bits")
+    add_definitions(-DIDXSIZE64)
+  else()
+    message(FATAL_ERROR "Invalid integer size value")
+  endif()
+endif()
+
 # Thread support in Scotch
 if(THREADS)
   find_package(Threads)
@@ -118,7 +143,13 @@ if(THREADS)
   endif()
 endif()
 
-# decompression libs
+# Detect and remove GCC _FORTIFY_SOURCE
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  message(WARNING "GCC _FORTIFY_SOURCE is known to cause problem with Scotch and is disabled by default")
+  set(CMAKE_C_FLAGS "-U_FORTIFY_SOURCE ${CMAKE_C_FLAGS}")
+endif()
+
+# Decompression libs
 if(USE_ZLIB)
   find_package(ZLIB)
 endif(USE_ZLIB)
@@ -134,7 +165,7 @@ endif(USE_LZMA)
 # MPI
 if(BUILD_PTSCOTCH)
   set(MPI_DETERMINE_LIBRARY_VERSION ON)
-  find_package(MPI COMPONENTS C)
+  find_package(MPI COMPONENTS ${MPI_COMPONENTS})
   if(NOT MPI_C_FOUND)
     message(FATAL_ERROR "MPI required to compile PT-Scotch\n Rerun cmake with -DBUILD_PTSCOTCH=OFF")
   else()
@@ -177,14 +208,13 @@ file(MAKE_DIRECTORY ${GENERATED_INCLUDE_DIR})
 
 # Build Scotch and PT-Scotch libraries
 add_subdirectory(libscotch)
-
 # Build Scotch executables
 add_subdirectory(scotch)
 
 # Build EsMUMPS library
-if(BUILD_LIBESMUMPS)
+if(BUILD_LIBESMUMPS AND NOT USE_SUFFIX)
   add_subdirectory(esmumps)
-endif(BUILD_LIBESMUMPS)
+endif(BUILD_LIBESMUMPS AND NOT USE_SUFFIX)
 
 # Build ScotchMeTiS library
 if(BUILD_LIBSCOTCHMETIS)

@@ -1,4 +1,4 @@
-## Copyright 2014-2016,2021-2023 IPB, Universite de Bordeaux, INRIA & CNRS
+## Copyright 2014-2016,2021-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,
 ## graph partitioning and sparse matrix ordering.
@@ -41,7 +41,7 @@
 ##   DATES      : # Version 6.0  : from : 01 sep 2014     ##
 ##                                 to     01 sep 2021     ##
 ##                # Version 7.0  : from : 01 sep 2021     ##
-##                                 to     01 nov 2023     ##
+##                                 to     18 dec 2025     ##
 ##                                                        ##
 ############################################################
 
@@ -54,8 +54,7 @@ set_source_files_properties(${GENERATED_INCLUDE_DIR}/metis.h PROPERTIES GENERATE
 
 # metis.h
 add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/metis.h
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/library_metis.h ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND $<TARGET_FILE:dummysizes> ${CMAKE_CURRENT_BINARY_DIR}/library_metis.h ${GENERATED_INCLUDE_DIR}/metis.h DEPENDS dummysizes
+  COMMAND $<TARGET_FILE:dummysizes> ${CMAKE_CURRENT_SOURCE_DIR}/library_metis.h ${GENERATED_INCLUDE_DIR}/metis.h DEPENDS dummysizes
   DEPENDS library_metis.h
   COMMENT "Generating metis.h")
 
@@ -64,8 +63,7 @@ add_custom_target(metis_h
 
 # metisf.h
 add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/metisf.h
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/library_metis_f.h ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND $<TARGET_FILE:dummysizes> ${CMAKE_CURRENT_BINARY_DIR}/library_metis_f.h ${GENERATED_INCLUDE_DIR}/metisf.h DEPENDS dummysizes
+  COMMAND $<TARGET_FILE:dummysizes> ${CMAKE_CURRENT_SOURCE_DIR}/library_metis_f.h ${GENERATED_INCLUDE_DIR}/metisf.h DEPENDS dummysizes
   DEPENDS library_metis_f.h
   COMMENT "Generating metisf.h")
 
@@ -90,6 +88,7 @@ foreach(version 3 5)
     ${GENERATED_INCLUDE_DIR}/scotch.h
     ${GENERATED_INCLUDE_DIR}/metis.h
     ${GENERATED_INCLUDE_DIR}/metisf.h)
+  add_library(SCOTCH::scotchmetisv${version} ALIAS scotchmetisv${version})
 
   set_target_properties(scotchmetisv${version} PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
     SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
@@ -151,8 +150,7 @@ if(BUILD_PTSCOTCH)
 
   # parmetis.h
   add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/parmetis.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/library_parmetis.h ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND $<TARGET_FILE:dummysizes> ${CMAKE_CURRENT_BINARY_DIR}/library_parmetis.h ${GENERATED_INCLUDE_DIR}/parmetis.h DEPENDS dummysizes
+    COMMAND $<TARGET_FILE:dummysizes> ${CMAKE_CURRENT_SOURCE_DIR}/library_parmetis.h ${GENERATED_INCLUDE_DIR}/parmetis.h DEPENDS dummysizes
     DEPENDS library_parmetis.h
     COMMENT "Generating parmetis.h")
 
@@ -162,6 +160,8 @@ if(BUILD_PTSCOTCH)
   # libPTScotchParMeTiS
   foreach(version 3)
     add_library(ptscotchparmetisv${version}
+      parmetis_dgraph_dual.c
+      parmetis_dgraph_dual_f.c
       parmetis_dgraph_order.c
       parmetis_dgraph_order_f.c
       parmetis_dgraph_part.c
@@ -222,5 +222,10 @@ if(BUILD_PTSCOTCH)
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
     endif()
+    # adm2dgr
+    add_executable(adm2dgr adm2dgr.c adm2dgr.h)
+    add_dependencies(adm2dgr parmetis_h)
+    target_link_libraries(adm2dgr PRIVATE ptscotchparmetisv${version} ptscotch scotch ptscotcherr)
+    install(TARGETS adm2dgr COMPONENT ptscotch RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   endforeach(version 3)
 endif()

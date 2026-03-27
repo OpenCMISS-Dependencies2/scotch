@@ -1,4 +1,4 @@
-/* Copyright 2007,2010,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2010,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -48,7 +48,7 @@
 /**                # Version 5.1  : from : 11 aug 2010     **/
 /**                                 to   : 12 aug 2010     **/
 /**                # Version 7.0  : from : 17 jan 2023     **/
-/**                                 to   : 17 jan 2023     **/
+/**                                 to   : 29 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -105,8 +105,8 @@ FILE * const                  stream)
 	       (Gnum) grafptr->vertlocnbr,
 	       (Gnum) grafptr->vertlocnnd);
       fprintf (stream, "  vertloctax:");
-      if (grafptr->vendloctax == grafptr->vertloctax + 1) {
-	for (vertlocnum = grafptr->baseval; vertlocnum <= grafptr->vertlocnnd; vertlocnum ++)/**/
+      if ((grafptr->flagval & DGRAPHHASVENDLOC) == 0) { /* If graph is compact */
+	for (vertlocnum = grafptr->baseval; vertlocnum <= grafptr->vertlocnnd; vertlocnum ++)
 	  fprintf (stream, " " GNUMSTRING,
 		   (Gnum) grafptr->vertloctax[vertlocnum]);
 	fprintf (stream, " x\n  vendloctax: = vertloctax + 1");

@@ -1,4 +1,4 @@
-/* Copyright 2007,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -34,6 +34,7 @@
 /**   NAME       : hdgraph_order_si.c                      **/
 /**                                                        **/
 /**   AUTHOR     : Francois PELLEGRINI                     **/
+/**                Clement BARTHELEMY                      **/
 /**                                                        **/
 /**   FUNCTION   : This module orders halo distributed     **/
 /**                graph vertices using a simple method.   **/
@@ -41,7 +42,7 @@
 /**   DATES      : # Version 5.0  : from : 15 apr 2006     **/
 /**                                 to   : 25 jul 2007     **/
 /**                # Version 7.0  : from : 19 jan 2023     **/
-/**                                 to   : 22 sep 2024     **/
+/**                                 to   : 12 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -70,13 +71,16 @@
 */
 
 int
-hdgraphOrderSi (
-Hdgraph * restrict const    grafptr,
-DorderCblk * restrict const cblkptr)              /*+ Single column-block +*/
+hdgraphOrderSi2 (
+DorderCblk * restrict const cblkptr,
+const Gnum                  baseval,
+const Gnum                  vertlocnbr,
+const Gnum * restrict const vnumloctax,
+const Gnum                  procdspval,
+MPI_Comm                    proccomm)
 {
-  Gnum * restrict     periloctab;
+  Gnum *              periloctab;
   Gnum * restrict     periloctax;
-  Gnum                vnohlocnbr;
   Gnum                vertlocnum;
 #ifdef SCOTCH_DEBUG_HDGRAPH1
   int                 cheklocval;
@@ -84,17 +88,16 @@ DorderCblk * restrict const cblkptr)              /*+ Single column-block +*/
 
   cheklocval = 0;
 #endif /* SCOTCH_DEBUG_HDGRAPH1 */
-  vnohlocnbr = grafptr->s.vertlocnbr;             /* Get number of local non-halo vertices                */
-  if ((periloctab = (Gnum *) memAlloc (vnohlocnbr * sizeof (Gnum))) == NULL) { /* Allocate local fragment */
-    errorPrint ("hdgraphOrderSi: out of memory");
+  if ((periloctab = (Gnum *) memAlloc (vertlocnbr * sizeof (Gnum))) == NULL) { /* Allocate local fragment */
+    errorPrint ("hdgraphOrderSi2: out of memory");
 #ifndef SCOTCH_DEBUG_HDGRAPH1
     return (1);
   }
 #else /* SCOTCH_DEBUG_HDGRAPH1 */
-    cheklocval = 1;                               /* Indicate a error */
+    cheklocval = 1;                               /* Indicate an error */
   }
-  if (MPI_Allreduce (&cheklocval, &chekglbval, 1, MPI_INT, MPI_MAX, grafptr->s.proccomm) != MPI_SUCCESS) { /* Communication cannot be merged with a useful one */
-    errorPrint ("hdgraphOrderSi: communication error (1)");
+  if (MPI_Allreduce (&cheklocval, &chekglbval, 1, MPI_INT, MPI_MAX, proccomm) != MPI_SUCCESS) { /* Communication cannot be merged with a useful one */
+    errorPrint ("hdgraphOrderSi2: communication error");
     return (1);
   }
   if (chekglbval != 0) {
@@ -105,8 +108,8 @@ DorderCblk * restrict const cblkptr)              /*+ Single column-block +*/
 #endif /* SCOTCH_DEBUG_HDGRAPH1 */
 
   cblkptr->typeval = DORDERCBLKLEAF;              /* Fill node as leaf */
-  cblkptr->data.leaf.ordelocval = cblkptr->ordeglbval + grafptr->s.procdsptab[grafptr->s.proclocnum] - grafptr->s.baseval;;
-  cblkptr->data.leaf.vnodlocnbr = vnohlocnbr;
+  cblkptr->data.leaf.ordelocval = cblkptr->ordeglbval + procdspval - baseval;
+  cblkptr->data.leaf.vnodlocnbr = vertlocnbr;
   cblkptr->data.leaf.periloctab = periloctab;
   cblkptr->data.leaf.nodelocnbr = 0;
   cblkptr->data.leaf.nodeloctab = NULL;
@@ -114,18 +117,27 @@ DorderCblk * restrict const cblkptr)              /*+ Single column-block +*/
   cblkptr->data.leaf.cblklocnum = -1;
 #endif /* SCOTCH_DEBUG_HDGRAPH2 */
 
-  periloctax = periloctab - grafptr->s.baseval;
-  if (grafptr->s.vnumloctax == NULL) {            /* If graph is original graph */
+  periloctax = periloctab - baseval;
+  if (vnumloctax == NULL) {                       /* If graph is original graph */
     Gnum                vertglbadj;
 
-    vertglbadj = grafptr->s.procdsptab[grafptr->s.proclocnum] - grafptr->s.baseval; /* Set adjustement for global ordering */
-    for (vertlocnum = grafptr->s.baseval; vertlocnum < grafptr->s.vertlocnnd; vertlocnum ++)
+    vertglbadj = procdspval - baseval;            /* Set adjustement for global ordering */
+    for (vertlocnum = baseval; vertlocnum < vertlocnbr + baseval; vertlocnum ++)
       periloctax[vertlocnum] = vertlocnum + vertglbadj;
   }
   else {                                          /* Graph is not original graph */
-    for (vertlocnum = grafptr->s.baseval; vertlocnum < grafptr->s.vertlocnnd; vertlocnum ++)
-      periloctax[vertlocnum] = grafptr->s.vnumloctax[vertlocnum];
+    for (vertlocnum = baseval; vertlocnum < vertlocnbr + baseval; vertlocnum ++)
+      periloctax[vertlocnum] = vnumloctax[vertlocnum];
   }
 
   return (0);
+}
+
+int
+hdgraphOrderSi (
+Hdgraph * restrict const    grafptr,
+DorderCblk * restrict const cblkptr)              /*+ Single column-block +*/
+{
+  return (hdgraphOrderSi2 (cblkptr, grafptr->s.baseval, grafptr->s.vertlocnbr, grafptr->s.vnumloctax,
+                           grafptr->s.procdsptab[grafptr->s.proclocnum], grafptr->s.proccomm));
 }

@@ -130,10 +130,12 @@ SCOTCH_Num                  seedval)
   intRandSeed (&intranddat, seedval);
 }
 
-/*+ This routine sets the value of the
-*** random seed.
+/*+ This routine returns a pseudo-random integer
+*** value in the range [0..randmax[. This routine
+*** is not thread-safe as it uses a global state
+*** variable.
 *** It returns:
-*** - void  : in all cases.
+*** - x  : pseudo-random number, in all cases.
 +*/
 
 SCOTCH_Num

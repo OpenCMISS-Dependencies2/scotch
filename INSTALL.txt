@@ -108,9 +108,16 @@ Some structuring options can be set during this phase, by using the
 "-DOPTION:TYPE=VALUE" syntax. The available options are:
 
   - INTSIZE:STRING (default value ""): set this variable to "32" or
-    "64" to set a prescribed integer size for SCOTCH_Num
-    integers. Else, the defaut compiler word size will be used
-    (recommended).
+    "64" to set a prescribed integer size for SCOTCH_Num integers.
+    Else, the defaut compiler word size will be used (recommended).
+
+  - IDXSIZE:STRING (default value ""): set this variable to "32" or
+    "64" to set a prescribed integer size for SCOTCH_Idx integers.
+    Indeed, this index data type should be able to index any byte in
+    the virtual memory of the computer. Consequently, on modern
+    architectures, this variable should always refer to 64-bit
+    integers. If it is not set, the defaut compiler word size will be
+    used (recommended for 64-bit platforms).
 
   - THREADS:BOOL (default value ON): set this flag to ON to use
     threads within Scotch and PT-Scotch. POSIX Pthreads and native
@@ -122,6 +129,17 @@ Some structuring options can be set during this phase, by using the
     thread-safe MPI library, it will take advantage of it to run some
     threaded algorithms in parallel across compute nodes. This option
     is relevant only if BUILD_PTSCOTCH is set to ON.
+
+  - SCOTCH_DETERMINISTIC:STRING (default value FIXED_SEED): set this
+    flag to NONE to use faster, non-deterministic algorithms in
+    Scotch, and a variable random seed; FIXED_SEED to use these
+    algorithms with a fixed random seed; FULL, to use fully
+    deterministic algorithms with a fixed random string, enabling
+    fully deterministic behavior with any number of threads and the
+    same number of MPI processes. These three levels are obtained by a
+    combination of the Make compilation flags
+    "-DCOMMON_RANDOM_FIXED_SEED" and "-DSCOTCH_DETERMINISTIC"; see
+    sections 3.9) and 3.10) of this document.
 
   - BUILD_PTSCOTCH:BOOL (default value ON): set this flag to ON to
     compile PT-Scotch in addition to Scotch (which is always compiled
@@ -210,16 +228,19 @@ basing on the structure of existing ones.
 In particular, the Makefile.inc file contains three variables
 which specify which C compiler to use. Their semantic is as
 follows:
-  - The compiler command in variable CCS is used to compile
+  - The C compiler command in variable CCS is used to compile
     the sequential (hence the "S" in "CCS") Scotch distribution.
-  - The compiler command in CCP is used to compile the parallel ("P")
-    PT-Scotch distribution.
-  - The compiler command in CCD is used to compile the version of the
+  - The C compiler command in CCP is used to compile the parallel ("P")
+    PT-Scotch distribution, using the MPI interface.
+  - The C compiler command in CCD is used to compile the version of the
     "dummysizes" ("D") executable used for compiling PT-Scotch, as
     explained below.
+  - The optional Fortran compiler command FCS is used to compile
+    Fortran tests.
 
-Create a symbolic link from the configuration file to the
-current "src/" working directory, renaming it as "Makefile.inc":
+Create a custom "src/Makefile.inc" file, or create a symbolic link
+from a sample configuration file to the current "src/" working
+directory, renaming it as "Makefile.inc":
 
 %prompt% ln -s Make.inc/Makefile.inc.xxxx_xxx_xxx Makefile.inc
 
@@ -426,21 +447,13 @@ naming conventions have been defined:
 It is possible to make several Scotch versions coexist in the same
 application. To do so, libraries must be compiled with adequate
 function renaming, by adding an appropriate suffix. For instance,
-a "_64" suffix can be appended to routines and data types of a
-64-bit version of the library.
+a "_64" suffix can be appended to routines, data types and symbols of
+a 64-bit version of the library.
 
 To activate this feature, the variable "SCOTCH_NAME_SUFFIX" must be
-defined in Makefile.inc (e.g., "SCOTCH_NAME_SUFFIX=_64").
-
-Note that, when libScotch data types are renamed, the programs of the
-Scotch package can no longer be compiled. Hence, users can only
-compile the libraries of the Scotch package, by running:
-
-%prompt% make libscotch
-
-and/or:
-
-%prompt% make libptscotch
+defined in Makefile.inc, either as an environment variable (e.g.,
+"export SCOTCH_NAME_SUFFIX=_64"), or as a definition in the CFLAGS
+variable (e.g., "-DSCOTCH_NAME_SUFFIX=_64").
 
 Since error handling routines are generic and belong to a separate
 library, suffix transformation is never applied to them. Hence,
@@ -707,7 +720,7 @@ mechanism is absolutely NOT thread-safe at the time being.
 ---------------
 
 Many algorithms in Scotch and PT-Scotch are based on the random
-selection of vertices (e.g. seed vertices for graph growing
+selection of vertices (e.g., seed vertices for graph growing
 algorithms, vertices to be mated for coarsening algorithms,
 etc.). This selection is performed by using integer pseudo-random
 generators to produce seemingly uncorrelated vertex indices.
@@ -730,6 +743,14 @@ pseudo-random generator for its own purposes. In order to avoid this
 problem, Scotch now uses its own pseudo-random generator. The use of
 operating system-dependent pseudo-random generators has been
 deprecated since version 7.0.
+
+From version v7.0, Scotch allows to parameterize the behavior of the
+libScotch library (and of the Scotch programs that use it) at run
+time, by way of environment variables which, when set, supersede
+compile-time definitions. The "SCOTCH_RANDOM_FIXED_SEED" environment
+variable may be set to 0 for setting a new, dynamically-changing
+pseudo-random seed at every run, and 1 for a fixed pseudo-random
+seed.
 
 
 3.10) Deterministic behavior
@@ -763,6 +784,14 @@ on a first-come, first-serve basis.
 
 Setting this flag automatically results in setting the
 "-DCOMMON_RANDOM_FIXED_SEED" flag.
+
+From version v7.0, Scotch allows to parameterize the behavior of the
+libScotch library (and of the Scotch programs that use it) at run
+time, by way of environment variables which, when set, supersede
+compile-time definitions. The "SCOTCH_DETERMINISTIC" environment
+variable may be set to 0 to allow for the use of faster,
+non-deterministic, multi-threaded algorithms, and 1 for a fully,
+albeit sometimes slower, deterministic multi-threaded behavior.
 
 
 3.11) Point-to-point or collective communications
@@ -836,9 +865,11 @@ error, as some symbols are multiply defined.
 
 Alternately, the names of the compatibility routines can be changed so
 as to avoid conflicts. When the "-DSCOTCH_METIS_PREFIX" flag is set at
-compile time, all Scotch versions of the MeTiS routines are prefixed
-with "SCOTCH_". Of course, this will require an equivalent change in
-the user's application code.
+compile time, all Scotch versions of the MeTiS routines are prefixed:
+C routines are prefixed with "SCOTCH_", and Fortran routines with
+"scotchf" (lowercase form) or "SCOTCHF" (uppercase form), with no
+following separating underscore. Of course, this will require an
+equivalent change in the user's application code.
 
 In this case, an improved solution can be to call directly the Scotch
 versions of these routines. Of course, this will require a change in
@@ -848,6 +879,23 @@ code insensitive to changes in the MeTiS API, because matching Scotch
 routines are prefixed by "SCOTCH_" and by the MeTiS API version
 number. This prevents all naming conflicts, such as those which
 appeared between MeTiS v3 and MeTiS v5.
+
+
+3.13) Source fortification
+--------------------------
+
+Recent developments in applied software engineering for code
+robustness have resulted in the implementation, in some compilers, of
+features which generate extra code for checking at run time the
+compliance of the parameters of relevant library function calls. The
+activation and intrusiveness of these checks is conditioned by a
+specific compiler macro, called "_FORTIFY_SOURCE", the value of which
+ranges from 0 (no checks) to 3 (most intrusive checks).
+
+In the case of Scotch, while values from 0 to 2 have proven innocuous
+to date, setting "_FORTIFY_SOURCE" to 3 leads to false positives that
+abort the program. Consequently, packagers and installers are
+requested not to use this latter level.
 
 
 4) Using the libScotch and libPTScotch

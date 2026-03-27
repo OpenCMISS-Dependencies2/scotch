@@ -1,4 +1,4 @@
-/* Copyright 2007,2008,2013,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2008,2013,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -45,7 +45,7 @@
 /**                # Version 6.0  : from : 10 oct 2013     **/
 /**                                 to   : 10 oct 2013     **/
 /**                # Version 7.0  : from : 18 jan 2023     **/
-/**                                 to   : 10 aug 2023     **/
+/**                                 to   : 26 nov 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -101,6 +101,13 @@ Order * restrict const        cordptr)
   int                         cheklocval;
   int                         chekglbval;
 
+#ifdef SCOTCH_DEBUG_DORDER2
+  if (dorderCheck (dordptr) != 0) {
+    errorPrint ("dorderGather: invalid distributed ordering");
+    return (1);
+  }
+#endif /* SCOTCH_DEBUG_DORDER2 */
+
   for (linklocptr = dordptr->linkdat.nextptr, leaflocnbr = vnodlocnbr = 0; /* For all nodes in local ordering structure */
        linklocptr != &dordptr->linkdat; linklocptr = linklocptr->nextptr) {
     const DorderCblk * restrict cblklocptr;
@@ -111,7 +118,8 @@ Order * restrict const        cordptr)
       vnodlocnbr += cblklocptr->data.leaf.vnodlocnbr; /* And more node vertices */
     }
 #ifdef SCOTCH_DEBUG_DORDER2
-    else if (cblklocptr->typeval != DORDERCBLKNEDI) {
+    else if ((cblklocptr->typeval != DORDERCBLKNEDI) &&
+             (cblklocptr->typeval != DORDERCBLKDICO)) {
       errorPrint ("dorderGather: invalid parameters");
       return (1);
     }
@@ -220,8 +228,8 @@ Order * restrict const        cordptr)
     }
   }
   else {
-    Gnum                  leaflocnum;
-    Gnum                  vnodlocnum;
+    Gnum                leaflocnum;
+    Gnum                vnodlocnum;
 
     for (linklocptr = dordptr->linkdat.nextptr, leaflocnum = vnodlocnum = 0;
          linklocptr != &dordptr->linkdat; linklocptr = linklocptr->nextptr) { /* For all nodes */
@@ -440,7 +448,8 @@ const int                     protnum)
       }
     }
 #ifdef SCOTCH_DEBUG_DORDER2
-    else if (cblklocptr->typeval != DORDERCBLKNEDI) {
+    else if ((cblklocptr->typeval != DORDERCBLKNEDI) &&
+             (cblklocptr->typeval != DORDERCBLKDICO)) {
       errorPrint ("dorderGatherTree: invalid column block type");
       return (1);
     }
@@ -508,10 +517,10 @@ const int                     protnum)
     }
     cordptr->cblknbr = cblkglbnbr;
 
-    cordptr->cblktre.typeval = (int) treercvtab[0].typeval; /* Process root node of separator tree */
-    cordptr->cblktre.vnodnbr = treercvtab[0].vnodnbr;
-    cordptr->cblktre.cblknbr = cblkglbtab[0].cblknbr;
-    cordptr->cblktre.cblktab = cblkglbtab[0].cblktab; /* Link its sons array */
+    cordptr->rootdat.typeval = (int) treercvtab[0].typeval; /* Process root node of separator tree */
+    cordptr->rootdat.vnodnbr = treercvtab[0].vnodnbr;
+    cordptr->rootdat.cblknbr = cblkglbtab[0].cblknbr;
+    cordptr->rootdat.cblktab = cblkglbtab[0].cblktab; /* Link its sons array */
 
     for (treeglbnum = 1; treeglbnum < treeglbnbr; treeglbnum ++) { /* For all nodes except the root */
       Gnum                  cblkfthnum;

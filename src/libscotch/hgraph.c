@@ -139,3 +139,22 @@ Graph * restrict const        ugrfptr)
   ugrfptr->edlosum = grafptr->enlosum;
   ugrfptr->degrmax = grafptr->s.degrmax;          /* Upper bound */
 }
+
+/* This routine fills-in the halo fields of a
+** halo graph from the fields of its non-halo,
+** underlying source graph.
+** It returns:
+** - VOID  : in all cases.
+*/
+
+void
+hgraphUnhalo2 (
+Hgraph * restrict const     grafptr)
+{
+  grafptr->vnohnbr = grafptr->s.vertnbr;
+  grafptr->vnohnnd = grafptr->s.vertnnd;
+  grafptr->vnhdtax = grafptr->s.vendtax;
+  grafptr->vnlosum = grafptr->s.velosum;
+  grafptr->enohnbr = grafptr->s.edgenbr;
+  grafptr->enlosum = grafptr->s.edlosum;
+}

@@ -49,7 +49,7 @@
 /**                # Version 6.1  : from : 05 dec 2021     **/
 /**                                 to   : 05 dec 2021     **/
 /**                # Version 7.0  : from : 20 jan 2023     **/
-/**                                 to   : 09 aug 2024     **/
+/**                                 to   : 30 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -224,9 +224,9 @@ const Gnum                                hashold) /*+ Maximum number of vertice
           errorPrint ("vmeshSeparateFmResize: internal error (3)");
           return (1);
         }
+#endif /* SCOTCH_DEBUG_VMESH2 */
         if (hnodtab[hnodnum].vnodnum == vertnum)  /* If element found */
           break;
-#endif /* SCOTCH_DEBUG_VMESH2 */
       }
       movetab[savenum].hertnum = -1 - hnodnum;    /* Save node hash index */
     }

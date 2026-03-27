@@ -157,7 +157,7 @@ graphCoarsen3 (
 ThreadDescriptor * restrict const descptr,
 GraphCoarsenData * restrict const coarptr)
 {
-  GraphCoarsenMulti * restrict  coarmulttax;      /* [norestrict] */
+  GraphCoarsenMulti * restrict  coarmulttax;      /* Work pointer to multinode array    */
   Gnum                          coarvertnbr;
   Gnum                          coarhashnbr;      /* Size of neighbor vertex hash table */
   Gnum                          coaredgebas;      /* Start of local edge sub-array      */
@@ -194,7 +194,7 @@ GraphCoarsenData * restrict const coarptr)
 #ifdef SCOTCH_PTHREAD
       if (thrdnum == 0)                           /* Thread 0 sets the return value */
 #endif /* SCOTCH_PTHREAD */
-	coarptr->retuval = 1;
+        coarptr->retuval = 1;
       return;
     }
   }
@@ -394,7 +394,7 @@ GraphCoarsenData * restrict const coarptr)
       const Gnum * restrict const fineverttax = finegrafptr->verttax;
       const Gnum * restrict const finevendtax = finegrafptr->vendtax;
 
-      for (coarvertnum = thrdptr->coarvertbas, /* For all local coarse vertices */
+      for (coarvertnum = thrdptr->coarvertbas,    /* For all local coarse vertices */
            coarvertnnd = thrdptr->coarvertnnd, coaredgenbr = 0;
            coarvertnum < coarvertnnd; coarvertnum ++) {
         Gnum                finevertnum;

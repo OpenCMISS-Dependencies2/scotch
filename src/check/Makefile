@@ -1,4 +1,4 @@
-## Copyright 2011,2012,2014-2016,2018-2021 IPB, Universite de Bordeaux, INRIA & CNRS
+## Copyright 2011,2012,2014-2016,2018-2021,2024,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,
 ## graph partitioning and sparse matrix ordering.
@@ -30,27 +30,52 @@
 ## knowledge of the CeCILL-C license and that you accept its terms.
 ##
 
-TMPDIR			= /tmp
+TMPDIR			?= /tmp
 
-SCOTCHBINDIR		= ../../bin
-SCOTCHINCDIR		= ../../include
-SCOTCHLIBDIR		= ../../lib
-SCOTCHTGTDIR		= ../../tgt
+SCOTCHBINDIR		?= ../../bin
+SCOTCHINCLUDEDIR	?= ../../include
+SCOTCHLIBDIR		?= ../../lib
+SCOTCHTGTDIR		?= ../../tgt
 
 LIBESMUMPS		= -lesmumps -lscotch -lscotcherr
 LIBPTSCOTCH		= -lptscotch -lscotch -lptscotcherr
 LIBSCOTCH		= -lscotch -lscotcherr
 
-DEPESMUMPS		= $(SCOTCHLIBDIR)/libesmumps$(LIB)
-DEPPTSCOTCH		= $(SCOTCHLIBDIR)/libptscotch$(LIB)
-DEPSCOTCH		= $(SCOTCHLIBDIR)/libscotch$(LIB)
+include ../Makefile.inc
 
-ifeq ($(origin SCOTCH_METIS_PREFIXFU), undefined)
-  ifeq ($(origin SCOTCH_METIS_PREFIX), undefined)
-    SCOTCH_METIS_PREFIXFU = ""
-  else
-    SCOTCH_METIS_PREFIXFU = SCOTCHF
+ifeq ($(strip $(SCOTCH_NAME_SUFFIX)),)
+  ifneq ($(findstring -DSCOTCH_NAME_SUFFIX=,$(CFLAGS)),)
+    scotch_name_suffix_defs = $(filter -DSCOTCH_NAME_SUFFIX=%,$(CFLAGS))
+    scotch_name_suffix_def = $(lastword $(scotch_name_suffix_defs))
+    export SCOTCH_NAME_SUFFIX = $(subst -DSCOTCH_NAME_SUFFIX=,,$(scotch_name_suffix_def))
   endif
+endif
+ifneq ($(strip $(SCOTCH_NAME_SUFFIX)),)
+  $(info Using suffix "$(SCOTCH_NAME_SUFFIX)")
+  ifeq ($(findstring -DSCOTCH_NAME_SUFFIX=,$(CFLAGS)),)
+    CFLAGS += -DSCOTCH_NAME_SUFFIX=$(SCOTCH_NAME_SUFFIX)
+  endif
+  ifeq ($(findstring -DSCOTCH_NAME_SUFFIX=,$(CCDFLAGS)),)
+    CCDFLAGS += -DSCOTCH_NAME_SUFFIX=$(SCOTCH_NAME_SUFFIX)
+  endif
+endif
+
+ifeq ($(strip $(SCOTCH_METIS_PREFIXFU)),)
+  ifneq ($(findstring -DSCOTCH_METIS_PREFIXFU=,$(CFLAGS)),)
+    scotch_metis_prefixfu_defs = $(filter -DSCOTCH_METIS_PREFIXFU=%,$(CFLAGS))
+    scotch_metis_prefixfu_def = $(lastword $(scotch_metis_prefixfu_defs))
+    export SCOTCH_METIS_PREFIXFU = $(subst -DSCOTCH_METIS_PREFIXFU=,,$(scotch_metis_prefixfu_def))
+  endif
+endif
+ifeq ($(strip $(SCOTCH_METIS_PREFIXFU)),)
+  ifeq ($(findstring -DSCOTCH_METIS_PREFIX,$(CFLAGS)),)
+    export SCOTCH_METIS_PREFIXFU =
+  else
+    export SCOTCH_METIS_PREFIXFU = SCOTCHF
+  endif
+endif
+ifneq ($(strip $(SCOTCH_METIS_PREFIXFU)),)
+  $(info Using MeTiS uppercase Fortran prefix "$(SCOTCH_METIS_PREFIXFU)")
 endif
 
 EXECPPROG		?= mpirun
@@ -68,37 +93,39 @@ PROGSED			?= sed
 ##  General inference rules.
 ##
 
-include ../Makefile.inc
-
 %$(OBJ)	:	%.c
-				$(CC) $(CFLAGS) $(CLIBFLAGS) -I$(SCOTCHINCDIR) -c $(<) -o $(@)
+				$(CC) $(CFLAGS) $(CLIBFLAGS) -I$(SCOTCHINCLUDEDIR) -c $(<) -o $(@)
 
 %_v3$(EXE) :	%.c
-				$(CC) $(CFLAGS) -I$(SCOTCHINCDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv3 $(SCOTCHLIBS) $(LDFLAGS)
+				$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv3 $(SCOTCHLIBS) $(LDFLAGS)
 
 %_v5$(EXE) :	%.c
-				$(CC) $(CFLAGS) -I$(SCOTCHINCDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv5 $(SCOTCHLIBS) $(LDFLAGS)
+				$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv5 $(SCOTCHLIBS) $(LDFLAGS)
 
 %$(EXE)	:	%.c
-				$(CC) $(CFLAGS) -I$(SCOTCHINCDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) $(SCOTCHLIBS) $(LDFLAGS)
+				$(CC) $(CFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) $(SCOTCHLIBS) $(LDFLAGS)
 
 %.f90	:	%.f90.in
-				$(PROGSED) -e 's/SCOTCHMETISNAMEFU\s*(\([A-Za-z0-8_]*\))/'"$(SCOTCH_METIS_PREFIXFU)"'\1/g' $(<) > $(@)
+				../libscotch/dummysizes$(EXE) -s$(SCOTCH_NAME_SUFFIX) $(<) $(@).tmp
+				$(PROGSED) -e 's/SCOTCHMETISNAMEFU[[:space:]]*(\([A-Za-z0-9_]*\))/'"$(SCOTCH_METIS_PREFIXFU)"'\1/g' $(@).tmp > $(@)
 
 %_v3$(EXE):	%.f90
-				$(FC) $(FFLAGS) -I$(SCOTCHINCDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv3 $(SCOTCHLIBS) $(LDFLAGS)
+				$(FC) $(FFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv3 $(SCOTCHLIBS) $(LDFLAGS)
 
 %_v5$(EXE):	%.f90
-				$(FC) $(FFLAGS) -I$(SCOTCHINCDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv5 $(SCOTCHLIBS) $(LDFLAGS)
+				$(FC) $(FFLAGS) -I$(SCOTCHINCLUDEDIR) -L$(SCOTCHLIBDIR) $(<) -o $(@) -lscotchmetisv5 $(SCOTCHLIBS) $(LDFLAGS)
 
 ##
 ##  Project rules.
 ##
 
-.PHONY				:	check	ptcheck	clean	realclean
+.PHONY				:	check	ptcheck	clean	realclean	nothing
+
+nothing				:
 
 check				:	realclean
 					$(MAKE) CC="$(CCS)" CCD="$(CCS)" SCOTCHLIBS="$(LIBSCOTCH)" $(CHECKSCOTCH)
+					$(MAKE) CC="$(CCS)" CCD="$(CCS)" FC="$(FCS)" SCOTCHLIBS="$(LIBSCOTCH)" $(CHECKSCOTCHF)
 
 check_full			:	realclean
 					$(MAKE) CC="$(CCS) -DSCOTCH_DEBUG_FULL" CCD="$(CCS)" SCOTCHLIBS="$(LIBSCOTCH)" check_prog_full
@@ -127,6 +154,7 @@ realclean			:	clean
 					test_libmetis_dual_v3		\
 					test_libmetis_dual_v5		\
 					test_libmetis_dual_f.f90	\
+					test_libmetis_dual_f.f90.tmp	\
 					test_libmetis_dual_f_v3		\
 					test_libmetis_dual_f_v5		\
 					test_scotch_arch		\
@@ -145,6 +173,7 @@ realclean			:	clean
 					test_scotch_dgraph_band		\
 					test_scotch_dgraph_check	\
 					test_scotch_dgraph_coarsen	\
+					test_scotch_dgraph_order	\
 					test_scotch_dgraph_grow		\
 					test_scotch_dgraph_induce	\
 					test_scotch_dgraph_redist	\
@@ -178,8 +207,6 @@ CHECKSCOTCH = 		check_common_file_compress		\
 			check_libmetis_v5			\
 			check_libmetis_dual_v3			\
 			check_libmetis_dual_v5			\
-			check_libmetis_dual_f_v3		\
-			check_libmetis_dual_f_v5		\
 			check_prog_amk				\
 			check_prog_amk_grf			\
 			check_prog_acpl				\
@@ -200,13 +227,22 @@ CHECKSCOTCH = 		check_common_file_compress		\
 			check_prog_mmk				\
 			check_prog_mord
 
+CHECKSCOTCHF = 		check_libmetis_dual_f_v3		\
+			check_libmetis_dual_f_v5
+
+ifeq ($(strip $(FCS)),)
+  CHECKSCOTCHF =	nothing
+endif
+
 CHECKPTSCOTCH = 	check_strat_par				\
 			check_scotch_dgraph_check		\
 			check_scotch_dgraph_band		\
 			check_scotch_dgraph_coarsen		\
+			check_scotch_dgraph_order		\
 			check_scotch_dgraph_grow		\
-			check_scotch_dgraph_induce      	\
+			check_scotch_dgraph_induce     		\
 			check_scotch_dgraph_redist		\
+			check_libparmetis_dual          	\
 			check_prog_dgord			\
 			check_prog_dgpart			\
 			check_prog_dgscat-dggath		\
@@ -323,6 +359,18 @@ check_libmetis_dual_f_v5	:	test_libmetis_dual_f_v5
 test_libmetis_dual_f_v5		:	test_libmetis_dual_f.f90	\
 					$(SCOTCHLIBDIR)/libscotch$(LIB)	\
 					$(SCOTCHLIBDIR)/libscotchmetisv5$(LIB)
+# libparmetis
+
+check_libparmetis_dual		:	$(SCOTCHBINDIR)/adm2dgr$(EXE)
+					$(EXECP3) $(SCOTCHBINDIR)/adm2dgr -c2 data/small3-%r.adm $(TMPDIR)/small3-%r.dgr
+					$(PROGDIFF) "data/small3-0.dgr" "$(TMPDIR)/small3-0.dgr"
+					$(PROGDIFF) "data/small3-1.dgr" "$(TMPDIR)/small3-1.dgr"
+					$(PROGDIFF) "data/small3-2.dgr" "$(TMPDIR)/small3-2.dgr"
+					$(EXECP4) $(SCOTCHBINDIR)/adm2dgr -c3 data/ship001-%r.adm $(TMPDIR)/ship001-%r.dgr
+					$(PROGDIFF) "data/ship001-0.dgr" "$(TMPDIR)/ship001-0.dgr"
+					$(PROGDIFF) "data/ship001-1.dgr" "$(TMPDIR)/ship001-1.dgr"
+					$(PROGDIFF) "data/ship001-2.dgr" "$(TMPDIR)/ship001-2.dgr"
+					$(PROGDIFF) "data/ship001-3.dgr" "$(TMPDIR)/ship001-3.dgr"
 
 ##
 
@@ -381,7 +429,7 @@ test_scotch_graph_diam		:	test_scotch_graph_diam.c	\
 
 check_scotch_graph_dump		:	test_scotch_graph_dump2
 					$(EXECS) ./test_scotch_graph_dump2 $(TMPDIR)/m16x16_b1.grf
-					$(PROGDIFF) "data/bump_b1.grf" "$(TMPDIR)/bump_b1.grf"
+					$(PROGDIFF) "data/m16x16_b1.grf" "$(TMPDIR)/m16x16_b1.grf"
 
 test_scotch_graph_dump2		:	test_scotch_graph_dump2.c	\
 					$(SCOTCHLIBDIR)/libscotch$(LIB)
@@ -389,7 +437,6 @@ test_scotch_graph_dump2		:	test_scotch_graph_dump2.c	\
 test_scotch_graph_dump2.c	:	test_scotch_graph_dump.c
 					$(EXECS) $(SCOTCHBINDIR)/gdump -ptest data/m16x16_b1.grf $(TMPDIR)/m16x16_b1.c
 					$(CAT) test_scotch_graph_dump.c $(TMPDIR)/m16x16_b1.c > $(@)
-
 
 ##
 
@@ -485,6 +532,16 @@ test_scotch_dgraph_coarsen	:	test_scotch_dgraph_coarsen.c	\
 
 ##
 
+check_scotch_dgraph_order	:	test_scotch_dgraph_order
+					$(EXECP3) ./test_scotch_dgraph_order data/bump.grf
+					$(EXECP3) ./test_scotch_dgraph_order data/bump_b100000.grf
+					$(EXECP3) ./test_scotch_dgraph_order data/m4x4_b1.grf
+
+test_scotch_dgraph_order	:	test_scotch_dgraph_order.c	\
+					$(SCOTCHLIBDIR)/libptscotch$(LIB)
+
+##
+
 check_scotch_dgraph_check	:	test_scotch_dgraph_check
 					$(EXECP3) ./test_scotch_dgraph_check data/bump.grf
 					$(EXECP3) ./test_scotch_dgraph_check data/bump_b100000.grf
@@ -569,12 +626,12 @@ check_prog_gmk_msh		:	check_prog_mmk
 					$(EXECS) $(SCOTCHBINDIR)/gtst $(TMPDIR)/m2_5_4_3.grf
 					$(EXECS) $(SCOTCHBINDIR)/gmk_msh data/ship001.msh $(TMPDIR)/ship001.grf
 					$(EXECS) $(SCOTCHBINDIR)/gtst $(TMPDIR)/ship001.grf
-					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small_55.msh" $(TMPDIR)/small_55_d1.grf -d1
-					$(PROGDIFF) "data/small_55_d1.grf" $(TMPDIR)/small_55_d1.grf
-					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small_55.msh" $(TMPDIR)/small_55_d2.grf -d2
-					$(PROGDIFF) "data/small_55_d2.grf" $(TMPDIR)/small_55_d2.grf
-					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small_55.msh" $(TMPDIR)/small_55_d3.grf -d3
-					$(PROGDIFF) "data/small_55_d2.grf" $(TMPDIR)/small_55_d3.grf
+					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small2.msh" $(TMPDIR)/small2_d1.grf -d1
+					$(PROGDIFF) "data/small2_d1.grf" $(TMPDIR)/small2_d1.grf
+					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small2.msh" $(TMPDIR)/small2_d2.grf -d2
+					$(PROGDIFF) "data/small2_d2.grf" $(TMPDIR)/small2_d2.grf
+					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/small2.msh" $(TMPDIR)/small2_d3.grf -d3
+					$(PROGDIFF) "data/small2_d2.grf" $(TMPDIR)/small2_d3.grf
 					$(EXECS) $(SCOTCHBINDIR)/gmk_msh "data/cube_8.msh" $(TMPDIR)/cube_8_d3.grf -d3
 					$(PROGDIFF) "data/cube_8_d3.grf" $(TMPDIR)/cube_8_d3.grf
 
@@ -603,12 +660,13 @@ check_prog_mord                 :	check_prog_gmk_msh
 
 check_prog_gmap			:
 					$(EXECS) $(SCOTCHBINDIR)/gmap data/bump.grf $(SCOTCHTGTDIR)/h3.tgt $(TMPDIR)/bump_h3.map -vmt
-					$(EXECS) $(SCOTCHBINDIR)/gmap data/small.grf $(SCOTCHTGTDIR)/m11x13.tgt $(TMPDIR)/small_m11x13.map -vmt
+					$(EXECS) $(SCOTCHBINDIR)/gmap data/small1.grf $(SCOTCHTGTDIR)/m11x13.tgt $(TMPDIR)/small1_m11x13.map -vmt
 
 check_prog_gord			:	check_prog_gmk_msh
 					$(EXECS) $(SCOTCHBINDIR)/gord data/bump.grf $(TMPDIR)/bump.ord -Cu -vt
-					$(EXECS) $(SCOTCHBINDIR)/gord data/bump_b1.grf $(TMPDIR)/bump_b1.ord -Cd -vt
-					$(EXECS) $(SCOTCHBINDIR)/gord data/bump_b1.grf '-On{sep=(/((vert)>(240))?(e{strat=g}|g|h);),ole=d{cmin=15,cmax=100000,frat=0},ose=g{pass=3}}' $(TMPDIR)/bump_b1_2.ord -Cr -vt
+					$(EXECS) $(SCOTCHBINDIR)/gord data/bump_b100000.grf $(TMPDIR)/bump_b100000.ord -Cd -vt
+					$(EXECS) $(SCOTCHBINDIR)/gord data/bump_b1.grf '-On{sep=(/((vert)>(240))?(e{strat=g}|g|h);),ole=d{cmin=15,cmax=100000,frat=0},ose=g{pass=3}}' $(TMPDIR)/bump_b1.ord -Cr -vt
+					$(EXECS) $(SCOTCHBINDIR)/gord data/m16x16_b100000_v.grf '-On{sep=(/((vert)>(20))?h;),ole=b{cmin=100},ose=b{cmin=3}}' $(TMPDIR)/m16x16_b100000_v.ord -vt
 					$(EXECS) $(SCOTCHBINDIR)/gord data/bump_imbal_32.grf $(TMPDIR)/bump_imbal_32.ord -Cf -vt
 					$(EXECS) $(SCOTCHBINDIR)/gord data/nocoarsen.grf $(TMPDIR)/nocoarsen.ord -vt
 					$(EXECS) $(SCOTCHBINDIR)/gord data/compress-coarsen.grf $(TMPDIR)/compress-coarsen.ord -vt
@@ -616,7 +674,7 @@ check_prog_gord			:	check_prog_gmk_msh
 
 check_prog_gotst		:	check_prog_gord
 					$(EXECS) $(SCOTCHBINDIR)/gotst data/bump.grf $(TMPDIR)/bump.ord
-					$(EXECS) $(SCOTCHBINDIR)/gotst data/bump_b1.grf $(TMPDIR)/bump_b1.ord
+					$(EXECS) $(SCOTCHBINDIR)/gotst data/bump_b100000.grf $(TMPDIR)/bump_b100000.ord
 					$(EXECS) $(SCOTCHBINDIR)/gotst data/bump_imbal_32.grf $(TMPDIR)/bump_imbal_32.ord
 					$(EXECS) $(SCOTCHBINDIR)/gotst data/nocoarsen.grf $(TMPDIR)/nocoarsen.ord
 					$(EXECS) $(SCOTCHBINDIR)/gotst data/compress-coarsen.grf $(TMPDIR)/compress-coarsen.ord
@@ -630,16 +688,21 @@ check_prog_gord_block		:	check_prog_gord
 check_prog_gout			:	check_prog_gord		\
 					check_prog_gpart
 					$(EXECS) $(SCOTCHBINDIR)/gout '-Oi{c,r}' data/bump.grf data/bump.xyz $(TMPDIR)/bump_k9.map $(TMPDIR)/bump_k9.iv
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Oi{g,r}' data/bump_b100000.grf data/bump_b100000.xyz $(TMPDIR)/bump_k9_b100000.map $(TMPDIR)/bump_k9_b100000.iv
 					$(EXECS) $(SCOTCHBINDIR)/gout '-Om{e}' -gn data/bump.grf /dev/null $(TMPDIR)/bump.ord $(TMPDIR)/bump_ord.eps
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Om{e}' -gn data/bump_b100000.grf /dev/null $(TMPDIR)/bump_b100000.ord $(TMPDIR)/bump_ord_b100000.eps
 					$(EXECS) $(SCOTCHBINDIR)/gout '-Op{d,e,g,r,s}' data/bump.grf data/bump.xyz $(TMPDIR)/bump_k9.map $(TMPDIR)/bump_k9.eps
-					$(EXECS) $(SCOTCHBINDIR)/gout '-Ot{b,c,r}' -mn data/bump.grf data/bump.xyz /dev/null $(TMPDIR)/bump_k9.tlp
-					$(EXECS) $(SCOTCHBINDIR)/gout '-Ov{v}' data/bump.grf data/bump.xyz $(TMPDIR)/bump_k9.map $(TMPDIR)/bump_k9.vtk
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Op{a,e,c,d,l}' data/bump_b100000.grf data/bump_b100000.xyz $(TMPDIR)/bump_k9_b100000.map $(TMPDIR)/bump_k9_b100000.eps
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Ot{c,d,v}' -mn data/bump.grf data/bump.xyz /dev/null $(TMPDIR)/bump_k9.tlp
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Ot{b,a,r}' data/bump_b100000.grf data/bump_b100000.xyz $(TMPDIR)/bump_k9_b100000.map $(TMPDIR)/bump_k9_b100000.tlp
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Ov{r}' data/bump.grf data/bump.xyz $(TMPDIR)/bump_k9.map $(TMPDIR)/bump_k9.vtk
+					$(EXECS) $(SCOTCHBINDIR)/gout '-Ov{v}' data/bump_b100000.grf data/bump_b100000.xyz $(TMPDIR)/bump_k9_b100000.map $(TMPDIR)/bump_k9_b100000.vtk
 
 check_prog_gpart		:
 					$(EXECS) $(SCOTCHBINDIR)/gpart 9 data/bump.grf $(TMPDIR)/bump_k9.map -Cd -vmt
-					$(EXECS) $(SCOTCHBINDIR)/gpart 9 data/bump_b100000.grf $(TMPDIR)/bump_k9.map -Cu -vmt
+					$(EXECS) $(SCOTCHBINDIR)/gpart 9 data/bump_b100000.grf $(TMPDIR)/bump_k9_b100000.map -Cu -vmt
 					$(EXECS) $(SCOTCHBINDIR)/gpart 9 data/nocoarsen.grf $(TMPDIR)/nocoarsen_k9.map -Cr -vmt
-					$(EXECS) $(SCOTCHBINDIR)/gpart 5 data/bump_b100000.grf $(TMPDIR)/bump_k5.map -Cf -vmt '-Mr{bal=0.05,sep=m{vert=120,low=h{pass=10}f{bal=0.05,move=120},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}}|m{vert=1000,low=r{bal=0.05,sep=m{vert=120,low=h{pass=10}f{bal=0.05,move=120},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}'
+					$(EXECS) $(SCOTCHBINDIR)/gpart 5 data/bump_b100000.grf $(TMPDIR)/bump_k5.map -Cf -vmt '-Mr{bal=0.05,sep=m{vert=120,low=(h{pass=10}|a)f{bal=0.05,move=120},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}}|m{vert=1000,low=r{bal=0.05,sep=m{vert=120,low=(h{pass=10}|a)f{bal=0.05,move=120},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}},asc=b{bnd=f{bal=0.05,move=120},org=f{bal=0.05,move=120}}}'
 
 check_prog_gpart_clustering	:
 					$(EXECS) $(SCOTCHBINDIR)/gpart -q 1 data/bump.grf $(TMPDIR)/bump_part_cls_9.map -vmt
@@ -662,8 +725,8 @@ check_prog_gpart_remap		:
 					$(EXECS) $(SCOTCHBINDIR)/gpart 32 data/bump_imbal_32.grf /dev/null -rodata/bump_old.map -vmt
 
 check_prog_gscat		:
-					$(EXECS) $(SCOTCHBINDIR)/gscat 4 data/small.grf $(TMPDIR)/small_%r.grf
-					$(EXECS) $(SCOTCHBINDIR)/gscat 4 -i1 data/bump.grf $(TMPDIR)/bump4_%r.grf
+					$(EXECS) $(SCOTCHBINDIR)/gscat 4 data/small1.grf $(TMPDIR)/small1-%r.grf
+					$(EXECS) $(SCOTCHBINDIR)/gscat 4 -i1 data/bump.grf $(TMPDIR)/bump4-%r.grf
 
 check_prog_gtst			:
 					$(EXECS) $(SCOTCHBINDIR)/gtst data/m4x4_b1_ev.grf $(TMPDIR)/gtst_ev.txt
@@ -684,24 +747,33 @@ check_prog_full		:
 check_prog_dgord		:
 					$(EXECP3) $(SCOTCHBINDIR)/dgord data/bump.grf /dev/null -Cu -vt
 					$(EXECP3) $(SCOTCHBINDIR)/dgord data/bump_b100000.grf /dev/null -Cd -vt
-					$(EXECP4) $(SCOTCHBINDIR)/dgord data/small_%r.grf $(TMPDIR)/small.ord -vt
+					$(EXECP4) $(SCOTCHBINDIR)/dgord data/small1-%r.grf $(TMPDIR)/small1.ord -vt
 
 check_prog_dgpart		:
 					$(EXECP3) $(SCOTCHBINDIR)/dgpart 9 data/bump.grf /dev/null -Cu -vmt
 					$(EXECP3) $(SCOTCHBINDIR)/dgpart 9 data/bump_b100000.grf /dev/null -Cd -vmt
-					$(EXECP4) $(SCOTCHBINDIR)/dgpart 50 data/small_%r.grf /dev/null -vmt
+					$(EXECP4) $(SCOTCHBINDIR)/dgpart 50 data/small1-%r.grf /dev/null -vmt
 
 check_prog_dgscat-dggath	:	TMP := $(shell mktemp -u)
 check_prog_dgscat-dggath	:
-					$(EXECP3) $(SCOTCHBINDIR)/dgscat -r1 -c data/m16x16.grf "$(TMP)1_%r.grf"
-					$(EXECP3) $(SCOTCHBINDIR)/dggath -r1 -c "$(TMP)1_%r.grf" "$(TMP)1.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dgscat -r1 -c data/m16x16.grf "$(TMP)1-%r.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dggath -r1 -c "$(TMP)1-%r.grf" "$(TMP)1.grf"
 					$(PROGDIFF) data/m16x16.grf "$(TMP)1.grf"
-					$(EXECP3) $(SCOTCHBINDIR)/dgscat -c data/m16x16_b100000.grf "$(TMP)2_%r.grf"
-					$(EXECP3) $(SCOTCHBINDIR)/dggath -c "$(TMP)2_%r.grf" "$(TMP)2.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dgscat -c data/m16x16_b100000.grf "$(TMP)2-%r.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dggath -c "$(TMP)2-%r.grf" "$(TMP)2.grf"
 					$(PROGDIFF) data/m16x16_b100000.grf "$(TMP)2.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dgscat -c data/m4x4_b1_elv.grf "$(TMP)3-%r.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dggath -c "$(TMP)3-%r.grf" "$(TMP)3.grf"
+					$(PROGDIFF) data/m4x4_b1_elv.grf "$(TMP)3.grf"
 
+check_prog_dgtst		:	TMP := $(shell mktemp -u)
 check_prog_dgtst		:
-					$(EXECP4) $(SCOTCHBINDIR)/dgtst data/small_%r.grf
+					$(EXECP4) $(SCOTCHBINDIR)/dgtst data/small1-%r.grf
+					$(EXECP3) $(SCOTCHBINDIR)/dgscat data/m4x4_b1_elv.grf "$(TMP)1-%r.grf"
+					$(EXECP3) $(SCOTCHBINDIR)/dgtst "$(TMP)1-%r.grf" "$(TMP)1.txt"
+					$(EXECS) $(SCOTCHBINDIR)/gtst data/m4x4_b1_elv.grf "$(TMP)2.txt"
+					$(PROGDIFF) "$(TMP)1.txt" "$(TMP)2.txt"
+
 ##
 
 check_prog_dfull		:

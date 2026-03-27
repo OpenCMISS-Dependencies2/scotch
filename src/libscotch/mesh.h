@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2010,2018,2019,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2010,2018,2019,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -45,9 +45,11 @@
 /**                # Version 6.0  : from : 06 jun 2018     **/
 /**                                 to   : 06 jun 2018     **/
 /**                # Version 7.0  : from : 03 may 2019     **/
-/**                                 to   : 18 jan 2023     **/
+/**                                 to   : 30 aug 2025     **/
 /**                                                        **/
 /************************************************************/
+
+#define SCOTCH_MESH_H
 
 /*
 **  The defines.
@@ -135,8 +137,8 @@ void                        meshFree            (Mesh * const);
 int                         meshLoad            (Mesh * restrict const, FILE * restrict const, const Gnum);
 int                         meshSave            (const Mesh * restrict const, FILE * restrict const);
 Gnum                        meshBase            (Mesh * const, const Gnum);
-int                         meshGraph           (const Mesh * restrict const, Graph * restrict const);
-int                         meshGraphDual       (const Mesh * restrict const, Graph * restrict const, const Gnum );
+int                         meshGraphNodal      (const Mesh * restrict const, Graph * restrict const);
+int                         meshGraphDual       (const Mesh * restrict const, Graph * restrict const, const Gnum);
 int                         meshInduceList      (const Mesh *, Mesh *, const VertList *);
 int                         meshInducePart      (const Mesh *, Mesh *, const Gnum, const GraphPart *, const GraphPart);
 int                         meshInduceSepa      (const Mesh * restrict const, const GraphPart * restrict const, const Gnum, const Gnum * restrict const, Mesh * restrict const);

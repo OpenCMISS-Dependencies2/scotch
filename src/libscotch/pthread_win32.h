@@ -1,4 +1,4 @@
-/* Copyright 2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2024,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -42,7 +42,7 @@
 /**                API for win32.                          **/
 /**                                                        **/
 /**   DATES      : # Version 7.0  : from : 15 jun 2024     **/
-/**                                 to   : 08 aug 2024     **/
+/**                                 to   : 29 aug 2025     **/
 /**                                                        **/
 /**   NOTES      : # This file is based on earlier work    **/
 /**                  by Samuel THIBAULT for the StarPU     **/
@@ -214,7 +214,7 @@ pthread_mutexattr_t *       attrptr)
   if ((attrptr != NULL) && (*attrptr != 0))
     return (EINVAL);
   InitOnceInitialize  (&muteptr->init);
-  InitOnceExecuteOnce (&muteptr->init, initCriticalSectionOnce, &muteptr->lock, NULL);
+  InitOnceExecuteOnce (&muteptr->init, (PINIT_ONCE_FN) initCriticalSectionOnce, &muteptr->lock, NULL);
 
   return (0);
 }
@@ -224,7 +224,7 @@ int
 pthread_mutex_lock (
 pthread_mutex_t *           muteptr)
 {
-  InitOnceExecuteOnce  (&muteptr->init, initCriticalSectionOnce, &muteptr->lock, NULL);
+  InitOnceExecuteOnce  (&muteptr->init, (PINIT_ONCE_FN) initCriticalSectionOnce, &muteptr->lock, NULL);
   EnterCriticalSection (&muteptr->lock);
 
   return (0);
@@ -235,7 +235,7 @@ int
 pthread_mutex_unlock (
 pthread_mutex_t *           muteptr)
 {
-  InitOnceExecuteOnce  (&muteptr->init, initCriticalSectionOnce, &muteptr->lock, NULL);
+  InitOnceExecuteOnce  (&muteptr->init, (PINIT_ONCE_FN) initCriticalSectionOnce, &muteptr->lock, NULL);
   LeaveCriticalSection (&muteptr->lock);
 
   return (0);

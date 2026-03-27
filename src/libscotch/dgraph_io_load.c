@@ -1,4 +1,4 @@
-/* Copyright 2007-2009,2012,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007-2009,2012,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -36,9 +36,9 @@
 /**   AUTHOR     : Francois PELLEGRINI                     **/
 /**                Sebastien FOURESTIER (v6.0)             **/
 /**                                                        **/
-/**   FUNCTION   : These lines are the data declarations   **/
-/**                for the input/output routines for       **/
-/**                distributed graphs.                     **/
+/**   FUNCTION   : These routines load a distributed       **/
+/**                graph from either centralized or        **/
+/**                distributed files.                      **/
 /**                                                        **/
 /**                # Version 5.0  : from : 28 apr 2007     **/
 /**                                 to   : 24 mar 2008     **/
@@ -47,7 +47,7 @@
 /**                # Version 6.0  : from : 25 aug 2012     **/
 /**                                 to   : 18 nov 2012     **/
 /**                # Version 7.0  : from : 17 jan 2023     **/
-/**                                 to   : 09 aug 2024     **/
+/**                                 to   : 07 oct 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -66,7 +66,7 @@
 
 /* This routine loads a distributed source
 ** graph from the given stream(s). Either
-** one processor holds a non-NULL stream
+** one process holds a non-NULL stream
 ** of a centralized graph, or all of them
 ** hold valid streams to either a centralized
 ** or a distributed graph.
@@ -81,18 +81,18 @@ DGRAPHALLREDUCEMAXSUMOP (10, 2)
 int
 dgraphLoad (
 Dgraph * restrict const     grafptr,              /* Not const since halo may update structure         */
-FILE * const                stream,               /* One single centralized stream or distributed ones */
+FILE * const                fileptr,              /* One single centralized stream or distributed ones */
 const Gnum                  baseval,              /* Base value (-1 means keep file base)              */
-const DgraphFlag            flagval)              /* Graph loading flags                               */
+const GraphLoadFlag         flagval)              /* Graph loading flags                               */
 {
-  Gnum                reduloctab[12];
-  Gnum                reduglbtab[12];
+  Gnum                reduloctab[9];
+  Gnum                reduglbtab[9];
   Gnum                versval;
 
 #ifdef SCOTCH_DEBUG_DGRAPH2
   if (MPI_Barrier (grafptr->proccomm) != MPI_SUCCESS) { /* Synchronize for debugging */
     errorPrint ("dgraphLoad: communication error (1)");
-    return     (1);
+    return (1);
   }
 #endif /* SCOTCH_DEBUG_DGRAPH2 */
 
@@ -105,9 +105,9 @@ const DgraphFlag            flagval)              /* Graph loading flags        
   reduloctab[6] =                                 /* Assume everything will be fine */
   reduloctab[7] =                                 /* Assume does not have a stream  */
   reduloctab[8] = 0;
-  if (stream != NULL) {
-    if (intLoad (stream, &versval) != 1) {        /* Read version number */
-      errorPrint ("dgraphLoad: bad input (1)");
+  if (fileptr != NULL) {
+    if (intLoad (fileptr, &versval) != 1) {       /* Read version number */
+      errorPrint ("dgraphLoad: bad input");
       versval       = 0;
       reduloctab[6] = 1;
     }
@@ -123,7 +123,7 @@ const DgraphFlag            flagval)              /* Graph loading flags        
 
   if (dgraphAllreduceMaxSum (reduloctab, reduglbtab, 6, 3, grafptr->proccomm) != 0) {
     errorPrint ("dgraphLoad: communication error (2)");
-    return     (1);
+    return (1);
   }
 
   if (reduglbtab[6] != 0)                         /* Return from previous errors */
@@ -131,33 +131,33 @@ const DgraphFlag            flagval)              /* Graph loading flags        
 
   if ((reduglbtab[0] != - reduglbtab[1])) {
     errorPrint ("dgraphLoad: inconsistent base value");
-    return     (1);
+    return (1);
   }
   if ((reduglbtab[2] != - reduglbtab[3])) {
     errorPrint ("dgraphLoad: inconsistent flag value");
-    return     (1);
+    return (1);
   }
   if ((reduglbtab[7] != 0) &&
       (reduglbtab[4] != - reduglbtab[5])) {
     errorPrint ("dgraphLoad: inconsistent graph file version value");
-    return     (1);
+    return (1);
   }
 
-  if (reduglbtab[4] == 2) {                       /* If distributed graph format             */
-    if (reduglbtab[7] == grafptr->procglbnbr)     /* If as many input streams as processors  */
-      return (dgraphLoadDist (grafptr, stream, baseval, flagval)); /* Read distributed graph */
+  if (reduglbtab[4] == 2) {                       /* If distributed graph format              */
+    if (reduglbtab[7] == grafptr->procglbnbr)     /* If as many input streams as processes    */
+      return (dgraphLoadDist (grafptr, fileptr, baseval, flagval)); /* Read distributed graph */
   }
   else {                                          /* If centralized graph format */
     if (reduglbtab[7] == 1)                       /* If only one reader stream   */
-      return (dgraphLoadCent (grafptr, stream, baseval, flagval, reduglbtab[8])); /* Distribute centralized graph from known root */
+      return (dgraphLoadCent (grafptr, fileptr, baseval, flagval, reduglbtab[8])); /* Distribute centralized graph from known root */
     else if (reduglbtab[7] == grafptr->procglbnbr)
-      return (dgraphLoadMulti (grafptr, stream, baseval, flagval)); /* Read multi-centralized graph */
+      return (dgraphLoadMulti (grafptr, fileptr, baseval, flagval)); /* Read multi-centralized graph */
   }
 
   errorPrint ((reduglbtab[7] == 0)
               ? "dgraphLoad: no input stream provided"
               : "dgraphLoad: invalid number of input streams");
-  return     (1);
+  return (1);
 }
 
 /* This routine loads a centralized source
@@ -171,9 +171,9 @@ static
 int
 dgraphLoadCent (
 Dgraph * restrict const     grafptr,              /* Distributed graph to load            */
-FILE * const                stream,               /* One single centralized stream        */
+FILE * const                fileptr,              /* One single centralized stream        */
 Gnum                        baseval,              /* Base value (-1 means keep file base) */
-const DgraphFlag            flagval,              /* Graph loading flags                  */
+const GraphLoadFlag         flagval,              /* Graph loading flags                  */
 const int                   protnum)              /* Root process number                  */
 {
   Gnum                vertglbnbr;
@@ -204,23 +204,23 @@ const int                   protnum)              /* Root process number        
   int                 o;
 
 #ifdef SCOTCH_DEBUG_DGRAPH2
-  if (((stream != NULL) && (protnum != grafptr->proclocnum)) || /* Enforce single stream */
-      ((stream == NULL) && (protnum == grafptr->proclocnum))) {
+  if (((fileptr != NULL) && (protnum != grafptr->proclocnum)) || /* Enforce single stream */
+      ((fileptr == NULL) && (protnum == grafptr->proclocnum))) {
     errorPrint ("dgraphLoadCent: invalid parameter (1)");
-    return     (1);
+    return (1);
   }
   if ((protnum < 0) || (protnum >= grafptr->procglbnbr)) {
     errorPrint ("dgraphLoadCent: invalid parameter (2)");
-    return     (1);
+    return (1);
   }
 #endif /* SCOTCH_DEBUG_DGRAPH2 */
 
   reduglbtab[0] = 0;                              /* Assume everything will be fine */
-  if (stream != NULL) {
-    if ((intLoad (stream, &reduglbtab[1]) != 1) || /* Read rest of header */
-        (intLoad (stream, &reduglbtab[2]) != 1) ||
-        (intLoad (stream, &reduglbtab[3]) != 1) ||
-        (intLoad (stream, &reduglbtab[4]) != 1) ||
+  if (fileptr != NULL) {
+    if ((intLoad (fileptr, &reduglbtab[1]) != 1) || /* Read rest of header */
+        (intLoad (fileptr, &reduglbtab[2]) != 1) ||
+        (intLoad (fileptr, &reduglbtab[3]) != 1) ||
+        (intLoad (fileptr, &reduglbtab[4]) != 1) ||
         (reduglbtab[4] < 0)                     ||
         (reduglbtab[4] > 111)) {
       errorPrint ("dgraphLoadCent: bad input (1)");
@@ -230,7 +230,7 @@ const int                   protnum)              /* Root process number        
 
   if (MPI_Bcast (&reduglbtab[0], 5, GNUM_MPI, protnum, grafptr->proccomm) != MPI_SUCCESS) {
     errorPrint ("dgraphLoadCent: communication error (1)");
-    return     (1);
+    return (1);
   }
   if (reduglbtab[0] != 0)
     return (1);
@@ -267,7 +267,7 @@ const int                   protnum)              /* Root process number        
     vertloctax  =
     vertlocptr -= baseval;
     vertlocptr += vertglbmax + 2;                 /* TRICK: "+2" for space for velolocsum */
-    if (proptab[2] != 0) {
+    if ((proptab[2] != 0) && ((flagval & GRAPHIONOLOADVERT) == 0)) {
       veloloctax  = vertlocptr;
       vertlocptr += vertglbmax;
     }
@@ -276,7 +276,7 @@ const int                   protnum)              /* Root process number        
       baseadj    = 0;                             /* No vertex adjustments if vertex labels */
     }
 
-    if (stream != NULL) {                         /* Allocate read edge array */
+    if (fileptr != NULL) {                        /* Allocate read edge array */
       Gnum                edgeredmax;
       Gnum                edloredmax;
 
@@ -309,12 +309,12 @@ const int                   protnum)              /* Root process number        
       memFree (edgeredtax + baseval);
     if (vertloctax != NULL)
       memFree (vertloctax + baseval);
-    return  (1);
+    return (1);
   }
 
   degrglbmax = 0;                                 /* No maximum degree yet */
 
-  if (stream != NULL) {
+  if (fileptr != NULL) {
     Gnum                procnum;
 
     for (procnum = 0; procnum < grafptr->procglbnbr; procnum ++) {
@@ -331,7 +331,7 @@ const int                   protnum)              /* Root process number        
         if (vlblredtax != NULL) {                 /* If must read label            */
           Gnum                vlblredval;         /* Vertex label value to be read */
 
-          if (intLoad (stream, &vlblredval) != 1) {  /* Read label data */
+          if (intLoad (fileptr, &vlblredval) != 1) { /* Read label data */
             errorPrint ("dgraphLoadCent: bad input (2)");
             cheklocval = 1;
             break;
@@ -341,7 +341,7 @@ const int                   protnum)              /* Root process number        
         if (proptab[2] != 0) {                    /* If must read vertex load */
           Gnum                veloredval;
 
-          if (intLoad (stream, &veloredval) != 1) { /* Read vertex load data */
+          if (intLoad (fileptr, &veloredval) != 1) { /* Read vertex load data */
             errorPrint ("dgraphLoadCent: bad input (3)");
             cheklocval = 1;
             break;
@@ -350,7 +350,7 @@ const int                   protnum)              /* Root process number        
             veloredsum            +=
             veloredtax[vertrednum] = veloredval;
         }
-        if (intLoad (stream, &degrredval) != 1) { /* Read vertex degree */
+        if (intLoad (fileptr, &degrredval) != 1) { /* Read vertex degree */
           errorPrint ("dgraphLoadCent: bad input (4)");
           cheklocval = 1;
           break;
@@ -391,7 +391,7 @@ const int                   protnum)              /* Root process number        
           if (proptab[1] != 0) {                  /* If must read edge load        */
             Gnum                edloredval;       /* Value where to read edge load */
 
-            if (intLoad (stream, &edloredval) != 1) { /* Read edge load data */
+            if (intLoad (fileptr, &edloredval) != 1) { /* Read edge load data */
               errorPrint ("dgraphLoadCent: bad input (5)");
               cheklocval = 1;
               break;
@@ -399,7 +399,7 @@ const int                   protnum)              /* Root process number        
             if (edloredtax != NULL)
               edloredtax[edgerednum] = edloredval;
           }
-          if (intLoad (stream, &edgeredval) != 1) { /* Read edge data */
+          if (intLoad (fileptr, &edgeredval) != 1) { /* Read edge data */
             errorPrint ("dgraphLoadCent: bad input (6)");
             cheklocval = 1;
             break;
@@ -422,26 +422,26 @@ const int                   protnum)              /* Root process number        
           if (MPI_Isend (vertredtax + baseval, vertrednnd - baseval + 2, /* TRICK: "+2" and not "+1" because of space for velolocsum       */
                          GNUM_MPI, procnum, TAGVERTLOCTAB, grafptr->proccomm, &requtab[0]) != MPI_SUCCESS) {
             errorPrint ("dgraphLoadCent: communication error (5)");
-            return     (1);                       /* Dirty exit as we can do nothing */
+            return (1);                           /* Dirty exit as we can do nothing */
           }
           requnbr = 1;
           if (veloredtax != NULL) {
             if (MPI_Isend (veloredtax + baseval, vertrednnd - baseval, GNUM_MPI,
                            procnum, TAGVELOLOCTAB, grafptr->proccomm, &requtab[requnbr ++]) != MPI_SUCCESS) {
               errorPrint ("dgraphLoadCent: communication error (6)");
-              return     (1);
+              return (1);
             }
           }
           if (vlblredtax != NULL) {
             if (MPI_Isend (vlblredtax + baseval, vertrednnd - baseval, GNUM_MPI,
                            procnum, TAGVLBLLOCTAB, grafptr->proccomm, &requtab[requnbr ++]) != MPI_SUCCESS) {
               errorPrint ("dgraphLoadCent: communication error (7)");
-              return     (1);
+              return (1);
             }
           }
           if (MPI_Recv (&reduglbtab[0], 0, MPI_INT, procnum, MPI_ANY_TAG, grafptr->proccomm, &stattab[0]) != MPI_SUCCESS) {
             errorPrint ("dgraphLoadCent: communication error (8)");
-            return     (1);
+            return (1);
           }
           if (stattab[0].MPI_TAG != TAGOK)        /* If receiver could not allocate memory for edge arrays */
             cheklocval = 1;
@@ -449,13 +449,13 @@ const int                   protnum)              /* Root process number        
             if (MPI_Isend (edgeredtax + baseval, edgerednum - baseval, GNUM_MPI,
                            procnum, TAGEDGELOCTAB, grafptr->proccomm, &requtab[requnbr ++]) != MPI_SUCCESS) {
               errorPrint ("dgraphLoadCent: communication error (9)");
-              return     (1);
+              return (1);
             }
             if (edloredtax != NULL) {
               if (MPI_Isend (edloredtax + baseval, edgerednum - baseval, GNUM_MPI,
                              procnum, TAGEDLOLOCTAB, grafptr->proccomm, &requtab[requnbr ++]) != MPI_SUCCESS) {
                 errorPrint ("dgraphLoadCent: communication error (10)");
-                return     (1);
+                return (1);
               }
             }
             MPI_Waitall (requnbr, &requtab[0], &stattab[0]);
@@ -544,21 +544,21 @@ const int                   protnum)              /* Root process number        
     if (MPI_Irecv (vertloctax + baseval, vertlocnbr + 2, GNUM_MPI, /* TRICK: "+2" and not "+1" because of velolocsum                      */
                    protnum, TAGVERTLOCTAB, grafptr->proccomm, &requtab[2]) != MPI_SUCCESS) { /* requtab[2] is first surely available slot */
       errorPrint ("dgraphLoadCent: communication error (10)");
-      return     (1);                             /* Dirty exit as we can do nothing */
+      return (1);                                 /* Dirty exit as we can do nothing */
     }
     requnbr = 0;
     if (veloloctax != NULL) {
       if (MPI_Irecv (veloloctax + baseval, vertlocnbr, GNUM_MPI,
                      protnum, TAGVELOLOCTAB, grafptr->proccomm, &requtab[requnbr ++]) != MPI_SUCCESS) {
         errorPrint ("dgraphLoadCent: communication error (11)");
-        return     (1);
+        return (1);
       }
     }
     if (vlblloctax != NULL) {
       if (MPI_Irecv (vlblloctax + baseval, vertlocnbr, GNUM_MPI,
                      protnum, TAGVLBLLOCTAB, grafptr->proccomm, &requtab[requnbr ++]) != MPI_SUCCESS) {
         errorPrint ("dgraphLoadCent: communication error (12)");
-        return     (1);
+        return (1);
       }
     }
 
@@ -595,13 +595,13 @@ const int                   protnum)              /* Root process number        
       else {
         if (MPI_Irecv (edgeloctax, edgelocnbr, GNUM_MPI, protnum, TAGEDGELOCTAB, grafptr->proccomm, &requtab[requnbr ++]) != MPI_SUCCESS) {
           errorPrint ("dgraphLoadCent: communication error (13)");
-          return     (1);
+          return (1);
         }
         if (edlolocnbr != 0) {
           edloloctax = edgeloctax + edgelocnbr;
           if (MPI_Irecv (edloloctax, edgelocnbr, GNUM_MPI, protnum, TAGEDLOLOCTAB, grafptr->proccomm, &requtab[requnbr ++]) != MPI_SUCCESS) {
             errorPrint ("dgraphLoadCent: communication error (14)");
-            return     (1);
+            return (1);
           }
           edloloctax -= baseval;
         }
@@ -644,9 +644,9 @@ static
 int
 dgraphLoadDist (
 Dgraph * restrict const     grafptr,              /* Distributed graph to load            */
-FILE * const                stream,               /* One single centralized stream        */
+FILE * const                fileptr,              /* One single centralized stream        */
 Gnum                        baseval,              /* Base value (-1 means keep file base) */
-const DgraphFlag            flagval)              /* Graph loading flags                  */
+const GraphLoadFlag         flagval)              /* Graph loading flags                  */
 {
   Gnum                proclocnum;
   Gnum                vertlocnbr;
@@ -674,35 +674,38 @@ const DgraphFlag            flagval)              /* Graph loading flags        
   int                 o;
 
 #ifdef SCOTCH_DEBUG_DGRAPH2
-  if (stream == NULL) {
+  if (fileptr == NULL) {
     errorPrint ("dgraphLoadDist: invalid parameter");
-    return     (1);
+    return (1);
   }
 #endif /* SCOTCH_DEBUG_DGRAPH2 */
 
   reduloctab[0] = 0;                              /* Assume everything will be fine */
-  o  = intLoad (stream, &reduloctab[1]);          /* Read rest of header            */
-  o += intLoad (stream, &proclocnum);
-  o += intLoad (stream, &reduloctab[3]);
-  o += intLoad (stream, &reduloctab[5]);
-  o += intLoad (stream, &reduloctab[10]);
-  o += intLoad (stream, &reduloctab[11]);
-  o += intLoad (stream, &reduloctab[7]);
-  o += intLoad (stream, &reduloctab[9]);
+  o  = intLoad (fileptr, &reduloctab[1]);         /* Read rest of header            */
+  o += intLoad (fileptr, &proclocnum);
+  o += intLoad (fileptr, &reduloctab[3]);
+  o += intLoad (fileptr, &reduloctab[5]);
+  o += intLoad (fileptr, &reduloctab[10]);
+  o += intLoad (fileptr, &reduloctab[11]);
+  o += intLoad (fileptr, &reduloctab[7]);
+  o += intLoad (fileptr, &reduloctab[9]);
   if ((o != 8)            ||
       (reduloctab[9] < 0) ||
       (reduloctab[9] > 111)) {
     errorPrint ("dgraphLoadDist: bad input (1)");
     reduloctab[0] = 2;                            /* Immediate abort has maximum value so as to be propagated by MAX reduce */
   }
-  reduloctab[2]  = - reduloctab[1];
-  reduloctab[4]  = - reduloctab[3];
-  reduloctab[6]  = - reduloctab[5];
-  reduloctab[8]  = - reduloctab[7];
-  if ((int) proclocnum != grafptr->proclocnum)    /* If fragment is not read by proper process */
+  reduloctab[2] = - reduloctab[1];
+  reduloctab[4] = - reduloctab[3];
+  reduloctab[6] = - reduloctab[5];
+  reduloctab[8] = - reduloctab[7];
+
+  if ((int) proclocnum != grafptr->proclocnum) {  /* If fragment is not read by proper process */
+    errorPrint ("dgraphLoadDist: wrong process number to read distributed graph fragment");
     reduloctab[0] |= 1;
+  }
   if ((int) reduloctab[1] != grafptr->procglbnbr) {
-    errorPrint ("dgraphLoadDist: wrong number of processors to read distributed graph");
+    errorPrint ("dgraphLoadDist: wrong number of processes to read distributed graph");
     reduloctab[0] = 2;
   }
 
@@ -713,23 +716,16 @@ const DgraphFlag            flagval)              /* Graph loading flags        
   if (reduglbtab[0] >= 2)                         /* If has to abort immediately */
     return (1);
 
-  if ((reduglbtab[2] != - reduglbtab[1]) ||
-      (reduglbtab[4] != - reduglbtab[3]) ||
-      (reduglbtab[6] != - reduglbtab[5]) ||
-      (reduglbtab[8] != - reduglbtab[7])) {
+  if ((reduglbtab[2]  != - reduglbtab[1]) ||
+      (reduglbtab[4]  != - reduglbtab[3]) ||
+      (reduglbtab[6]  != - reduglbtab[5]) ||
+      (reduglbtab[8]  != - reduglbtab[7]) ||
+      (reduglbtab[10] !=   reduglbtab[3]) ||
+      (reduglbtab[11] !=   reduglbtab[5])) {
     errorPrint ("dgraphLoadDist: inconsistent distributed graph headers");
-    return     (1);
-  }
-  if (reduloctab[0] == 1)
-    errorPrint ("dgraphLoadDist: distributed graph file not read by proper process");
-  if (reduglbtab[0] != 0)                         /* If cannot go on anyway */
     return (1);
-
-  if ((reduglbtab[10] != reduloctab[3]) ||
-      (reduglbtab[11] != reduloctab[5]))
-    errorPrint ("dgraphLoadDist: bad input (2)");
-  if ((reduglbtab[10] != reduglbtab[3]) ||
-      (reduglbtab[11] != reduglbtab[5]))
+  }
+  if (reduglbtab[0] != 0)                         /* If cannot go on anyway */
     return (1);
 
   if (baseval == -1) {                            /* If keep file graph base     */
@@ -793,7 +789,7 @@ const DgraphFlag            flagval)              /* Graph loading flags        
       memFree (edgeloctax + baseval);
     if (vertloctax != NULL)
       memFree (vertloctax + baseval);
-    return  (1);
+    return (1);
   }
 
   degrlocmax = 0;                                 /* No maximum degree yet */
@@ -805,7 +801,7 @@ const DgraphFlag            flagval)              /* Graph loading flags        
     if (vlblloctax != NULL) {                     /* If must read label            */
       Gnum                vlbllocval;             /* Vertex label value to be read */
 
-      if (intLoad (stream, &vlbllocval) != 1) {  /* Read label data */
+      if (intLoad (fileptr, &vlbllocval) != 1) {  /* Read label data */
         errorPrint ("dgraphLoadDist: bad input (2)");
         cheklocval = 1;
         break;
@@ -815,7 +811,7 @@ const DgraphFlag            flagval)              /* Graph loading flags        
     if (proptab[2] != 0) {                    /* If must read vertex load */
       Gnum                velolocval;
 
-      if (intLoad (stream, &velolocval) != 1) { /* Read vertex load data */
+      if (intLoad (fileptr, &velolocval) != 1) { /* Read vertex load data */
         errorPrint ("dgraphLoadDist: bad input (3)");
         cheklocval = 1;
         break;
@@ -824,7 +820,7 @@ const DgraphFlag            flagval)              /* Graph loading flags        
         velolocsum            +=
         veloloctax[vertlocnum] = velolocval;
     }
-    if (intLoad (stream, &degrlocval) != 1) {     /* Read vertex degree */
+    if (intLoad (fileptr, &degrlocval) != 1) {    /* Read vertex degree */
       errorPrint ("dgraphLoadDist: bad input (4)");
       cheklocval = 1;
       break;
@@ -846,7 +842,7 @@ const DgraphFlag            flagval)              /* Graph loading flags        
       if (proptab[1] != 0) {                  /* If must read edge load        */
         Gnum                edlolocval;       /* Value where to read edge load */
 
-        if (intLoad (stream, &edlolocval) != 1) { /* Read edge load data */
+        if (intLoad (fileptr, &edlolocval) != 1) { /* Read edge load data */
           errorPrint ("dgraphLoadDist: bad input (5)");
           cheklocval = 1;
           break;
@@ -854,7 +850,7 @@ const DgraphFlag            flagval)              /* Graph loading flags        
         if (edloloctax != NULL)
           edloloctax[edgelocnum] = edlolocval;
       }
-      if (intLoad (stream, &edgelocval) != 1) { /* Read edge data */
+      if (intLoad (fileptr, &edgelocval) != 1) { /* Read edge data */
         errorPrint ("dgraphLoadDist: bad input (6)");
         cheklocval = 1;
         break;
@@ -900,10 +896,10 @@ static
 int
 dgraphLoadMulti (
 Dgraph * restrict const     grafptr,              /* Distributed graph to load            */
-FILE * const                stream,               /* One single centralized stream        */
+FILE * const                fileptr,              /* Duplicated centralized streams       */
 Gnum                        baseval,              /* Base value (-1 means keep file base) */
-const DgraphFlag            flagval)              /* Graph loading flags                  */
+const GraphLoadFlag         flagval)              /* Graph loading flags                  */
 {
   errorPrint ("dgraphLoadMulti: not implemented");
-  return     (1);
+  return (1);
 }

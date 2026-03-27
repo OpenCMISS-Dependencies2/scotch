@@ -171,8 +171,8 @@ const char * const          dataptr)              /* No use           */
     return (1);
   }
 
-  meshptr->flagval = MESHFREETABS;                /* Totally new mesh structure       */
-  meshptr->baseval = 1;                           /* Harwell-Boeing meshs have base 1 */
+  meshptr->flagval = MESHFREETABS;                /* Totally new mesh structure        */
+  meshptr->baseval = 1;                           /* Harwell-Boeing meshes have base 1 */
   meshptr->vendtax = meshptr->verttax;
   meshptr->verttax --;
   meshptr->edgenbr = habvixnbr * 2;

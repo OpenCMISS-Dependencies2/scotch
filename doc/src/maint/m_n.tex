@@ -30,7 +30,7 @@ As in standard typesetting, there is no space after an opening
 parenthesis, nor before a closing one, because they are not words.
 
 When it follows a keyword, an opening brace is always on the same line
-as the keyword (save for special cases, e.g. preprocessing macros
+as the keyword (save for special cases, \eg, preprocessing macros
 between the keyword and the opening brace). This is meant to maximize
 the number of ``useful readable lines'' on the screen. However,
 closing braces are on a separate line, aligned with the indent of the
@@ -48,7 +48,10 @@ Semicolons are always stuck to the word on their left, except when
 they follow an empty instruction, e.g., an empty loop body or an empty
 \texttt{for} field. Empty instructions are materialized by a single
 space character, which makes the semicolon separated from the
-preceding word. For instance: ``\texttt{for~(~;~;~)~;}''.
+preceding word. For instance:
+\begin{lstlisting}
+  for (hashbas = hashold - 1; hashtab[hashbas].vertnum != ~0; hashbas --) ;
+\end{lstlisting}
 
 Ternary operator elements ``\texttt{?}'' and ``\texttt{:}'' are
 considered as words and are surrounded by spaces. When the ternary
@@ -70,7 +73,39 @@ overlap, open parentheses have to be aligned. However, when arguments
 do not overlap, alignment is not required (e.g., for \texttt{return}
 statements with small parameters).
 
-\subsubsection{Idiomatic specificities}
+\subsubsection{The \texttt{goto} keyword}
+
+The use of the \texttt{goto} keyword should be restricted to the very
+specific cases when doing without it would significantly weigh down
+the coding style (\eg, through duplication of a long or complex piece
+of code), and/or would complicate the understanding of the code,
+and/or would impede performance (\eg, by adding a dedicated flag that
+would require extra tests within nested loops).
+
+In the following code snippet, the use of a \texttt{goto} statement
+allows one to jump directly to a long block that would else have to be
+duplicated, or the execution of which would require to add a dedicated
+flag to pass in sequence the two tests that guard the block.
+\begin{lstlisting}
+          if (hashtab[helmend].vertnum != velmnum) { /* If edge not yet created        */
+            ...                                   /* Record edge in hash table         */
+            nghbnbr = ...;                        /* Set number of remaining neighbors */
+            goto test;                            /* Is it enough to create the edge ? */
+          }
+          if (hashtab[helmend].vertend == velmend) { /* If hash slot found       */
+            if (... > 0) {                        /* If edge not already created */
+              hashtab[helmend].nghbnbr = -- nghbnbr; /* One more instance        */
+test:         if (nghbnbr <= 0) {                 /* If threshold reached        */
+                ...
+\end{lstlisting}
+
+Label names for \texttt{goto} statements should be in lowercase only,
+as their visibility is limited to the inside of a routine, like local
+variables. They should be short and telling, \eg~: ``\texttt{abort}'',
+``\texttt{fail}'', ``\texttt{loop}'', ``\texttt{nomatch}'', etc. Their
+indentation rules are explained below.
+
+\subsubsection{The \texttt{return} keyword}
 
 While, in C, \texttt{return} is a keyword which does not need
 parentheses around its argument, the \scotch\ coding style treats it
@@ -102,6 +137,25 @@ Loop bodies are always indented on the line below the loop statement,
 except when the loop body is an empty instruction. In this case, the
 terminating semicolon is placed on the same line as the loop
 statement, after a single space.
+
+\subsubsection{Indenting and labels}
+
+Label names for \texttt{goto} statements always start at column zero,
+and the colon should immediately follow the label. If at least one
+blank character can be placed between the colon and the indented text,
+the label should be placed on the same line as the text; else, the
+label should be placed on a separate line, immediately followed by the
+next line, without any blank line in-between. If a blank line is
+deemed necessary for the sake of readability, it should be placed
+before the label.
+\begin{lstlisting}
+    goto fail;
+    ...
+  }
+
+fail:
+  ...
+\end{lstlisting}
 
 \subsection{Comments}
 

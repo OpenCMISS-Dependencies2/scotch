@@ -1,4 +1,4 @@
-/* Copyright 2007-2010,2012,2014,2019,2020,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007-2010,2012,2014,2019,2020,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -57,7 +57,7 @@
 /**                # Version 6.0  : from : 29 sep 2012     **/
 /**                                 to   : 31 aug 2019     **/
 /**                # Version 7.0  : from : 03 may 2019     **/
-/**                                 to   : 17 jan 2023     **/
+/**                                 to   : 29 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -68,12 +68,15 @@
 #include "module.h"
 #include "common.h"
 #include "dgraph.h"
+#include "dgraph_allreduce.h"
 
 /*****************************/
 /*                           */
 /* This is the main routine. */
 /*                           */
 /*****************************/
+
+DGRAPHALLREDUCEMAXSUMOP (19, 7)
 
 /* This function checks the consistency
 ** of the given distributed graph.
@@ -112,8 +115,8 @@ const Dgraph * restrict const grafptr)
   Gnum                edlolocsiz;                 /* Size of neighbor edge load array (if any)    */
   int                 cheklocval;                 /* Local consistency flag                       */
   int                 chekglbval;                 /* Global consistency flag                      */
-  Gnum                reduloctab[20];             /* Arrays for reductions                        */
-  Gnum                reduglbtab[20];
+  Gnum                reduloctab[26];             /* Arrays for reductions                        */
+  Gnum                reduglbtab[26];
   MPI_Request         requloctab[8];              /* Arrays for pipelined communications          */
   MPI_Status          statloctab[8];
 
@@ -128,7 +131,7 @@ const Dgraph * restrict const grafptr)
 
   if (MPI_Barrier (proccomm) != MPI_SUCCESS) {    /* Synchronize */
     errorPrint ("dgraphCheck: communication error (1)");
-    return     (1);
+    return (1);
   }
 
   cheklocval =                                    /* Assume everything is all right */
@@ -145,20 +148,20 @@ const Dgraph * restrict const grafptr)
 
   if (MPI_Allreduce (&cheklocval, &chekglbval, 1, MPI_INT, MPI_MAX, proccomm) != MPI_SUCCESS) {
     errorPrint ("dgraphCheck: communication error (2)");
-    return     (1);
+    return (1);
   }
   if (chekglbval != 0)
     return (1);
   reduloctab[0] = (grafptr->procdsptab == NULL) ? 0 : 1; /* If private data not initialized */
   if (MPI_Allreduce (reduloctab, reduglbtab, 1, GNUM_MPI, MPI_SUM, proccomm) != MPI_SUCCESS) {
     errorPrint ("dgraphCheck: communication error (3)");
-    return     (1);
+    return (1);
   }
   if (reduglbtab[0] == 0)                         /* If distributed graph is empty         */
     return (0);                                   /* Do not go any further                 */
   if (reduglbtab[0] != procglbnbr) {              /* If private data not consistently here */
     errorPrint ("dgraphCheck: inconsistent communication data (2)");
-    return     (1);
+    return (1);
   }
 
   for (procrcvnum = 0; procrcvnum < grafptr->procglbnbr; procrcvnum ++) {
@@ -183,7 +186,7 @@ const Dgraph * restrict const grafptr)
   }
   if (MPI_Allreduce (&cheklocval, &chekglbval, 1, MPI_INT, MPI_MAX, proccomm) != MPI_SUCCESS) {
     errorPrint ("dgraphCheck: communication error (4)");
-    return     (1);
+    return (1);
   }
   if (chekglbval != 0) {
     if (procngbtab != NULL)
@@ -217,7 +220,9 @@ const Dgraph * restrict const grafptr)
   if ((grafptr->baseval    < 0) ||                /* Elementary constraints on graph fields */
       (grafptr->vertlocnbr < 0) ||
       (grafptr->vertlocnnd != (grafptr->vertlocnbr + grafptr->baseval)) ||
-      (((grafptr->flagval & DGRAPHHASEDGEGST) != 0) &&
+      (((grafptr->flagval & DGRAPHHASVENDLOC) == 0) && /* Graph is declared to be compact but vertex arrays are not merged */
+       (grafptr->vendloctax != (grafptr->vertloctax + 1))) ||
+      (((grafptr->flagval & DGRAPHHASEDGEGST) != 0) && /* Graph is declared to have a ghost edge array but data are inconsistent */
        ((grafptr->vertgstnbr < grafptr->vertlocnbr) ||
         (grafptr->vertgstnnd != (grafptr->vertgstnbr + grafptr->baseval)))) ||
       (grafptr->edgelocnbr < 0) ||
@@ -245,14 +250,23 @@ const Dgraph * restrict const grafptr)
   reduloctab[16] = - grafptr->edgeglbsmx;
   reduloctab[17] =   grafptr->degrglbmax;
   reduloctab[18] = - grafptr->degrglbmax;
-  reduloctab[19] = (Gnum) cheklocval;
-  if (MPI_Allreduce (reduloctab, reduglbtab, 20, GNUM_MPI, MPI_MAX, proccomm) != MPI_SUCCESS) {
+
+  reduloctab[19] = (veloloctax          != NULL) ? 1 : 0; /* Check consistency */
+  reduloctab[20] = (edgegsttax          != NULL) ? 1 : 0;
+  reduloctab[21] = (edloloctax          != NULL) ? 1 : 0;
+  reduloctab[22] = (grafptr->vnumloctax != NULL) ? 1 : 0;
+  reduloctab[23] = grafptr->vertlocnbr;           /* Recompute local sizes */
+  reduloctab[24] = grafptr->edgelocnbr;
+  reduloctab[25] = (Gnum) cheklocval;
+   
+  if (dgraphAllreduceMaxSum (reduloctab, reduglbtab, 19, 7, proccomm) != 0) {
     errorPrint ("dgraphCheck: communication error (5)");
-    return     (1);
-  }
-  if (reduglbtab[19] != 0)
     return (1);
-  if ((reduglbtab[ 1] != - reduglbtab[ 0]) ||       /* Check if global graph data match */
+  }
+  if (reduglbtab[25] != 0)
+    return (1);
+
+  if ((reduglbtab[ 1] != - reduglbtab[ 0]) ||     /* Check if global graph data match */
       (reduglbtab[ 3] != - reduglbtab[ 2]) ||
       (reduglbtab[ 5] != - reduglbtab[ 4]) ||
       (reduglbtab[ 7] != - reduloctab[ 6]) ||
@@ -265,39 +279,27 @@ const Dgraph * restrict const grafptr)
       (reduglbtab[18] != - reduloctab[17])) {
     errorPrint ("dgraphCheck: inconsistent global graph data (1)");
     cheklocval = 1;
+    goto abort;
   }
-  reduloctab[0] = (veloloctax          != NULL) ? 1 : 0; /* Check consistency */
-  reduloctab[1] = (edgegsttax          != NULL) ? 1 : 0;
-  reduloctab[2] = (edloloctax          != NULL) ? 1 : 0;
-  reduloctab[3] = (grafptr->vnumloctax != NULL) ? 1 : 0;
-  reduloctab[4] = grafptr->vertlocnbr;            /* Recompute local sizes */
-  reduloctab[5] = grafptr->edgelocnbr;
-  reduloctab[6] = (Gnum) cheklocval;
-  if (MPI_Allreduce (reduloctab, reduglbtab, 7, GNUM_MPI, MPI_SUM, proccomm) != MPI_SUCCESS) {
-    errorPrint ("dgraphCheck: communication error (6)");
-    return     (1);
-  }
-  if (reduglbtab[6] != 0)
-    return (1);
-  if (((reduglbtab[0] != 0) && (reduglbtab[0] != procglbnbr)) ||
-      ((reduglbtab[1] != 0) && (reduglbtab[1] != procglbnbr)) ||
-      ((reduglbtab[2] != 0) && (reduglbtab[2] != procglbnbr)) ||
-      ((reduglbtab[3] != 0) && (reduglbtab[3] != procglbnbr)) ||
-      (reduglbtab[4] != grafptr->vertglbnbr)                  ||
-      (reduglbtab[5] != grafptr->edgeglbnbr)) {
+  if (((reduglbtab[19] != 0) && (reduglbtab[19] != procglbnbr)) ||
+      ((reduglbtab[20] != 0) && (reduglbtab[20] != procglbnbr)) ||
+      ((reduglbtab[21] != 0) && (reduglbtab[21] != procglbnbr)) ||
+      ((reduglbtab[22] != 0) && (reduglbtab[22] != procglbnbr)) ||
+      (reduglbtab[23] != grafptr->vertglbnbr)                   ||
+      (reduglbtab[24] != grafptr->edgeglbnbr)) {
     errorPrint ("dgraphCheck: inconsistent global graph data (2)");
     cheklocval = 1;
+    goto abort;
   }
-
+  
   for (vertlocnum = grafptr->baseval, edgelocnbr = 0; vertlocnum < grafptr->vertlocnnd; vertlocnum ++) {
     Gnum                edgelocnum;
 
     if ((vendloctax[vertlocnum] < vertloctax[vertlocnum]) ||
         (vendloctax[vertlocnum] > (grafptr->edgelocsiz + grafptr->baseval))) {
       errorPrint ("dgraphCheck: inconsistent local vertex arrays");
-      edgelocnbr = grafptr->edgelocnbr;           /* Avoid unwanted cascaded error messages */
       cheklocval = 1;
-      break;
+      goto abort;
     }
     edgelocnbr += vendloctax[vertlocnum] - vertloctax[vertlocnum];
 
@@ -306,19 +308,15 @@ const Dgraph * restrict const grafptr)
         if ((edgegsttax[edgelocnum] < grafptr->baseval) ||
             (edgegsttax[edgelocnum] >= grafptr->vertgstnnd)) {
           errorPrint ("dgraphCheck: inconsistent ghost edge array");
-          edgelocnbr = grafptr->edgelocnbr;       /* Avoid unwanted cascaded error messages */
-          vertlocnum = grafptr->vertlocnnd;       /* Exit outer loop                        */
           cheklocval = 1;
-          break;
+          goto abort;
         }
 
         if ((edloloctax != NULL) &&
             (edloloctax[edgelocnum] <= 0)) {
           errorPrint ("dgraphCheck: invalid edge load");
-          edgelocnbr = grafptr->edgelocnbr;       /* Avoid unwanted cascaded error messages */
-          vertlocnum = grafptr->vertlocnnd;       /* Exit outer loop                        */
           cheklocval = 1;
-          break;
+          goto abort;
         }
       }
     }
@@ -328,9 +326,10 @@ const Dgraph * restrict const grafptr)
     cheklocval = 1;
   }
 
+abort:
   if (MPI_Allreduce (&cheklocval, &chekglbval, 1, MPI_INT, MPI_MAX, proccomm) != MPI_SUCCESS) {
-    errorPrint ("dgraphCheck: communication error (7)");
-    return     (1);
+    errorPrint ("dgraphCheck: communication error (6)");
+    return (1);
   }
   if (chekglbval != 0)
     return (1);
@@ -351,7 +350,10 @@ const Dgraph * restrict const grafptr)
       velolocsum += veloval;
     }
 
-    MPI_Allreduce (&velolocsum, &veloglbsum, 1, GNUM_MPI, MPI_SUM, proccomm);
+    if (MPI_Allreduce (&velolocsum, &veloglbsum, 1, GNUM_MPI, MPI_SUM, proccomm) != MPI_SUCCESS) {
+      errorPrint ("dgraphCheck: communication error (7)");
+      return (1);
+    }
 
     if (velolocsum != grafptr->velolocsum) {
       errorPrint ("dgraphCheck: invalid local vertex load sum");
@@ -361,7 +363,11 @@ const Dgraph * restrict const grafptr)
       errorPrint ("dgraphCheck: invalid global vertex load sum");
       cheklocval = 1;
     }
-    MPI_Allreduce (&cheklocval, &chekglbval, 1, MPI_INT, MPI_MAX, proccomm);
+
+    if (MPI_Allreduce (&cheklocval, &chekglbval, 1, MPI_INT, MPI_MAX, proccomm) != MPI_SUCCESS) {
+      errorPrint ("dgraphCheck: communication error (8)");
+      return (1);
+    }
     if (chekglbval != 0)
       return (1);
   }
@@ -390,8 +396,8 @@ const Dgraph * restrict const grafptr)
     edlongbtab[1] -= grafptr->baseval;
   }
   if (MPI_Allreduce (&cheklocval, &chekglbval, 1, MPI_INT, MPI_MAX, proccomm) != MPI_SUCCESS) {
-    errorPrint ("dgraphCheck: communication error (8)");
-    return     (1);
+    errorPrint ("dgraphCheck: communication error (9)");
+    return (1);
   }
   if (chekglbval != 0) {
     if (cheklocval == 0)
@@ -419,7 +425,7 @@ const Dgraph * restrict const grafptr)
     if ((vertngbnbr[procngbsel] != grafptr->proccnttab[procngbnum]) ||
         (vertngbnbr[procngbsel]  > (vertngbmax - vertngbmin))) {
       errorPrint ("dgraphCheck: internal error (1)");
-      return     (1);
+      return (1);
     }
 #endif /* SCOTCH_DEBUG_DGRAPH2 */
 

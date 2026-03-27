@@ -1,4 +1,4 @@
-/* Copyright 2020,2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2020,2021,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -44,7 +44,7 @@
 /**   DATES      : # Version 6.1  : from : 01 sep 2020     **/
 /**                                 to   : 28 may 2021     **/
 /**                # Version 7.0  : from : 21 jan 2023     **/
-/**                                 to   : 11 aug 2024     **/
+/**                                 to   : 06 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -231,13 +231,13 @@ SCOTCH_Num ** const         adjncy)
 
   o = _SCOTCH_METIS_MeshToDual2 (&meshdat, *nuimflag, *nn, *ne, eptr, eind);
   if (o != METIS_OK) {
-    SCOTCH_errorPrint ("METIS_MeshToDual: cannot create mesh");
+    SCOTCH_errorPrint ("SCOTCH_METIS_MeshToDual: cannot create mesh");
     return (o);
   }
   o = SCOTCH_meshGraphDual (&meshdat, &grafdat, *ncommon);
   SCOTCH_meshExit (&meshdat);                     /* Mesh structure is no longer needed */
   if (o != 0) {
-    SCOTCH_errorPrint ("METIS_MeshToDual: cannot create graph from mesh");
+    SCOTCH_errorPrint ("SCOTCH_METIS_MeshToDual: cannot create graph from mesh");
     return (o);
   }
 
@@ -245,7 +245,7 @@ SCOTCH_Num ** const         adjncy)
 
   if (((*xadj   = malloc ((vertnbr + 1) * sizeof (SCOTCH_Num))) == NULL) || /* Do not use libScotch memory allocation as freed by user */
       ((*adjncy = malloc (edgenbr       * sizeof(SCOTCH_Num)))  == NULL)) {
-    SCOTCH_errorPrint ("METIS_MeshToDual: out of memory");
+    SCOTCH_errorPrint ("SCOTCH_METIS_MeshToDual: out of memory");
     if (*xadj != NULL)
       free (*xadj);
     SCOTCH_graphExit (&grafdat);

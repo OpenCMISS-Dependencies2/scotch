@@ -1,4 +1,4 @@
-/* Copyright 2007,2010,2012,2018,2019,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2010,2012,2018,2019,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -47,7 +47,7 @@
 /**                # Version 6.0  : from : 27 nov 2012     **/
 /**                                 to   : 23 may 2018     **/
 /**                # Version 7.0  : from : 04 aug 2018     **/
-/**                                 to   : 19 jan 2023     **/
+/**                                 to   : 07 oct 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -116,11 +116,11 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
   reduloctab[3] = dgrfptr->ehallocnbr;
   if (MPI_Allreduce (reduloctab, reduglbtab, 4, GNUM_MPI, MPI_SUM, dgrfptr->s.proccomm) != MPI_SUCCESS) {
     errorPrint ("hdgraphGather: communication error (1)");
-    return     (1);
+    return (1);
   }
   if (reduglbtab[0] != 1) {
     errorPrint ("hdgraphGather: should have only one root");
-    return     (1);
+    return (1);
   }
   rootnum = (int) reduglbtab[1];                  /* Get rank of root process                           */
   degrmax = dgrfptr->s.degrglbmax;                /* Distributed degree does not account for halo edges */
@@ -185,20 +185,21 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
       cgrfptr->contptr   = dgrfptr->contptr;
     }
   }
-  if ((cheklocval == 0) &&
-      (memAllocGroup ((void **) (void *)
-                      &verthaltax, (size_t) (dgrfptr->vhallocnbr * sizeof (Gnum)),
-                      &edgehaltax, (size_t) (dgrfptr->ehallocnbr * sizeof (Gnum)), NULL) == NULL)) {
-    errorPrint ("hdgraphGather: out of memory (4)");
-    cheklocval = 1;
-  }
-  else {
-    verthaltax -= dgrfptr->s.baseval;
-    edgehaltax -= dgrfptr->s.baseval;
+  if (cheklocval == 0) {
+    if (memAllocGroup ((void **) (void *)
+                       &verthaltax, (size_t) (dgrfptr->vhallocnbr * sizeof (Gnum)),
+                       &edgehaltax, (size_t) (dgrfptr->ehallocnbr * sizeof (Gnum)), NULL) == NULL) {
+      errorPrint ("hdgraphGather: out of memory (4)");
+      cheklocval = 1;
+    }
+    else {
+      verthaltax -= dgrfptr->s.baseval;
+      edgehaltax -= dgrfptr->s.baseval;
+    }
   }
   if (MPI_Allreduce (&cheklocval, &chekglbval, 1, MPI_INT, MPI_SUM, dgrfptr->s.proccomm) != MPI_SUCCESS) {
     errorPrint ("hdgraphGather: communication error (2)");
-    return     (1);
+    return (1);
   }
   if (chekglbval != 0) {
     if (verthaltax != NULL)
@@ -224,13 +225,13 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
                        cgrfptr->s.verttax + 1,      /* First index will always be equal to baseval too, and procdsptab holds based values */
                        dgrfptr->s.proccnttab, dgrfptr->s.procdsptab, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
         errorPrint ("hdgraphGather: communication error (3)");
-        return     (1);
+        return (1);
       }
       if (commGatherv (dgrfptr->s.vendloctax + dgrfptr->s.baseval,
                        dgrfptr->s.vertlocnbr, GNUM_MPI, cgrfptr->vnhdtax, /* procdsptab holds based values */
                        dgrfptr->s.proccnttab, dgrfptr->s.procdsptab, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
         errorPrint ("hdgraphGather: communication error (4)");
-        return     (1);
+        return (1);
       }
 
       for (procglbnum = 1, vertnum = dgrfptr->s.procdsptab[1] + 1; /* Adjust index sub-arrays for all processors except the first one */
@@ -257,31 +258,31 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
                        (int) (dgrfptr->s.edgelocnbr + dgrfptr->ehallocnbr), GNUM_MPI, cgrfptr->s.edgetax,
                        recvcnttab, recvdsptab, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
         errorPrint ("hdgraphGather: communication error (5)");
-        return     (1);
+        return (1);
       }
     }
     else {
       if (MPI_Gatherv (dgrfptr->s.vertloctax + 1 + dgrfptr->s.baseval, /* Do not send first index, it is always equal to baseval */
                        (int) dgrfptr->s.vertlocnbr, GNUM_MPI, NULL, NULL, NULL, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
         errorPrint ("hdgraphGather: communication error (6)");
-        return     (1);
+        return (1);
       }
       if (MPI_Gatherv (dgrfptr->s.vendloctax + dgrfptr->s.baseval,
                        (int) dgrfptr->s.vertlocnbr, GNUM_MPI, NULL, NULL, NULL, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
         errorPrint ("hdgraphGather: communication error (7)");
-        return     (1);
+        return (1);
       }
       if (MPI_Gatherv (dgrfptr->s.edgeloctax + dgrfptr->s.baseval, /* Gather edge arrays with global vertex indices */
                        (int) (dgrfptr->s.edgelocnbr + dgrfptr->ehallocnbr), GNUM_MPI,
                        NULL, NULL, NULL, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
         errorPrint ("hdgraphGather: communication error (8)");
-        return     (1);
+        return (1);
       }
     }
   }
   else {
     errorPrint ("hdgraphGather: Not implemented"); /* Not really necessary as all Hdgraph structures created by Scotch itself are compact */
-    return     (1);
+    return (1);
   }
 
   memSet (verthaltax + dgrfptr->s.baseval, 0, dgrfptr->vhallocnbr * sizeof (Gnum)); /* Initialize halo end vertex count array */
@@ -294,7 +295,7 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
   vhallocnbr = (int) dgrfptr->vhallocnbr;
   if (MPI_Gather (&vhallocnbr, 1, MPI_INT, recvcnttab, 1, MPI_INT, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
     errorPrint ("hdgraphGather: communication error (9)");
-    return     (1);
+    return (1);
   }
   if (cgrfptr != NULL) {                          /* Build gather parameter array to receive halo edge counts */
     Gnum               procglbnum;
@@ -307,7 +308,7 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
     if (MPI_Gatherv (verthaltax + dgrfptr->s.baseval, (int) dgrfptr->vhallocnbr, GNUM_MPI, /* Gather count arrays of halo vertices */
                      cgrfptr->s.verttax + cgrfptr->vnohnnd + 1, recvcnttab, recvdsptab, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
       errorPrint ("hdgraphGather: communication error (10)");
-      return     (1);
+      return (1);
     }
 
     for (procglbnum = 0, vertnum = dgrfptr->s.baseval; /* Adjust end vertex indices for halo edges */
@@ -330,7 +331,7 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
     if (MPI_Gatherv (verthaltax + dgrfptr->s.baseval, (int) dgrfptr->vhallocnbr, GNUM_MPI, /* Gather count arrays of halo vertices */
                      NULL, NULL, NULL, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
       errorPrint ("hdgraphGather: communication error (11)");
-      return     (1);
+      return (1);
     }
   }
   for (vertlocnum = edgehalnum = dgrfptr->s.baseval, vhallocnnd = dgrfptr->vhallocnbr + dgrfptr->s.baseval;
@@ -351,7 +352,7 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
   ehallocnbr = (int) dgrfptr->ehallocnbr;
   if (MPI_Gather (&ehallocnbr, 1, MPI_INT, recvcnttab, 1, MPI_INT, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) { /* Gather halo edge counts */
     errorPrint ("hdgraphGather: communication error (12)");
-    return     (1);
+    return (1);
   }
   if (cgrfptr != NULL) {                          /* Compute receive arrays for edge sub-arrays of halo vertices */
     Gnum               procglbnum;
@@ -365,14 +366,14 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
                      cgrfptr->s.edgetax + cgrfptr->enohnbr + reduglbtab[3] + dgrfptr->s.baseval, recvcnttab, recvdsptab, GNUM_MPI,
                      rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
       errorPrint ("hdgraphGather: communication error (13)");
-      return     (1);
+      return (1);
     }
   }
   else {
     if (MPI_Gatherv (edgehaltax + dgrfptr->s.baseval, (int) dgrfptr->ehallocnbr, GNUM_MPI, /* Gather edge arrays of halo vertices */
                      NULL, NULL, NULL, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
       errorPrint ("hdgraphGather: communication error (14)");
-      return     (1);
+      return (1);
     }
   }
 
@@ -387,7 +388,7 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
                        cgrfptr->s.velotax, dgrfptr->s.proccnttab, dgrfptr->s.procdsptab, GNUM_MPI,
                        rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
         errorPrint ("hdgraphGather: communication error (15)");
-        return     (1);
+        return (1);
       }
 
       for (vertnum = cgrfptr->vnohnnd; vertnum < cgrfptr->s.vertnnd; vertnum ++) /* complete filling of vertex load array */
@@ -398,7 +399,7 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
                        cgrfptr->s.vnumtax, dgrfptr->s.proccnttab, dgrfptr->s.procdsptab, GNUM_MPI,
                        rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
         errorPrint ("hdgraphGather: communication error (16)");
-        return     (1);
+        return (1);
       }
     }
 
@@ -421,14 +422,14 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
       if (MPI_Gatherv (dgrfptr->s.veloloctax + dgrfptr->s.baseval, (int) dgrfptr->s.vertlocnbr, GNUM_MPI,
                        NULL, NULL, NULL, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
         errorPrint ("hdgraphGather: communication error (17)");
-        return     (1);
+        return (1);
       }
     }
     if (dgrfptr->s.vnumloctax != NULL) {          /* Get vertex numbers if any */
       if (MPI_Gatherv (dgrfptr->s.vnumloctax + dgrfptr->s.baseval, (int) dgrfptr->s.vertlocnbr, GNUM_MPI,
                        NULL, NULL, NULL, GNUM_MPI, rootnum, dgrfptr->s.proccomm) != MPI_SUCCESS) {
         errorPrint ("hdgraphGather: communication error (18)");
-        return     (1);
+        return (1);
       }
     }
   }
@@ -437,7 +438,7 @@ Hgraph * restrict const     cgrfptr)              /* Centralized halo graph */
   cheklocval = (cgrfptr != NULL) ? hgraphCheck (cgrfptr) : 0;
   if (MPI_Allreduce (&cheklocval, &chekglbval, 1, MPI_INT, MPI_MAX, dgrfptr->s.proccomm) != MPI_SUCCESS) {
     errorPrint ("hdgraphGather: communication error (19)");
-    return     (1);
+    return (1);
   }
   if (chekglbval != 0) {
     errorPrint ("hdgraphGather: internal error");

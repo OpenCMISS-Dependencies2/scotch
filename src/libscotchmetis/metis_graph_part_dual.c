@@ -1,4 +1,4 @@
-/* Copyright 2020,2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2020,2021,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -44,7 +44,7 @@
 /**   DATES      : # Version 6.1  : from : 01 sep 2020     **/
 /**                                 to   : 30 dec 2021     **/
 /**                # Version 7.0  : from : 21 jan 2023     **/
-/**                                 to   : 11 aug 2024     **/
+/**                                 to   : 06 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -116,12 +116,12 @@ SCOTCH_Num * const          npart)                /*+ Node partition array to be
     for (partnum = 0, wtgtsum = 0.0; partnum < *nparts; partnum ++)
       wtgtsum += tpwgts[partnum];                 /* Sum floating-point part weights */
     if (fabs (wtgtsum - 1.0) >= EPSILON) {
-      SCOTCH_errorPrint ("METIS_PartMeshDual: invalid partition weight sum");
+      SCOTCH_errorPrint ("SCOTCH_METIS_PartMeshDual: invalid partition weight sum");
       *objval = METIS_ERROR_INPUT;
       return (METIS_ERROR_INPUT);
     }
     if ((wtgttab = memAlloc (*nparts * sizeof (SCOTCH_Num))) == NULL) {
-      SCOTCH_errorPrint ("METIS_PartMeshDual: out of memory (1)");
+      SCOTCH_errorPrint ("SCOTCH_METIS_PartMeshDual: out of memory (1)");
       *objval = METIS_ERROR_MEMORY;
       return (METIS_ERROR_MEMORY);
     }
@@ -133,7 +133,7 @@ SCOTCH_Num * const          npart)                /*+ Node partition array to be
     memFree (wtgttab);
 
     if (o != 0) {
-      SCOTCH_errorPrint ("METIS_PartMeshDual: cannot create weighted architecture");
+      SCOTCH_errorPrint ("SCOTCH_METIS_PartMeshDual: cannot create weighted architecture");
       SCOTCH_archExit   (&archdat);
       *objval = METIS_ERROR_MEMORY;
       return (METIS_ERROR_MEMORY);
@@ -146,7 +146,7 @@ SCOTCH_Num * const          npart)                /*+ Node partition array to be
 
   SCOTCH_meshInit (&meshdat);
   if ((o = _SCOTCH_METIS_MeshToDual2 (&meshdat, baseval, *nn, *ne, eptr, eind)) != METIS_OK) {
-    SCOTCH_errorPrint ("METIS_PartMeshDual: cannot build dual mesh");
+    SCOTCH_errorPrint ("SCOTCH_METIS_PartMeshDual: cannot build dual mesh");
     SCOTCH_archExit   (&archdat);
     *objval = o;                                  /* Error value for the Fortran interface */
     return (o);
@@ -155,7 +155,7 @@ SCOTCH_Num * const          npart)                /*+ Node partition array to be
   SCOTCH_graphInit (&grafdat);
   o = SCOTCH_meshGraphDual (&meshdat, &grafdat, *ncommon);
   if (o != 0) {
-    SCOTCH_errorPrint ("METIS_PartMeshDual: cannot build dual graph");
+    SCOTCH_errorPrint ("SCOTCH_METIS_PartMeshDual: cannot build dual graph");
     SCOTCH_meshExit   (&meshdat);
     SCOTCH_graphExit  (&grafdat);
     SCOTCH_archExit   (&archdat);
@@ -173,7 +173,7 @@ SCOTCH_Num * const          npart)                /*+ Node partition array to be
     SCOTCH_Num * restrict       edlotax;
 
     if ((edlotab = memAlloc (edgenbr * sizeof (SCOTCH_Num))) == NULL) {
-      SCOTCH_errorPrint ("METIS_PartMeshDual: out of memory (2)");
+      SCOTCH_errorPrint ("SCOTCH_METIS_PartMeshDual: out of memory (2)");
       SCOTCH_meshExit   (&meshdat);
       SCOTCH_graphExit  (&grafdat);
       SCOTCH_archExit   (&archdat);
@@ -231,7 +231,7 @@ SCOTCH_Num * const          npart)                /*+ Node partition array to be
   SCOTCH_graphExit (&grafdat);
 
   if (o != METIS_OK) {
-    SCOTCH_errorPrint ("METIS_PartMeshDual: could not partition graph");
+    SCOTCH_errorPrint ("SCOTCH_METIS_PartMeshDual: could not partition graph");
     SCOTCH_meshExit   (&meshdat);
     *objval = METIS_ERROR;
     return (METIS_ERROR);

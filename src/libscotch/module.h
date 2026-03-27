@@ -1,4 +1,4 @@
-/* Copyright 2004,2007-2016,2018-2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007-2016,2018-2026 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -55,7 +55,7 @@
 /**                # Version 6.1  : from : 24 aug 2020     **/
 /**                                 to   : 30 dec 2021     **/
 /**                # Version 7.0  : from : 19 feb 2018     **/
-/**                                 to   : 20 nov 2024     **/
+/**                                 to   : 08 feb 2026     **/
 /**                                                        **/
 /************************************************************/
 
@@ -63,7 +63,7 @@
 ** Version and copyright strings.
 */
 
-#define SCOTCH_COPYRIGHT_STRING     "Copyright 1992-2024 IPB, Universite de Bordeaux, INRIA & CNRS, France"
+#define SCOTCH_COPYRIGHT_STRING     "Copyright 1992-2026 IPB, Universite de Bordeaux, INRIA & CNRS, France"
 #define SCOTCH_LICENSE_STRING       "This software is libre/free software under CeCILL-C -- see the user's manual for more information"
 #ifdef SCOTCH_CODENAME
 #define SCOTCH_VERSION_STRING       STRINGIFY (SCOTCH_VERSION) "." STRINGIFY (SCOTCH_RELEASE) "." STRINGIFY (SCOTCH_PATCHLEVEL) " (" STRINGIFY (SCOTCH_CODENAME) ")"
@@ -158,6 +158,7 @@
 #define SCOTCH_DEBUG_BGRAPH2
 #define SCOTCH_DEBUG_DGRAPH2
 #define SCOTCH_DEBUG_DMAP2
+#define SCOTCH_DEBUG_DMESH2
 #define SCOTCH_DEBUG_DORDER2
 #define SCOTCH_DEBUG_GEOM2
 #define SCOTCH_DEBUG_GRAPH2
@@ -188,6 +189,7 @@
 #define SCOTCH_DEBUG_BGRAPH1
 #define SCOTCH_DEBUG_DGRAPH1
 #define SCOTCH_DEBUG_DMAP1
+#define SCOTCH_DEBUG_DMESH1
 #define SCOTCH_DEBUG_DORDER1
 #define SCOTCH_DEBUG_GEOM1
 #define SCOTCH_DEBUG_GRAPH1
@@ -263,6 +265,9 @@
 #define SCOTCH_COARSENFOLD          SCOTCH_NAME_PUBLIC (SCOTCH_COARSENFOLD)
 #define SCOTCH_COARSENFOLDDUP       SCOTCH_NAME_PUBLIC (SCOTCH_COARSENFOLDDUP)
 #define SCOTCH_COARSENNOMERGE       SCOTCH_NAME_PUBLIC (SCOTCH_COARSENNOMERGE)
+#define SCOTCH_NUM_MPI              SCOTCH_NAME_PUBLIC (SCOTCH_NUM_MPI)
+#define SCOTCH_NUMMAX               SCOTCH_NAME_PUBLIC (SCOTCH_NUMMAX)
+#define SCOTCH_NUMSTRING            SCOTCH_NAME_PUBLIC (SCOTCH_NUMSTRING)
 #define SCOTCH_STRATDEFAULT         SCOTCH_NAME_PUBLIC (SCOTCH_STRATDEFAULT)
 #define SCOTCH_STRATQUALITY         SCOTCH_NAME_PUBLIC (SCOTCH_STRATQUALITY)
 #define SCOTCH_STRATSPEED           SCOTCH_NAME_PUBLIC (SCOTCH_STRATSPEED)
@@ -275,26 +280,31 @@
 #define SCOTCH_STRATLEVELMIN        SCOTCH_NAME_PUBLIC (SCOTCH_STRATLEVELMIN)
 #define SCOTCH_STRATLEAFSIMPLE      SCOTCH_NAME_PUBLIC (SCOTCH_STRATLEAFSIMPLE)
 #define SCOTCH_STRATSEPASIMPLE      SCOTCH_NAME_PUBLIC (SCOTCH_STRATSEPASIMPLE)
-#endif /* SCOTCH_RENAME_ALL */
+#define SCOTCH_STRATDISCONNECTED    SCOTCH_NAME_PUBLIC (SCOTCH_STRATDISCONNECTED)
 
-#ifdef SCOTCH_RENAME
 #define SCOTCH_Arch                 SCOTCH_NAME_PUBLIC (SCOTCH_Arch)
+#define SCOTCH_ArchDom              SCOTCH_NAME_PUBLIC (SCOTCH_ArchDom)
+#define SCOTCH_Context              SCOTCH_NAME_PUBLIC (SCOTCH_Context)
+#define SCOTCH_Dgraph               SCOTCH_NAME_PUBLIC (SCOTCH_Dgraph)
+#define SCOTCH_DgraphHaloReq        SCOTCH_NAME_PUBLIC (SCOTCH_DgraphHaloReq)
+#define SCOTCH_Dmapping             SCOTCH_NAME_PUBLIC (SCOTCH_Dmapping)
+#define SCOTCH_Dmesh                SCOTCH_NAME_PUBLIC (SCOTCH_Dmesh)
+#define SCOTCH_Dordering            SCOTCH_NAME_PUBLIC (SCOTCH_Dordering)
 #define SCOTCH_Geom                 SCOTCH_NAME_PUBLIC (SCOTCH_Geom)
 #define SCOTCH_Graph                SCOTCH_NAME_PUBLIC (SCOTCH_Graph)
+#define SCOTCH_GraphPart2           SCOTCH_NAME_PUBLIC (SCOTCH_GraphPart2)
 #define SCOTCH_Idx                  SCOTCH_NAME_PUBLIC (SCOTCH_Idx)
 #define SCOTCH_Mesh                 SCOTCH_NAME_PUBLIC (SCOTCH_Mesh)
 #define SCOTCH_Mapping              SCOTCH_NAME_PUBLIC (SCOTCH_Mapping)
 #define SCOTCH_Num                  SCOTCH_NAME_PUBLIC (SCOTCH_Num)
 #define SCOTCH_Ordering             SCOTCH_NAME_PUBLIC (SCOTCH_Ordering)
 #define SCOTCH_Strat                SCOTCH_NAME_PUBLIC (SCOTCH_Strat)
-#endif /* SCOTCH_RENAME */
+#endif /* SCOTCH_RENAME_ALL */
 
-#ifdef SCOTCH_COMMON_RENAME
-#define SCOTCH_NAME_GLOBAL(n)       SCOTCH_NAME_MACRO2 (SCOTCH_, n) /* Same name whatever the suffix is, since external library */
+#define SCOTCH_NAME_GLOBAL(n)       SCOTCH_NAME_MACRO2 (SCOTCH_, n) /* Always renamed, since exposed in Scotch user's manual */
 #define errorPrint                  SCOTCH_NAME_GLOBAL (errorPrint)
 #define errorPrintW                 SCOTCH_NAME_GLOBAL (errorPrintW)
 #define errorProg                   SCOTCH_NAME_GLOBAL (errorProg)
-#endif /* SCOTCH_COMMON_RENAME */
 
 #if ((defined SCOTCH_COMMON_RENAME) && ! (defined SCOTCH_COMMON_INTERNAL))
 #define clockGet                    SCOTCH_NAME_INTERN (clockGet)
@@ -715,6 +725,7 @@
 #define bgraphBipartDfJoin          SCOTCH_NAME_INTERN (bgraphBipartDfJoin)
 #define bgraphBipartEx              SCOTCH_NAME_INTERN (bgraphBipartEx)
 #define bgraphBipartFm              SCOTCH_NAME_INTERN (bgraphBipartFm)
+#define bgraphBipartGa              SCOTCH_NAME_INTERN (bgraphBipartGa)
 #define bgraphBipartGg              SCOTCH_NAME_INTERN (bgraphBipartGg)
 #define bgraphBipartGp              SCOTCH_NAME_INTERN (bgraphBipartGp)
 #define bgraphBipartMl              SCOTCH_NAME_INTERN (bgraphBipartMl)
@@ -790,6 +801,14 @@
 #define dmapTerm                    SCOTCH_NAME_INTERN (dmapTerm)
 #define dmapSave                    SCOTCH_NAME_INTERN (dmapSave)
 
+#define dmeshBuildAdm               SCOTCH_NAME_INTERN (dmeshBuildAdm)
+#define dmeshDgraphDual             SCOTCH_NAME_INTERN (dmeshDgraphDual)
+#define dmeshExit                   SCOTCH_NAME_INTERN (dmeshExit)
+#define dmeshFree                   SCOTCH_NAME_INTERN (dmeshFree)
+#define dmeshInit                   SCOTCH_NAME_INTERN (dmeshInit)
+#define dmeshLoad                   SCOTCH_NAME_INTERN (dmeshLoad)
+
+#define dorderCheck                 SCOTCH_NAME_INTERN (dorderCheck)
 #define dorderDispose               SCOTCH_NAME_INTERN (dorderDispose)
 #define dorderExit                  SCOTCH_NAME_INTERN (dorderExit)
 #define dorderFree                  SCOTCH_NAME_INTERN (dorderFree)
@@ -884,6 +903,7 @@
 #define hdgraphOrderNd              SCOTCH_NAME_INTERN (hdgraphOrderNd)
 #define hdgraphOrderNd2             SCOTCH_NAME_INTERN (hdgraphOrderNd2)
 #define hdgraphOrderSi              SCOTCH_NAME_INTERN (hdgraphOrderSi)
+#define hdgraphOrderSi2             SCOTCH_NAME_INTERN (hdgraphOrderSi2)
 #define hdgraphOrderSq              SCOTCH_NAME_INTERN (hdgraphOrderSq)
 #define hdgraphOrderSq2             SCOTCH_NAME_INTERN (hdgraphOrderSq2)
 #define hdgraphOrderSt              SCOTCH_NAME_INTERN (hdgraphOrderSt)
@@ -907,6 +927,7 @@
 #define hgraphOrderSi               SCOTCH_NAME_INTERN (hgraphOrderSi)
 #define hgraphOrderSt               SCOTCH_NAME_INTERN (hgraphOrderSt)
 #define hgraphUnhalo                SCOTCH_NAME_INTERN (hgraphUnhalo)
+#define hgraphUnhalo2               SCOTCH_NAME_INTERN (hgraphUnhalo2)
 
 #define hmeshorderststratab         SCOTCH_NAME_INTERN (hmeshorderststratab)
 #define hmeshExit                   SCOTCH_NAME_INTERN (hmeshExit)
@@ -1001,7 +1022,7 @@
 #define meshGeomLoadHabo            SCOTCH_NAME_INTERN (meshGeomLoadHabo)
 #define meshGeomLoadScot            SCOTCH_NAME_INTERN (meshGeomLoadScot)
 #define meshGeomSaveScot            SCOTCH_NAME_INTERN (meshGeomSaveScot)
-#define meshGraph                   SCOTCH_NAME_INTERN (meshGraph)
+#define meshGraphNodal              SCOTCH_NAME_INTERN (meshGraphNodal)
 #define meshGraphDual               SCOTCH_NAME_INTERN (meshGraphDual)
 #define meshInduceList              SCOTCH_NAME_INTERN (meshInduceList)
 #define meshInducePart              SCOTCH_NAME_INTERN (meshInducePart)
@@ -1030,10 +1051,16 @@
 #define stratCondEval               SCOTCH_NAME_INTERN (stratCondEval)
 #define stratCondExit               SCOTCH_NAME_INTERN (stratCondExit)
 #define stratCondSave               SCOTCH_NAME_INTERN (stratCondSave)
-#define stratParserBegin            SCOTCH_NAME_INTERN (stratParserBegin)
 #define stratParserInit             SCOTCH_NAME_INTERN (stratParserInit)
 #define stratParserInput            SCOTCH_NAME_INTERN (stratParserInput)
 #define stratParserLex              SCOTCH_NAME_INTERN (stratParserLex)
+#define stratParserLexBegin         SCOTCH_NAME_INTERN (stratParserLexBegin)
+#define stratParserLexBufDelete     SCOTCH_NAME_INTERN (stratParserLexBufDelete)
+#define stratParserLexBufDestroy    SCOTCH_NAME_INTERN (stratParserLexBufDestroy)
+#define stratParserLexBufSwitch     SCOTCH_NAME_INTERN (stratParserLexBufSwitch)
+#define stratParserLexDestroy       SCOTCH_NAME_INTERN (stratParserLexDestroy)
+#define stratParserLexInit          SCOTCH_NAME_INTERN (stratParserLexInit)
+#define stratParserLexScanString    SCOTCH_NAME_INTERN (stratParserLexScanString)
 #define stratParserRemain           SCOTCH_NAME_INTERN (stratParserRemain)
 #define stratParserSelect           SCOTCH_NAME_INTERN (stratParserSelect)
 #define stratParserParse            SCOTCH_NAME_INTERN (stratParserParse)
@@ -1128,7 +1155,14 @@
 #define SCOTCH_archCmplt            SCOTCH_NAME_PUBLIC (SCOTCH_archCmplt)
 #define SCOTCH_archCmpltw           SCOTCH_NAME_PUBLIC (SCOTCH_archCmpltw)
 #define SCOTCH_archDomAlloc         SCOTCH_NAME_PUBLIC (SCOTCH_archDomAlloc)
+#define SCOTCH_archDomBipart        SCOTCH_NAME_PUBLIC (SCOTCH_archDomBipart)
+#define SCOTCH_archDomDist          SCOTCH_NAME_PUBLIC (SCOTCH_archDomDist)
+#define SCOTCH_archDomFrst          SCOTCH_NAME_PUBLIC (SCOTCH_archDomFrst)
+#define SCOTCH_archDomNum           SCOTCH_NAME_PUBLIC (SCOTCH_archDomNum)
 #define SCOTCH_archDomSizeof        SCOTCH_NAME_PUBLIC (SCOTCH_archDomSizeof)
+#define SCOTCH_archDomSize          SCOTCH_NAME_PUBLIC (SCOTCH_archDomSize)
+#define SCOTCH_archDomTerm          SCOTCH_NAME_PUBLIC (SCOTCH_archDomTerm)
+#define SCOTCH_archDomWght          SCOTCH_NAME_PUBLIC (SCOTCH_archDomWght)
 #define SCOTCH_archExit             SCOTCH_NAME_PUBLIC (SCOTCH_archExit)
 #define SCOTCH_archHcub             SCOTCH_NAME_PUBLIC (SCOTCH_archHcub)
 #define SCOTCH_archInit             SCOTCH_NAME_PUBLIC (SCOTCH_archInit)
@@ -1149,12 +1183,28 @@
 #define SCOTCH_archVar              SCOTCH_NAME_PUBLIC (SCOTCH_archVar)
 #define SCOTCH_archVcmplt           SCOTCH_NAME_PUBLIC (SCOTCH_archVcmplt)
 #define SCOTCH_archVhcub            SCOTCH_NAME_PUBLIC (SCOTCH_archVhcub)
+#define SCOTCH_contextBindDgraph    SCOTCH_NAME_PUBLIC (SCOTCH_contextBindDgraph)
+#define SCOTCH_contextBindGraph     SCOTCH_NAME_PUBLIC (SCOTCH_contextBindGraph)
+#define SCOTCH_contextBindMesh      SCOTCH_NAME_PUBLIC (SCOTCH_contextBindMesh)
+#define SCOTCH_contextExit          SCOTCH_NAME_PUBLIC (SCOTCH_contextExit)
+#define SCOTCH_contextInit          SCOTCH_NAME_PUBLIC (SCOTCH_contextInit)
+#define SCOTCH_contextOptionGetNum  SCOTCH_NAME_PUBLIC (SCOTCH_contextOptionGetNum)
+#define SCOTCH_contextOptionParse   SCOTCH_NAME_PUBLIC (SCOTCH_contextOptionParse)
+#define SCOTCH_contextOptionSetNum  SCOTCH_NAME_PUBLIC (SCOTCH_contextOptionSetNum)
+#define SCOTCH_contextRandomClone   SCOTCH_NAME_PUBLIC (SCOTCH_contextRandomClone)
+#define SCOTCH_contextRandomReset   SCOTCH_NAME_PUBLIC (SCOTCH_contextRandomReset)
+#define SCOTCH_contextRandomSeed    SCOTCH_NAME_PUBLIC (SCOTCH_contextRandomSeed)
+#define SCOTCH_contextThreadImport1 SCOTCH_NAME_PUBLIC (SCOTCH_contextThreadImport1)
+#define SCOTCH_contextThreadImport2 SCOTCH_NAME_PUBLIC (SCOTCH_contextThreadImport2)
+#define SCOTCH_contextThreadSpawn   SCOTCH_NAME_PUBLIC (SCOTCH_contextThreadSpawn)
+#define SCOTCH_contextSizeof        SCOTCH_NAME_PUBLIC (SCOTCH_contextSizeof)
 #define SCOTCH_dgraphAlloc          SCOTCH_NAME_PUBLIC (SCOTCH_dgraphAlloc)
 #define SCOTCH_dgraphBand           SCOTCH_NAME_PUBLIC (SCOTCH_dgraphBand)
 #define SCOTCH_dgraphBuild          SCOTCH_NAME_PUBLIC (SCOTCH_dgraphBuild)
 #define SCOTCH_dgraphBuildGrid3D    SCOTCH_NAME_PUBLIC (SCOTCH_dgraphBuildGrid3D)
 #define SCOTCH_dgraphCheck          SCOTCH_NAME_PUBLIC (SCOTCH_dgraphCheck)
 #define SCOTCH_dgraphCoarsen        SCOTCH_NAME_PUBLIC (SCOTCH_dgraphCoarsen)
+#define SCOTCH_dgraphCoarsenVertLocMax SCOTCH_NAME_PUBLIC (SCOTCH_dgraphCoarsenVertLocMax)
 #define SCOTCH_dgraphCorderExit     SCOTCH_NAME_PUBLIC (SCOTCH_dgraphCorderExit)
 #define SCOTCH_dgraphCorderInit     SCOTCH_NAME_PUBLIC (SCOTCH_dgraphCorderInit)
 #define SCOTCH_dgraphData           SCOTCH_NAME_PUBLIC (SCOTCH_dgraphData)
@@ -1165,6 +1215,7 @@
 #define SCOTCH_dgraphGhstReplace    SCOTCH_NAME_PUBLIC (SCOTCH_dgraphGhstReplace)
 #define SCOTCH_dgraphGrow           SCOTCH_NAME_PUBLIC (SCOTCH_dgraphGrow)
 #define SCOTCH_dgraphHalo           SCOTCH_NAME_PUBLIC (SCOTCH_dgraphHalo)
+#define SCOTCH_dgraphHaloReqSizeof  SCOTCH_NAME_PUBLIC (SCOTCH_dgraphHaloReqSizeof)
 #define SCOTCH_dgraphHaloAsync      SCOTCH_NAME_PUBLIC (SCOTCH_dgraphHaloAsync)
 #define SCOTCH_dgraphHaloReqAlloc   SCOTCH_NAME_PUBLIC (SCOTCH_dgraphHaloReqAlloc)
 #define SCOTCH_dgraphHaloWait       SCOTCH_NAME_PUBLIC (SCOTCH_dgraphHaloWait)
@@ -1199,6 +1250,16 @@
 #define SCOTCH_dgraphStat           SCOTCH_NAME_PUBLIC (SCOTCH_dgraphStat)
 #define SCOTCH_dmapAlloc            SCOTCH_NAME_PUBLIC (SCOTCH_dmapAlloc)
 #define SCOTCH_dmapSizeof           SCOTCH_NAME_PUBLIC (SCOTCH_dmapSizeof)
+#define SCOTCH_dmeshAlloc           SCOTCH_NAME_PUBLIC (SCOTCH_dmeshAlloc)
+#define SCOTCH_dmeshBuildAdm        SCOTCH_NAME_PUBLIC (SCOTCH_dmeshBuildAdm)
+#define SCOTCH_dmeshData            SCOTCH_NAME_PUBLIC (SCOTCH_dmeshData)
+#define SCOTCH_dmeshDgraphDual      SCOTCH_NAME_PUBLIC (SCOTCH_dmeshDgraphDual)
+#define SCOTCH_dmeshExit            SCOTCH_NAME_PUBLIC (SCOTCH_dmeshExit)
+#define SCOTCH_dmeshFree            SCOTCH_NAME_PUBLIC (SCOTCH_dmeshFree)
+#define SCOTCH_dmeshInit            SCOTCH_NAME_PUBLIC (SCOTCH_dmeshInit)
+#define SCOTCH_dmeshLoad            SCOTCH_NAME_PUBLIC (SCOTCH_dmeshLoad)
+#define SCOTCH_dmeshSize            SCOTCH_NAME_PUBLIC (SCOTCH_dmeshSize)
+#define SCOTCH_dmeshSizeof          SCOTCH_NAME_PUBLIC (SCOTCH_dmeshSizeof)
 #define SCOTCH_dorderAlloc          SCOTCH_NAME_PUBLIC (SCOTCH_dorderAlloc)
 #define SCOTCH_dorderSizeof         SCOTCH_NAME_PUBLIC (SCOTCH_dorderSizeof)
 #define SCOTCH_geomAlloc            SCOTCH_NAME_PUBLIC (SCOTCH_geomAlloc)
@@ -1216,6 +1277,7 @@
 #define SCOTCH_graphColor           SCOTCH_NAME_PUBLIC (SCOTCH_graphColor)
 #define SCOTCH_graphData            SCOTCH_NAME_PUBLIC (SCOTCH_graphData)
 #define SCOTCH_graphDiamPV          SCOTCH_NAME_PUBLIC (SCOTCH_graphDiamPV)
+#define SCOTCH_graphDump            SCOTCH_NAME_PUBLIC (SCOTCH_graphDump)
 #define SCOTCH_graphExit            SCOTCH_NAME_PUBLIC (SCOTCH_graphExit)
 #define SCOTCH_graphFree            SCOTCH_NAME_PUBLIC (SCOTCH_graphFree)
 #define SCOTCH_graphGeomLoadChac    SCOTCH_NAME_PUBLIC (SCOTCH_graphGeomLoadChac)
@@ -1253,6 +1315,7 @@
 #define SCOTCH_graphPart            SCOTCH_NAME_PUBLIC (SCOTCH_graphPart)
 #define SCOTCH_graphPartFixed       SCOTCH_NAME_PUBLIC (SCOTCH_graphPartFixed)
 #define SCOTCH_graphPartOvl         SCOTCH_NAME_PUBLIC (SCOTCH_graphPartOvl)
+#define SCOTCH_graphPartOvlView     SCOTCH_NAME_PUBLIC (SCOTCH_graphPartOvlView)
 #define SCOTCH_graphRemap           SCOTCH_NAME_PUBLIC (SCOTCH_graphRemap)
 #define SCOTCH_graphRemapCompute    SCOTCH_NAME_PUBLIC (SCOTCH_graphRemapCompute)
 #define SCOTCH_graphRemapFixed      SCOTCH_NAME_PUBLIC (SCOTCH_graphRemapFixed)
@@ -1262,11 +1325,15 @@
 #define SCOTCH_graphRepart          SCOTCH_NAME_PUBLIC (SCOTCH_graphRepart)
 #define SCOTCH_graphRepartFixed     SCOTCH_NAME_PUBLIC (SCOTCH_graphRepartFixed)
 #define SCOTCH_graphSave            SCOTCH_NAME_PUBLIC (SCOTCH_graphSave)
+#define SCOTCH_graphSize            SCOTCH_NAME_PUBLIC (SCOTCH_graphSize)
 #define SCOTCH_graphSizeof          SCOTCH_NAME_PUBLIC (SCOTCH_graphSizeof)
 #define SCOTCH_graphStat            SCOTCH_NAME_PUBLIC (SCOTCH_graphStat)
 #define SCOTCH_graphTabLoad         SCOTCH_NAME_PUBLIC (SCOTCH_graphTabLoad)
+#define SCOTCH_graphTabSave         SCOTCH_NAME_PUBLIC (SCOTCH_graphTabSave)
 #define SCOTCH_mapAlloc             SCOTCH_NAME_PUBLIC (SCOTCH_mapAlloc)
 #define SCOTCH_mapSizeof            SCOTCH_NAME_PUBLIC (SCOTCH_mapSizeof)
+#define SCOTCH_memCur               SCOTCH_NAME_PUBLIC (SCOTCH_memCur)
+#define SCOTCH_memMax               SCOTCH_NAME_PUBLIC (SCOTCH_memMax)
 #define SCOTCH_meshAlloc            SCOTCH_NAME_PUBLIC (SCOTCH_meshAlloc)
 #define SCOTCH_meshBuild            SCOTCH_NAME_PUBLIC (SCOTCH_meshBuild)
 #define SCOTCH_meshCheck            SCOTCH_NAME_PUBLIC (SCOTCH_meshCheck)
@@ -1301,8 +1368,8 @@
 #define SCOTCH_randomReset          SCOTCH_NAME_PUBLIC (SCOTCH_randomReset)
 #define SCOTCH_randomSave           SCOTCH_NAME_PUBLIC (SCOTCH_randomSave)
 #define SCOTCH_randomSeed           SCOTCH_NAME_PUBLIC (SCOTCH_randomSeed)
+#define SCOTCH_randomVal            SCOTCH_NAME_PUBLIC (SCOTCH_randomVal)
 #define SCOTCH_stratAlloc           SCOTCH_NAME_PUBLIC (SCOTCH_stratAlloc)
-#define SCOTCH_stratArchBuild       SCOTCH_NAME_PUBLIC (SCOTCH_stratArchBuild)
 #define SCOTCH_stratDgraphClusterBuild SCOTCH_NAME_PUBLIC (SCOTCH_stratDgraphClusterBuild)
 #define SCOTCH_stratDgraphMap       SCOTCH_NAME_PUBLIC (SCOTCH_stratDgraphMap)
 #define SCOTCH_stratDgraphMapBuild  SCOTCH_NAME_PUBLIC (SCOTCH_stratDgraphMapBuild)

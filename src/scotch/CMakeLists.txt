@@ -1,4 +1,4 @@
-## Copyright 2014-2016,2021-2023 IPB, Universite de Bordeaux, INRIA & CNRS
+## Copyright 2014-2016,2021-2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,
 ## graph partitioning and sparse matrix ordering.
@@ -41,7 +41,7 @@
 ##   DATES      : # Version 6.0  : from : 01 sep 2014     ##
 ##                                 to     01 sep 2021     ##
 ##                # Version 7.0  : from : 01 sep 2021     ##
-##                                 to     01 nov 2023     ##
+##                                 to     10 jun 2025     ##
 ##                                                        ##
 ############################################################
 
@@ -57,15 +57,15 @@ function(add_scotch_exe)
     set(src_exe ${ARGV})
     list(REMOVE_AT src_exe 0)
   elseif(ARGC EQUAL 1)
-    set(src_exe ${file_we}.c ${file_we}.h)
+     set(src_exe ${file_we}.c ${file_we}.h)
   endif()
-  add_executable(${file_we}
+    add_executable(${file_we}
     ${src_exe}
     ${LIBSCOTCH_INCLUDE_DIR}/module.h
     ${GENERATED_INCLUDE_DIR}/scotch.h
     ${LIBSCOTCH_INCLUDE_DIR}/common.h)
   add_dependencies(${file_we} scotch_h)
-  target_include_directories(${file_we} PRIVATE ${GENERATED_INCLUDE_DIR})
+  target_include_directories(${file_we} PRIVATE ${GENERATED_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
   target_compile_definitions(${file_we} PUBLIC "SCOTCH_CODENAME=\"${SCOTCH_CODENAME}\"")
   if(Threads_FOUND)
     target_compile_definitions(${file_we} PUBLIC SCOTCH_PTHREAD COMMON_PTHREAD)
@@ -86,6 +86,7 @@ set(scotch_exe
   atst
   gbase
   gcv
+  gdump
   gmap
   gmk_hy
   gmk_m2
@@ -119,7 +120,7 @@ add_scotch_exe(gpart gmap.c gmap.h)
 target_compile_definitions(gpart PRIVATE SCOTCH_COMPILE_PART)
 
 # Install all Scotch executables
-foreach(target ${scotch_exe})
+foreach(target ${scotch_exe} gout gpart)
   install(TARGETS ${target} COMPONENT scotch RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endforeach()
 
@@ -166,7 +167,7 @@ if(BUILD_PTSCOTCH)
   add_ptscotch_exe(dgpart dgmap.c dgmap.h)
   target_compile_definitions(dgpart PRIVATE SCOTCH_COMPILE_PART)
   # Install all PT-Scotch executables
-  foreach(target ${ptscotch_exe})
+  foreach(target ${ptscotch_exe} dgpart)
     install(TARGETS ${target} COMPONENT ptscotch RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   endforeach()
  endif(BUILD_PTSCOTCH)

@@ -1,4 +1,4 @@
-/* Copyright 2007,2018,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2018,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -44,7 +44,7 @@
 /**                # Version 6.0  : from : 07 jun 2018     **/
 /**                                 to   : 07 jun 2018     **/
 /**                # Version 7.0  : from : 17 jan 2023     **/
-/**                                 to   : 17 jan 2023     **/
+/**                                 to   : 11 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -53,7 +53,7 @@
 */
 
 #ifdef SCOTCH_DGRAPH_IO_LOAD
-static int                  dgraphLoadCent      (Dgraph * restrict const, FILE * const, Gnum, const GraphFlag, const int);
-static int                  dgraphLoadDist      (Dgraph * restrict const, FILE * const, Gnum, const GraphFlag);
-static int                  dgraphLoadMulti     (Dgraph * restrict const, FILE * const, Gnum, const GraphFlag);
+static int                  dgraphLoadCent      (Dgraph * restrict const, FILE * const, Gnum, const GraphLoadFlag, const int);
+static int                  dgraphLoadDist      (Dgraph * restrict const, FILE * const, Gnum, const GraphLoadFlag);
+static int                  dgraphLoadMulti     (Dgraph * restrict const, FILE * const, Gnum, const GraphLoadFlag);
 #endif /* SCOTCH_DGRAPH_IO_LOAD */

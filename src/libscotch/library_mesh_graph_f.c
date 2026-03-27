@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2018,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2018,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -46,7 +46,7 @@
 /**                # Version 6.1  : from : 19 may 2021     **/
 /**                                 to   : 19 may 2021     **/
 /**                # Version 7.0  : from : 21 jan 2023     **/
-/**                                 to   : 21 jan 2023     **/
+/**                                 to   : 28 jul 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -87,9 +87,9 @@ SCOTCH_FORTRAN (                      \
 MESHGRAPHDUAL, meshgraphdual, (       \
 const SCOTCH_Mesh * const   meshptr,  \
 SCOTCH_Graph * const        grafptr,  \
-const SCOTCH_Num * const    ncomptr,  \
+const SCOTCH_Num * const    nocoptr,  \
 int * const                 revaptr), \
-(meshptr, grafptr, ncomptr, revaptr))
+(meshptr, grafptr, nocoptr, revaptr))
 {
-  *revaptr = SCOTCH_meshGraphDual (meshptr, grafptr, *ncomptr);
+  *revaptr = SCOTCH_meshGraphDual (meshptr, grafptr, *nocoptr);
 }

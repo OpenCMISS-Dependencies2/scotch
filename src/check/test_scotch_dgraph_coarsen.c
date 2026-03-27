@@ -1,4 +1,4 @@
-/* Copyright 2014,2015,2018,2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2014,2015,2018,2021,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -44,7 +44,7 @@
 /**                # Version 6.1  : from : 16 jun 2021     **/
 /**                                 to   : 28 dec 2021     **/
 /**                # Version 7.0  : from : 03 jul 2023     **/
-/**                                 to   : 04 jul 2024     **/
+/**                                 to   : 02 Aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -77,9 +77,9 @@ char *              argv[])
   MPI_Comm            proccomm;
   int                 procglbnbr;                 /* Number of processes sharing graph data */
   int                 proclocnum;                 /* Number of this process                 */
-  SCOTCH_Num          vertglbnbr;
-  SCOTCH_Num          vertlocnbr;
-  SCOTCH_Dgraph       grafdat;
+  SCOTCH_Dgraph       finegrafdat;
+  SCOTCH_Num          finevertglbnbr;
+  SCOTCH_Num          finevertlocnbr;
   SCOTCH_Dgraph       coargrafdat;
   SCOTCH_Num          coarvertglbnbr;
   SCOTCH_Num          coarvertlocnbr;
@@ -129,14 +129,14 @@ char *              argv[])
   fileBlockInit (C_fileTab, 1);                   /* Set default stream pointers */
   fileBlockName (C_fileTab, 0) = argv[1];         /* Use provided file           */
 
-  if (SCOTCH_dgraphInit (&grafdat, proccomm) != 0) { /* Initialize source graph */
+  if (SCOTCH_dgraphInit (&finegrafdat, proccomm) != 0) { /* Initialize fine graph */
     SCOTCH_errorPrint ("main: cannot initialize graph (1)");
     exit (EXIT_FAILURE);
   }
 
   fileBlockOpenDist (C_fileTab, 1, procglbnbr, proclocnum, 0); /* Open all files */
 
-  if (SCOTCH_dgraphLoad (&grafdat, fileBlockFile (C_fileTab, 0), -1, 0) != 0) {
+  if (SCOTCH_dgraphLoad (&finegrafdat, fileBlockFile (C_fileTab, 0), -1, 0) != 0) {
     SCOTCH_errorPrint ("main: cannot load graph");
     exit (EXIT_FAILURE);
   }
@@ -148,7 +148,8 @@ char *              argv[])
     exit (EXIT_FAILURE);
   }
 
-  SCOTCH_dgraphData (&grafdat, NULL, &vertglbnbr, &vertlocnbr, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  SCOTCH_dgraphData (&finegrafdat, NULL, &finevertglbnbr, &finevertlocnbr, NULL, NULL, NULL, NULL, NULL,
+                     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
   coarrat = 0.8;                                  /* Lazy coarsening ratio */
 
@@ -179,7 +180,7 @@ char *              argv[])
     if (proclocnum == 0)
       printf ("%s\n", foldstr);
 
-    coarvertlocmax = SCOTCH_dgraphCoarsenVertLocMax (&grafdat, foldval); /* Get upper bound on size of multinode array */
+    coarvertlocmax = SCOTCH_dgraphCoarsenVertLocMax (&finegrafdat, foldval); /* Get upper bound on size of multinode array */
 
     if ((multloctab = malloc (coarvertlocmax * 2 * sizeof (SCOTCH_Num))) == NULL) { /* Allocate prescribed size */
       SCOTCH_errorPrint ("main: cannot allocate multinode array");
@@ -191,21 +192,25 @@ char *              argv[])
       exit (EXIT_FAILURE);
     }
 
-    o = SCOTCH_dgraphCoarsen (&grafdat, 0, coarrat, foldval, &coargrafdat, multloctab);
+    o = SCOTCH_dgraphCoarsen (&finegrafdat, 0, coarrat, foldval, &coargrafdat, multloctab);
 
     switch (o) {
       case 0 :
-        coarstr = "coarse graph created";
+        coarstr = ((foldval == SCOTCH_COARSENFOLD) && (proclocnum > (procglbnbr / 2)))
+          ? "folded graph not created here"
+          : "coarse graph created";
         break;
       case 1 :
         coarstr = "graph could not be coarsened";
         break;
-      case 2 :
-        coarstr = "folded graph not created here";
-        break;
-      case 3 :
+      default :
         coarstr = "cannot create coarse graph";
+        o = 2;                                    /* Set unique error flag */
         break;
+    }
+    if (o == 2) {
+      SCOTCH_errorPrint ("main: %s", coarstr);
+      exit (EXIT_FAILURE);
     }
 
     SCOTCH_dgraphData (&coargrafdat, NULL, &coarvertglbnbr, &coarvertlocnbr, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
@@ -220,10 +225,10 @@ char *              argv[])
         printf ("%d: %s (" SCOTCH_NUMSTRING " / " SCOTCH_NUMSTRING " / " SCOTCH_NUMSTRING " / %f)\n",
                 procnum,
                 coarstr,
-                vertlocnbr,
+                finevertlocnbr,
                 coarvertlocmax,
                 coarvertlocnbr,
-                (double) coarvertglbnbr / (double) vertglbnbr);
+                (double) coarvertglbnbr / (double) finevertglbnbr);
 
       MPI_Barrier (proccomm);
     }
@@ -232,7 +237,7 @@ char *              argv[])
     free (multloctab);
   }
 
-  SCOTCH_dgraphExit (&grafdat);
+  SCOTCH_dgraphExit (&finegrafdat);
 
   MPI_Finalize ();
   exit (EXIT_SUCCESS);

@@ -1,4 +1,4 @@
-## Copyright 2014-2016,2021-2024 IPB, Universite de Bordeaux, INRIA & CNRS
+## Copyright 2014-2016,2021-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,
 ## graph partitioning and sparse matrix ordering.
@@ -37,13 +37,19 @@
 ##   FUNCTION   : Top-level CMake configuration file      ##
 ##                                                        ##
 ##   DATES      : # Version 7.0  : from : 18 jan 2022     ##
-##                                 to     27 nov 2024     ##
+##                                 to     08 oct 2025     ##
 ##                                                        ##
 ############################################################
 
 cmake_minimum_required(VERSION 3.10)
 
 project(SCOTCH LANGUAGES C)
+
+# Use C99 as C standard
+set(CMAKE_C_STANDARD 99)
+
+# Set MPI components depending on language support
+set(MPI_COMPONENTS C)
 
 # Add Fortran support
 option(BUILD_FORTRAN "Enable Fortran" ON)
@@ -52,6 +58,7 @@ if(BUILD_FORTRAN)
   if(NOT CMAKE_Fortran_COMPILER)
     message(ERROR "Fortran enabled but no compiler detected")
   endif()
+  list(APPEND MPI_COMPONENTS Fortran)
 endif()
 
 # Add module directory
@@ -59,7 +66,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 set(SCOTCH_VERSION 7)
 set(SCOTCH_RELEASE 0)
-set(SCOTCH_PATCHLEVEL 6)
+set(SCOTCH_PATCHLEVEL 11)
 set(SCOTCH_CODENAME "Sankara")
 
 add_definitions(-DSCOTCH_VERSION_NUM=${SCOTCH_VERSION}
@@ -71,6 +78,14 @@ set(SCOTCH_VERSION_LONG "${SCOTCH_VERSION}.${SCOTCH_RELEASE}.${SCOTCH_PATCHLEVEL
 # Set integer size: by default, use compiler int size
 set(INTSIZE "" CACHE STRING "Integer size: empty string stands for C compiler int type size")
 
+# Set index size: by default, use compiler int size
+set(IDXSIZE "" CACHE STRING "Index size: empty string stands for C compiler int type size")
+
+# Manage suffixes
+set(SCOTCH_NAME_SUFFIX "" CACHE STRING "Suffix to add to every symbol in the Scotch/PT-Scotch libraries")
+if(NOT "${SCOTCH_NAME_SUFFIX}" STREQUAL "")
+  set(USE_SUFFIX ON)
+endif()
 # Thread support
 option(THREADS "Use multi-threading in Scotch and PT-Scotch" ON)
 
@@ -91,6 +106,10 @@ option(SCOTCH_METIS_PREFIX "Prefix Scotch version of MeTiS routines" OFF)
 
 # Install our MeTiS header stubs
 option(INSTALL_METIS_HEADERS "Install libScotchMeTiS headers in destination directory" ON)
+
+# Level of deterministic behavior
+set(SCOTCH_DETERMINISTIC "FIXED_SEED" CACHE STRING "Level of determinism in Scotch")
+set_property(CACHE SCOTCH_DETERMINISTIC PROPERTY STRINGS NONE FIXED_SEED FULL)
 
 # Compression format options
 option(USE_ZLIB "Use ZLIB compression format if found" ON)
@@ -143,7 +162,7 @@ foreach(f IN LISTS scotch_man_pages)
     DESTINATION ${CMAKE_INSTALL_DATADIR}/man/man1 COMPONENT scotch)
 endforeach()
 
-if (BUILD_PTSCOTCH)
+if(BUILD_PTSCOTCH)
   set(ptscotch_man_pages dgmap.1 dgord.1 dgscat.1 dgtst.1)
   foreach(f IN LISTS ptscotch_man_pages)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/man/man1/${f}

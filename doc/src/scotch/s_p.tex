@@ -80,20 +80,32 @@ threads that are used by the threaded algorithms of the
 \libscotch\ library and, consequently, by the \scotch\ standalone
 programs that call them. These algorithms are enabled when \scotch\ is
 compiled with the flag ``\texttt{-DSCOTCH\_\lbt PTHREAD}'' set.
+\\
 
-Unless explicitly prevented to do so, \scotch\ standalone programs
-will detect the number of cores available on the user's system and
-will use as many of them as prescribed at compile time or, if no upper
-threshold was set at that time, all of those which are currently
-available. This behavior can be controlled further by means of the
-shell environment variable
-``\texttt{SCOTCH\_\lbt PTHREAD\_\lbt NUMBER=}$x$'', where $x$ is the
-prescribed maximum number of threads to be used. Setting a thread
-number to $1$ will coerce \scotch\ into using only purely sequential
-algorithms (which may differ in nature from their multi-threaded
-counterparts). Setting the thread number to $-1$ will make
-\scotch\ use all available cores, overriding the value possibly set at
-compile time.
+The behavior of the \libscotch\ and all the executables that rely on
+it (including the \scotch\ standalone programs themselves) can be
+modified dynamically by way of environment variables, which take
+precedence over the compilation flags with same purpose.
+\begin{itemize}
+\item
+\texttt{SCOTCH\_PTHREAD\_NUMBER}: this environment variable sets the
+prescribed maximum number of threads that \scotch\ may use in the
+course of its computations. A value of \texttt{-1} indicates to use as
+many threads as provided by the system at launch time. Setting this
+number to \texttt{1} will coerce \scotch\ into using only purely
+sequential algorithms (which may differ in nature from their
+multi-threaded counterparts).
+\item
+\texttt{SCOTCH\_DETERMINISTIC}: when set to \texttt{0}, faster,
+non-deterministic, multi-threaded algorithms may be used; when set to
+\texttt{1}, fully deterministic, albeit sometimes slower,
+multi-threaded algorithms are always used.
+\item
+\texttt{SCOTCH\_RANDOM\_FIXED\_SEED}: when set to \texttt{1}, the same
+pseudo-random seed is used for each run, allowing for reproducibility
+in case only deterministic algorithms are used; when set to
+\texttt{0}, a new pseudo-random seed is used for each run.
+\end{itemize}
 
 \subsection{Using compressed files}
 \label{sec-prog-compressed}
@@ -332,8 +344,8 @@ page~\pageref{sec-lib-arch-build}, for further information.
 \iteme[\texttt{-b}{\it strategy}]
 Use recursive bipartitioning strategy {\it strategy\/} to build the
 decomposition of the architecture graph. The format of bipartitioning
-strategies is defined within section~\ref{sec-lib-format-map},
-at page~\pageref{sec-lib-format-bipart}.
+strategies is defined within section~\ref{sec-lib-format-strat-bipart},
+at page~\pageref{sec-lib-format-strat-bipart}.
 \iteme[\texttt{-h}]
 Display the program synopsis.
 \iteme[\texttt{-l}{\it input\_vertex\_file}]
@@ -545,9 +557,9 @@ Display the program synopsis.
 Apply mapping strategy {\it strat}. In the case of static mapping or
 of edge-based graph partitioning, the format of mapping strategies
 should comply with the format defined in
-Section~\ref{sec-lib-format-map}.  If the \texttt{-o} option is used (see
+Section~\ref{sec-lib-format-strat-map}. If the \texttt{-o} option is used (see
 below), strategies must be vertex partitioning strategies, which are
-described in Section~\ref{sec-lib-format-part-ovl}.
+described in Section~\ref{sec-lib-format-strat-part-ovl}.
 This option is incompatible with options \texttt{-b} and
 \texttt{-c}.
 \iteme[\texttt{-o}]
@@ -843,7 +855,7 @@ processed by program \texttt{gout} to display the vertex separators and
 supervariable amalgamations that have been computed.
 \iteme[{\texttt{-o}{\it strat}}]
 Apply ordering strategy {\it strat}. The format of ordering
-strategies is defined in section~\ref{sec-lib-format-ord}.
+strategies is defined in section~\ref{sec-lib-format-strat-ord}.
 \iteme[\texttt{-t}{\it output\_tree\_file}]
 Write to {\it output\_tree\_file\/} the structure of the separator
 tree. The data that is written resembles much the one of a mapping
@@ -926,9 +938,10 @@ At the time being, \texttt{gout} can generate plain and encapsulated PostScript
 files for the display of adjacency matrix patterns and the
 display of planar graphs (although tridimensional objects
 can be displayed by means of isometric projection, the display of
-tridimensional mappings is not efficient), and {\sc Open Inventor}
-files~\cite{oinv} for the interactive visualization of
-tridimensional graphs.
+tridimensional mappings is not efficient), and
+\textsc{Open Inventor}~\cite{oinv}, \textsc{Tulip}~\cite{tulip}, and
+\textsc{VTK} files for the interactive visualization of tridimensional
+graphs.
 \\
 In the case of mapping display,
 the number of mapping pairs contained in the input mapping file may
@@ -1011,7 +1024,7 @@ Specify the type of output, with optional parameters within curly braces
 and separated by commas. The output formats are listed below.
 \begin{itemize}
 \iteme[\texttt{i}]
-Output the graph in SGI's {\sc Open Inventor} format, in ASCII mode,
+Output the graph in SGI's \textsc{Open Inventor} format, in ASCII mode,
 suitable for display by the \texttt{ivview} program~\cite{oinv}. The
 optional parameters are given below.
 \begin{itemize}
@@ -1076,6 +1089,26 @@ Maximum X relative clipping position (in [0.0;1.0]).
 Minimum Y relative clipping position (in [0.0;1.0]).
 \iteme[\texttt{Y=}{\it val}]
 Maximum Y relative clipping position (in [0.0;1.0]).
+\end{itemize}
+\iteme[\texttt{t}]
+Output the graph in the \textsc{Tulip} graph format, suitable for
+display by the \textsc{Tulip} data visualization
+software~\cite{tulip}. The optional parameters are given below.
+\begin{itemize}
+\iteme[\texttt{a}]
+Avoid displaying mapping spheres around vertices. Opposite of \texttt{d}.
+\iteme[\texttt{b}]
+Black-and-white output. Opposite of \texttt{c}.
+\iteme[\texttt{c}]
+Color output, using $16$ different colors. Opposite of \texttt{b}.
+\iteme[\texttt{d}]
+Display mapping spheres around vertices. Opposite of \texttt{a}.
+\iteme[\texttt{r}]
+Remove cut edges. Edges the ends of which are mapped onto different
+processors are not displayed. Opposite of \texttt{v}.
+\iteme[\texttt{v}]
+View cut edges. All graph edges are displayed.
+Opposite of \texttt{r}.
 \end{itemize}
 \iteme[\texttt{v}]
 Output the graph in VTK legacy ASCII format, suitable for display by
@@ -1282,7 +1315,7 @@ the \texttt{gmk\_\lbt msh} program, to display the node vertex separators
 and supervariable amalgamations that have been computed.
 \iteme[{\texttt{-o}{\it strat}}]
 Apply ordering strategy {\it strat}. The format of ordering
-strategies is defined in section~\ref{sec-lib-format-ord}.
+strategies is defined in section~\ref{sec-lib-format-strat-ord}.
 \iteme[\texttt{-t}{\it output\_tree\_file}]
 Write to {\it output\_tree\_file\/} the structure of the separator
 tree. The data that is written resembles much the one of a mapping

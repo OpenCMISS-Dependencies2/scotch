@@ -1,4 +1,4 @@
-## Copyright 2004,2007-2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+## Copyright 2004,2007-2021,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,
 ## graph partitioning and sparse matrix ordering.
@@ -30,16 +30,52 @@
 ## knowledge of the CeCILL-C license and that you accept its terms.
 ##
 
-includedir	= ../../include
-libdir		= ../../lib
+SCOTCHINCLUDEDIR	?= ../../include
+SCOTCHLIBDIR		?= ../../lib
 
 include ../Makefile.inc
 
-CCDFLAGS	?= $(CFLAGS)
+CCDFLAGS ?= $(CFLAGS)
 
+ifeq ($(strip $(SCOTCH_NAME_SUFFIX)),)
+  ifneq ($(findstring -DSCOTCH_NAME_SUFFIX=,$(CFLAGS)),)
+    scotch_name_suffix_defs = $(filter -DSCOTCH_NAME_SUFFIX=%,$(CFLAGS))
+    scotch_name_suffix_def = $(lastword $(scotch_name_suffix_defs))
+    export SCOTCH_NAME_SUFFIX = $(subst -DSCOTCH_NAME_SUFFIX=,,$(scotch_name_suffix_def))
+  endif
+endif
 ifneq ($(strip $(SCOTCH_NAME_SUFFIX)),)
-CFLAGS		+= -DSCOTCH_NAME_SUFFIX=$(SCOTCH_NAME_SUFFIX)
-CCDFLAGS	+= -DSCOTCH_NAME_SUFFIX=$(SCOTCH_NAME_SUFFIX)
+  $(info Using suffix "$(SCOTCH_NAME_SUFFIX)")
+  ifeq ($(findstring -DSCOTCH_NAME_SUFFIX=,$(CFLAGS)),)
+    CFLAGS += -DSCOTCH_NAME_SUFFIX=$(SCOTCH_NAME_SUFFIX)
+  endif
+  ifeq ($(findstring -DSCOTCH_RENAME_ALL=,$(CFLAGS)),)
+    CFLAGS += -DSCOTCH_RENAME_ALL
+  endif
+  ifeq ($(findstring -DSCOTCH_NAME_SUFFIX=,$(CCDFLAGS)),)
+    CCDFLAGS += -DSCOTCH_NAME_SUFFIX=$(SCOTCH_NAME_SUFFIX)
+  endif
+  ifeq ($(findstring -DSCOTCH_RENAME_ALL=,$(CCDFLAGS)),)
+    CCDFLAGS += -DSCOTCH_RENAME_ALL
+  endif
+endif
+
+## Manage Flex 2.6.1 bug
+
+ifneq ($(strip $(FLEX)),)
+  ifneq ($(findstring 2.6.1,$(shell $(FLEX) --version)),)
+    $(warning WARNING: Flex 2.6.1 is bogus)
+    FLEX =
+  endif
+endif
+
+ifeq ($(strip $(FLEX)),)
+  $(warning WARNING: Compiling with a default version of lexer files. Install Flex >= 2.6.4 if it does not work)
+  FLEX = false blockoptions
+endif
+ifeq ($(strip $(BISON)),)
+  $(warning WARNING: Compiling with a default version of parser files. Install Bison >= 3.8.2 if it does not work)
+  BISON = false blockoptions
 endif
 
 ##
@@ -47,10 +83,10 @@ endif
 ##
 
 %$(OBJ)	:	%.c
-				$(CC) $(CFLAGS) $(CLIBFLAGS) -c $(<) -o $(@) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL)
+					$(CC) $(CFLAGS) $(CLIBFLAGS) -c $(<) -o $(@) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL)
 
 %$(EXE)	:	%.c
-				$(CC) $(CFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
+					$(CC) $(CFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
 
 ##
 ##  Project rules.
@@ -59,7 +95,7 @@ endif
 .PHONY				:	ptscotch	scotch	ptinstall	install	clean	realclean
 
 scotch				:
-					$(MAKE) 					\
+					$(MAKE)						\
 					CC="$(CCS)"					\
 					CCD="$(CCS)"					\
 					scotch.h					\
@@ -69,7 +105,7 @@ scotch				:
 					libscotcherrexit$(LIB)
 
 ptscotch			:	scotch
-					$(MAKE) 					\
+					$(MAKE)						\
 					CC="$(CCP)"					\
 					CFLAGS="$(CFLAGS) -DSCOTCH_PTSCOTCH"		\
 					CCDFLAGS="$(CCDFLAGS) -DSCOTCH_PTSCOTCH"	\
@@ -79,17 +115,17 @@ ptscotch			:	scotch
 					libptscotcherr$(LIB)				\
 					libptscotcherrexit$(LIB)
 
-install				:	$(includedir)/scotch.h				\
-					$(includedir)/scotchf.h				\
-					$(libdir)/libscotch$(LIB)
+install				:	$(SCOTCHINCLUDEDIR)/scotch.h			\
+					$(SCOTCHINCLUDEDIR)/scotchf.h			\
+					$(SCOTCHLIBDIR)/libscotch$(LIB)
 
 ptinstall			:	install						\
-					$(includedir)/ptscotch.h			\
-					$(includedir)/ptscotchf.h			\
-					$(libdir)/libptscotch$(LIB)
+					$(SCOTCHINCLUDEDIR)/ptscotch.h			\
+					$(SCOTCHINCLUDEDIR)/ptscotchf.h			\
+					$(SCOTCHLIBDIR)/libptscotch$(LIB)
 
 clean				:
-					-$(RM) *~ *$(OBJ) lib*$(LIB) parser_yy.c parser_ly.h parser_ll.c *scotch.h *scotchf.h y.output *dummysizes$(EXE)
+					-$(RM) *~ *$(OBJ) lib*$(LIB) parser_yy.c parser_lh.h parser_ly.h parser_ll.c parser_yy.c *scotch.h *scotchf.h y.output *dummysizes$(EXE)
 
 realclean			:	clean
 
@@ -98,23 +134,23 @@ realclean			:	clean
 ##  Installation dependencies
 ##
 
-$(includedir)/scotch.h		:	scotch.h
-					-$(CP) scotch.h $(includedir)
+$(SCOTCHINCLUDEDIR)/scotch.h		:	scotch.h
+						-$(CP) scotch.h $(SCOTCHINCLUDEDIR)
 
-$(includedir)/scotchf.h		:	scotchf.h
-					-$(CP) scotchf.h $(includedir)
+$(SCOTCHINCLUDEDIR)/scotchf.h		:	scotchf.h
+						-$(CP) scotchf.h $(SCOTCHINCLUDEDIR)
 
-$(includedir)/ptscotch.h	:	ptscotch.h
-					-$(CP) ptscotch.h $(includedir)
+$(SCOTCHINCLUDEDIR)/ptscotch.h		:	ptscotch.h
+						-$(CP) ptscotch.h $(SCOTCHINCLUDEDIR)
 
-$(includedir)/ptscotchf.h	:	ptscotchf.h
-					-$(CP) ptscotchf.h $(includedir)
+$(SCOTCHINCLUDEDIR)/ptscotchf.h		:	ptscotchf.h
+						-$(CP) ptscotchf.h $(SCOTCHINCLUDEDIR)
 
-$(libdir)/libscotch$(LIB)	:	libscotch$(LIB)
-					-$(CP) libscotch$(LIB) libscotcherr*$(LIB) $(libdir)
+$(SCOTCHLIBDIR)/libscotch$(LIB)		:	libscotch$(LIB)
+						-$(CP) libscotch$(LIB) libscotcherr*$(LIB) $(SCOTCHLIBDIR)
 
-$(libdir)/libptscotch$(LIB)	:	libptscotch$(LIB)
-					-$(CP) libptscotch$(LIB) libptscotcherr*$(LIB) $(libdir)
+$(SCOTCHLIBDIR)/libptscotch$(LIB)	:	libptscotch$(LIB)
+						-$(CP) libptscotch$(LIB) libptscotcherr*$(LIB) $(SCOTCHLIBDIR)
 
 ##
 ##  Library dependencies.
@@ -172,7 +208,12 @@ LIBPTSCOTCHDEPS =	arch_mpi$(OBJ)				\
 			dgraph_view$(OBJ)			\
 			dmapping$(OBJ)				\
 			dmapping_io$(OBJ)			\
+			dmesh$(OBJ)				\
+			dmesh_build_adm$(OBJ)			\
+			dmesh_dgraph$(OBJ)			\
+			dmesh_io_load$(OBJ)			\
 			dorder$(OBJ)				\
+			dorder_check$(OBJ)			\
 			dorder_gather$(OBJ)			\
 			dorder_io$(OBJ)				\
 			dorder_io_block$(OBJ)			\
@@ -244,6 +285,14 @@ LIBPTSCOTCHDEPS =	arch_mpi$(OBJ)				\
 			library_dgraph_stat$(OBJ)		\
 			library_dgraph_stat_f$(OBJ)		\
 			library_dmapping$(OBJ)			\
+			library_dmesh$(OBJ)			\
+			library_dmesh_f$(OBJ)			\
+			library_dmesh_build_adm$(OBJ)		\
+			library_dmesh_build_adm_f$(OBJ)		\
+			library_dmesh_dgraph$(OBJ)		\
+			library_dmesh_dgraph_f$(OBJ)		\
+			library_dmesh_io_load$(OBJ)		\
+			library_dmesh_io_load_f$(OBJ)		\
 			library_dorder$(OBJ)			\
 			vdgraph$(OBJ)				\
 			vdgraph_check$(OBJ)			\
@@ -276,6 +325,7 @@ LIBSCOTCHDEPS	=	arch$(OBJ)				\
 			bgraph_bipart_df$(OBJ)			\
 			bgraph_bipart_ex$(OBJ)			\
 			bgraph_bipart_fm$(OBJ)			\
+			bgraph_bipart_ga$(OBJ)			\
 			bgraph_bipart_gg$(OBJ)			\
 			bgraph_bipart_gp$(OBJ)			\
 			bgraph_bipart_ml$(OBJ)			\
@@ -354,6 +404,7 @@ LIBSCOTCHDEPS	=	arch$(OBJ)				\
 			kgraph$(OBJ)				\
 			kgraph_band$(OBJ)			\
 			kgraph_check$(OBJ)			\
+			kgraph_cost$(OBJ)			\
 			kgraph_map_bd$(OBJ)			\
 			kgraph_map_cp$(OBJ)			\
 			kgraph_map_df$(OBJ)			\
@@ -477,12 +528,12 @@ LIBSCOTCHDEPS	=	arch$(OBJ)				\
 			vmesh_store$(OBJ)			\
 			wgraph$(OBJ)				\
 			wgraph_check$(OBJ)			\
-			wgraph_part_es$(OBJ)  			\
-			wgraph_part_fm$(OBJ)  			\
-			wgraph_part_ml$(OBJ)   			\
-			wgraph_part_rb$(OBJ)  			\
-			wgraph_part_st$(OBJ)  			\
-			wgraph_part_zr$(OBJ)  			\
+			wgraph_part_es$(OBJ)			\
+			wgraph_part_fm$(OBJ)			\
+			wgraph_part_ml$(OBJ)			\
+			wgraph_part_rb$(OBJ)			\
+			wgraph_part_st$(OBJ)			\
+			wgraph_part_zr$(OBJ)			\
 			wgraph_store$(OBJ)
 
 ##
@@ -929,6 +980,14 @@ bgraph_bipart_fm$(OBJ)		:	bgraph_bipart_fm.c			\
 					bgraph.h				\
 					bgraph_bipart_fm.h
 
+bgraph_bipart_ga$(OBJ)		:	bgraph_bipart_ga.c			\
+					module.h				\
+					common.h				\
+					graph.h					\
+					arch.h					\
+					bgraph.h				\
+					bgraph_bipart_ga.h
+
 bgraph_bipart_gg$(OBJ)		:	bgraph_bipart_gg.c			\
 					gain.h					\
 					fibo.h					\
@@ -966,6 +1025,8 @@ bgraph_bipart_st$(OBJ)		:	bgraph_bipart_st.c			\
 					parser.h				\
 					graph.h					\
 					arch.h					\
+					mapping.h				\
+					graph_coarsen.h				\
 					bgraph.h				\
 					bgraph_bipart_bd.h			\
 					bgraph_bipart_df.h			\
@@ -1055,7 +1116,8 @@ dgraph_build_hcub$(OBJ)		:	dgraph_build_hcub.c			\
 dgraph_check$(OBJ)		:	dgraph_check.c				\
 					module.h				\
 					common.h				\
-					dgraph.h
+					dgraph.h				\
+					dgraph_allreduce.h
 
 dgraph_coarsen$(OBJ)		:	dgraph_coarsen.c			\
 					module.h				\
@@ -1127,7 +1189,9 @@ dgraph_induce$(OBJ)		:	dgraph_induce.c				\
 dgraph_io_load$(OBJ)		:	dgraph_io_load.c			\
 					module.h				\
 					common.h				\
+					graph.h					\
 					dgraph.h				\
+					dgraph_allreduce.h			\
 					dgraph_io_load.h
 
 dgraph_io_save$(OBJ)		:	dgraph_io_save.c			\
@@ -1154,7 +1218,7 @@ dgraph_match_sync_coll$(OBJ)	:	dgraph_match_sync_coll.c		\
 					module.h				\
 					common.h				\
 					dgraph.h				\
-					dgraph_coarsen.h                        \
+					dgraph_coarsen.h			\
 					dgraph_match.h
 
 dgraph_match_sync_ptop$(OBJ)	:	dgraph_match_sync_ptop.c		\
@@ -1162,7 +1226,7 @@ dgraph_match_sync_ptop$(OBJ)	:	dgraph_match_sync_ptop.c		\
 					common.h				\
 					context.h				\
 					dgraph.h				\
-					dgraph_coarsen.h                        \
+					dgraph_coarsen.h			\
 					dgraph_match.h
 
 dgraph_redist$(OBJ)		:	dgraph_redist.c				\
@@ -1198,12 +1262,46 @@ dmapping_io$(OBJ)		:	dmapping_io.c				\
 					dgraph_allreduce.h			\
 					dmapping.h
 
+dmesh$(OBJ)			:	dmesh.c					\
+					module.h				\
+					common.h				\
+					dmesh.h
+
+dmesh_build_adm$(OBJ)		:	dmesh_build_adm.c			\
+					module.h				\
+					common.h				\
+					dgraph_allreduce.h			\
+					dmesh.h
+
+dmesh_dgraph$(OBJ)		:	dmesh_dgraph.c				\
+					module.h				\
+					common.h				\
+					dgraph.h				\
+					dmesh.h					\
+					dmesh_dgraph.h
+
+dmesh_io_load$(OBJ)		:	dmesh_io_load.c				\
+					module.h				\
+					common.h				\
+					graph.h					\
+					dgraph_allreduce.h			\
+					dmesh.h					\
+					dmesh_io_load.h
+
 dorder$(OBJ)			:	dorder.c				\
 					module.h				\
 					common.h				\
 					dgraph.h				\
 					order.h					\
 					dorder.h
+
+dorder_check$(OBJ)		:	dorder_check.c				\
+					module.h				\
+					common.h				\
+					dgraph.h				\
+					dgraph_allreduce.h			\
+					order.h					\
+					dorder.h				\
 
 dorder_gather$(OBJ)		:	dorder_gather.c				\
 					module.h				\
@@ -1880,11 +1978,11 @@ kgraph$(OBJ)			:	kgraph.c				\
 					mapping.h				\
 					kgraph.h
 
-kgraph_band$(OBJ)		:	kgraph_band.c		   		\
+kgraph_band$(OBJ)		:	kgraph_band.c				\
 					module.h				\
 					common.h				\
 					arch.h					\
-					graph.h			        	\
+					graph.h					\
 					mapping.h				\
 					kgraph.h
 
@@ -1893,6 +1991,14 @@ kgraph_check$(OBJ)		:	kgraph_check.c				\
 					common.h				\
 					graph.h					\
 					arch.h					\
+					mapping.h				\
+					kgraph.h
+
+kgraph_cost$(OBJ)		:	kgraph_cost.c				\
+					module.h				\
+					common.h				\
+					graph.h					\
+					arch$(OBJ)				\
 					mapping.h				\
 					kgraph.h
 
@@ -1943,7 +2049,7 @@ kgraph_map_fm$(OBJ)		:	kgraph_map_fm.c				\
 					arch.h					\
 					mapping.h				\
 					kgraph.h				\
-					kgraph_map_fm.h                         \
+					kgraph_map_fm.h				\
 					kgraph_map_rb.h
 
 kgraph_map_ml$(OBJ)		:	kgraph_map_ml.c				\
@@ -2454,6 +2560,57 @@ library_dmapping$(OBJ)		:	library_dmapping.c			\
 					common.h				\
 					ptscotch.h
 
+library_dmesh$(OBJ)		:	library_dmesh.c				\
+					module.h				\
+					common.h				\
+					context.h				\
+					dmesh.h					\
+					ptscotch.h
+
+library_dmesh_f$(OBJ)		:	library_dmesh_f.c			\
+					module.h				\
+					common.h				\
+					ptscotch.h
+
+library_dmesh_build_adm$(OBJ)	:	library_dmesh_build_adm.c		\
+					module.h				\
+					common.h				\
+					context.h				\
+					graph.h					\
+					dmesh.h					\
+					ptscotch.h
+
+library_dmesh_build_adm_f$(OBJ)	:	library_dmesh_build_adm_f.c		\
+					module.h				\
+					common.h				\
+					ptscotch.h
+
+library_dmesh_io_load$(OBJ)	:	library_dmesh_io_load.c			\
+					module.h				\
+					common.h				\
+					context.h				\
+					graph.h					\
+					dmesh.h					\
+					ptscotch.h
+
+library_dmesh_io_load_f$(OBJ)	:	library_dmesh_io_load_f.c		\
+					module.h				\
+					common.h				\
+					ptscotch.h
+
+library_dmesh_dgraph$(OBJ)	:	library_dmesh_dgraph.c			\
+					module.h				\
+					common.h				\
+					context.h				\
+					dgraph.h				\
+					dmesh.h					\
+					ptscotch.h
+
+library_dmesh_dgraph_f$(OBJ)	:	library_dmesh_dgraph_f.c		\
+					module.h				\
+					common.h				\
+					ptscotch.h
+
 library_dorder$(OBJ)		:	library_dorder.c			\
 					module.h				\
 					common.h				\
@@ -2946,8 +3103,11 @@ parser$(OBJ)			:	parser.c				\
 					module.h				\
 					common.h				\
 					parser.h				\
+					parser_lh.h				\
 					parser_ly.h				\
 					parser_yy.h
+
+parser_lh.h			:	parser_ll.c
 
 parser_ll.c			:	parser_ll.l				\
 					module.h				\
@@ -2955,9 +3115,12 @@ parser_ll.c			:	parser_ll.l				\
 					parser.h				\
 					parser_ll.h				\
 					parser_ly.h
-					$(FLEX) "-Pscotchyy$(SCOTCH_NAME_SUFFIX)" "-oparser_ll.c" parser_ll.l
+					$(FLEX) "-P_SCOTCHyy$(SCOTCH_NAME_SUFFIX)" "-oparser_ll.c" "--header-file=parser_lh.h" parser_ll.l || \
+					$(CP) last_resort/parser_ll.c last_resort/parser_lh.h .
+
 
 parser_ll$(OBJ)			:	parser_ll.c				\
+					parser_lh.h				\
 					parser_ly.h
 
 parser_ly.h			:	parser_yy.c
@@ -2967,9 +3130,13 @@ parser_yy.c			:	parser_yy.y				\
 					common.h				\
 					parser.h				\
 					parser_yy.h
-					$(BISON) "-pscotchyy$(SCOTCH_NAME_SUFFIX)" --defines="parser_ly.h" --output="parser_yy.c" parser_yy.y
+					$(BISON) "-p_SCOTCHyy$(SCOTCH_NAME_SUFFIX)" --defines="parser_ly.h" --output="parser_yy.c" parser_yy.y || \
+					$(CP) last_resort/parser_ly.h last_resort/parser_yy.c .
 
-parser_yy$(OBJ)			:	parser_yy.c
+parser_yy$(OBJ)			:	parser_yy.c				\
+					parser_lh.h				\
+					parser_ll.h				\
+					parser_yy.h
 
 vdgraph$(OBJ)			:	vdgraph.c				\
 					module.h				\
@@ -3307,7 +3474,7 @@ wgraph_part_fm$(OBJ)		:	wgraph_part_fm.c			\
 					wgraph_part_rb.h			\
 					wgraph_part_fm.h
 
-wgraph_part_ml$(OBJ)		: 	wgraph_part_ml.c			\
+wgraph_part_ml$(OBJ)		:	wgraph_part_ml.c			\
 					module.h				\
 					common.h				\
 					parser.h				\
@@ -3321,14 +3488,14 @@ wgraph_part_ml$(OBJ)		: 	wgraph_part_ml.c			\
 
 wgraph_part_rb$(OBJ)		:	wgraph_part_rb.c			\
 					module.h				\
-					common.h                                \
-					parser.h                                \
-					graph.h                                 \
-					arch.h                                  \
-					vgraph.h                                \
-					vgraph_separate_st.h                    \
-					vgraph_separate_zr.h                    \
-					wgraph.h                                \
+					common.h				\
+					parser.h				\
+					graph.h					\
+					arch.h					\
+					vgraph.h				\
+					vgraph_separate_st.h			\
+					vgraph_separate_zr.h			\
+					wgraph.h				\
 					wgraph_part_rb.h
 
 wgraph_part_st$(OBJ)		:	wgraph_part_st.c			\
@@ -3352,7 +3519,7 @@ wgraph_part_st$(OBJ)		:	wgraph_part_st.c			\
 					wgraph_part_zr.h			\
 					wgraph_part_st.h
 
-wgraph_part_zr$(OBJ)		: 	wgraph_part_zr.c			\
+wgraph_part_zr$(OBJ)		:	wgraph_part_zr.c			\
 					module.h				\
 					common.h				\
 					graph.h					\
@@ -3377,30 +3544,30 @@ dummysizes$(EXE)		:	dummysizes.c				\
 					mapping.h				\
 					order.h					\
 					parser.h
-			 		$(CCD) $(CCDFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
+					$(CCD) $(CCDFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
 
 ptdummysizes$(EXE)		:	dummysizes.c				\
 					module.h				\
 					common.h				\
 					dgraph.h				\
 					dorder.h
-			 		$(CCD) $(CCDFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
+					$(CCD) $(CCDFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
 
 scotch.h			:	dummysizes$(EXE)			\
 					library.h
-					./dummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library.h scotch.h
+					./dummysizes$(EXE) -s$(SCOTCH_NAME_SUFFIX) library.h scotch.h
 
-scotchf.h			:	dummysizes$(EXE) 			\
+scotchf.h			:	dummysizes$(EXE)			\
 					library_f.h
-					./dummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library_f.h scotchf.h
+					./dummysizes$(EXE) -s$(SCOTCH_NAME_SUFFIX) library_f.h scotchf.h
 
 ptscotch.h			:	ptdummysizes$(EXE)			\
 					library_pt.h
-					./ptdummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library_pt.h ptscotch.h
+					./ptdummysizes$(EXE) -s$(SCOTCH_NAME_SUFFIX) library_pt.h ptscotch.h
 
 ptscotchf.h			:	ptdummysizes$(EXE)			\
 					library_pt_f.h
-					./ptdummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library_pt_f.h ptscotchf.h
+					./ptdummysizes$(EXE) -s$(SCOTCH_NAME_SUFFIX) library_pt_f.h ptscotchf.h
 
 libscotch$(LIB)			:	$(LIBSCOTCHDEPS)
 					$(AR) $(ARFLAGS) $(@) $(?)

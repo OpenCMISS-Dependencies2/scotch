@@ -15,13 +15,17 @@ All of the features provided by the programs of the
 \ptscotch\ distribution may be directly accessed by calling
 the appropriate functions of the \libscotch\ library, archived
 in files {\tt libptscotch.a} and {\tt libptscotcherr.a}.
-All of the existing parallel routines belong to four distinct classes:
+All of the existing parallel routines belong to five distinct classes:
 \begin{itemize}
 \item
 distributed source graph handling routines, which serve to declare,
 build, load, save, and check the consistency of distributed source
 graphs;
 %, along with their geometry data;
+\item
+distributed source mesh handling routines, which serve to declare,
+build, and load%, and check the consistency of
+distributed source meshes;
 \item
 strategy handling routines, which allow the user to declare and build
 parallel mapping and ordering strategies;
@@ -36,14 +40,14 @@ and save distributed orderings of distributed source graphs.
 Error handling is performed using the existing sequential routines of
 the \scotch\ distribution, which are described in the
 {\it\scotch\ User's Guide}~\scotchcitesuser. Their use is recalled in
-Section~\ref{sec-lib-error}.
+Section~\ref{sec-lib-func-error}.
 
 A \parmetis\ compatibility library, called {\tt lib\lbo ptscotch\lbo
 parmetis.a}, is also available. It allows users who were previously
 using \parmetis\ in their software to take advantage of the efficieny
 of \ptscotch\ without having to modify their code. The services
 provided by this library are described in
-Section~\ref{sec-lib-parmetis}.
+Section~\ref{sec-lib-func-parmetis}.
 
 \subsection{Using multi-threading}
 \label{sec-lib-thread}
@@ -151,7 +155,7 @@ function succeeds, and a non-zero value in case of error.
 
 For instance, the {\tt SCOTCH\_\lbt dgraph\lbt Init} and {\tt
 SCOTCH\_\lbt dgraph\lbt Load} routines, described in
-section~\ref{sec-lib-dgraph}, can be called from C by using the
+section~\ref{sec-lib-func-dgraph}, can be called from C by using the
 following code.
 {\tt
 \begin{verbatim}
@@ -223,7 +227,7 @@ Fortran, and is called {\tt FNUM}.
 
 For instance, the {\tt SCOTCH\_\lbt dgraph\lbt Init} and
 {\tt SCOTCH\_\lbt dgraph\lbt Load} routines, described in
-sections~\ref{sec-lib-dgraphinit} and~\ref{sec-lib-dgraphload},
+sections~\ref{sec-lib-func-dgraphinit} and~\ref{sec-lib-func-dgraphload},
 respectively, can be called from Fortran by using the following code.
 {\tt
 \begin{verbatim}
@@ -285,7 +289,7 @@ as {\tt mpicc}.
 If you want to handle errors by yourself, you should not link with
 library file {\tt libptscotcherr.a}, but rather provide a
 {\tt SCOTCH\_\lbt error\lbt Print()} routine. Please refer to
-Section~\ref{sec-lib-error} for more information on error handling.
+Section~\ref{sec-lib-func-error} for more information on error handling.
 
 Programs that use both sequential and parallel routines of
 \scotch\ need only be linked against the parallel version of the
@@ -312,7 +316,7 @@ routines in a parallel program, both options can be used.
 
 Graph indices are represented in \scotch\ as integer values of type
 {\tt SCOTCH\_\lbt Num}. By default, this type equates to the {\tt int}
-C type, that is, an integer type of size equal to the one of
+C type, that is, an integer type of size equal to that of
 the machine word. However, it can represent any other integer
 type. Indeed, the size of the {\tt SCOTCH\_\lbt Num} integer type can
 be coerced to 32 or 64 bits by using the ``{\tt -DINTSIZE32}'' or
@@ -346,7 +350,7 @@ should be used for all graph-related values, in accordance to the size
 of the {\tt SCOTCH\_\lbt Num} type, as set by the
 ``{\tt -DINTSIZE}{\it x}'' compilation flags. Also, the
 {\tt INTEGER*}{\it idx} type represents an integer type of a size
-equivalent to the one of a {\tt SCOTCH\_\lbt Idx}, as set by the
+equivalent to that of a {\tt SCOTCH\_\lbt Idx}, as set by the
 ``{\tt -DIDXSIZE}{\it x}'' compilation flags. Values of this type are
 used in the Fortran interface to represent arbitrary array indices
 which can span across the whole address space, and consequently
@@ -376,7 +380,7 @@ longer be able to link against the service routines of the genuine
 \metis/\parmetis\ v3 library, as they are only available as a 32-bit
 implementation.
 
-\subsection{Data formats}
+\subsection{Data types}
 
 All of the data used in the \libscotch\ interface are of integer type
 {\tt SCOTCH\_Num}. To hide the internals of \ptscotch\ to callers, all
@@ -394,8 +398,8 @@ always labeled as {\tt baseval}, whether {\tt baseval} is set to $0$
 internally manages with base values and array pointers so as to
 process these arrays accordingly.
 
-\subsubsection{Distributed graph format}
-\label{sec-lib-format-dgraph}
+\subsubsection{\texttt{SCOTCH\_Dgraph} distributed graph type}
+\label{sec-lib-type-dgraph}
 
 In \ptscotch, distributed source graphs are represented so as to
 distribute graph data without any information duplication which could
@@ -528,7 +532,7 @@ or can be explicitey asked for by the user by calling function
 This array can serve to index user-defined arrays of quantities borne
 by graph vertices, which can be exchanged between neighboring
 processes thanks to the {\tt SCOTCH\_\lbt dgraph\lbt Halo}
-routine documented in Section~\ref{sec-lib-dgraphhalo}.
+routine documented in Section~\ref{sec-lib-func-dgraphhalo}.
 \iteme[{\tt edloloctab}]
 Optional array, of a size equal at least to $\left(\max_{i}(\mbox{\tt
 vend\lbt loc\lbt tab[} i \mbox{\tt ]}) - \mbox{\tt baseval}\right)$,
@@ -614,18 +618,122 @@ tab}\mbox{\tt [}i\mbox{\tt ]}$ must be updated accordingly. With
 simple housekeeping of free areas of the edge array, dynamic arrays
 can be updated with as little data movement as possible.
 
-\subsubsection{Block ordering format}
-\label{sec-lib-format-order}
+\subsubsection{\texttt{SCOTCH\_Dmesh} distributed mesh type}
+\label{sec-lib-type-dmesh}
+
+The distributed mesh data type is currently a prototype, which has no
+official support. Its main use is to host data that will eventually
+serve to compute a \texttt{SCOTCH\_\lbt Dgraph} distributed dual
+graph. Unlike other \scotch\ and \ptscotch\ data structures, such as
+the \texttt{SCOTCH\_\lbt Mesh} centralized data structure, which are
+symmetric, this mesh data type only provides adjacency lists for
+elements: the list of nodes connected to a given element is available,
+while the node-to-element adjacency is currently not. Hence, at the
+time being, there is no possibility to provide node weights, since
+node vertices have no existence. Element weights are not handled to
+date either, but that may change in the future if the need arises. Due
+to the prototype nature of this data type, its internal structure may
+be subject to changes at any time.
+
+As said, the \texttt{SCOTCH\_\lbt Dmesh} structure only holds the
+minimum set of information needed to perform dual graph
+computation. The only data which are replicated on every process are
+of a size linear in the number of processes and small. Apart from
+these, the sum across all processes of all of the element vertex data
+is in $O(v_e+p)$, where $v_e$ is the overall number of vertices in the
+distributed mesh and $p$ the number of processes, and the sum of all
+of the edge data is in $O(e_e)$, where $e_e$ is the overall number of
+element-to-node arcs in the distributed mesh. No halo information is
+present.
+
+Distributed source meshes are described by means of adjacency
+lists. The description of a distributed mesh requires several
+\texttt{SCOTCH\_\lbt Num} scalars and arrays, as illustrated in
+Figure~\ref{fig-lib-dmesh-one}.
+Some of these data are said to be global, and are duplicated on every
+process that holds part of the distributed mesh; their names contain
+the ``{\tt glb}'' infix. Others are local, that is, their value may
+differ for each process; their names contain the ``{\tt loc}''
+infix. Global data have the following meaning:
+\begin{itemize}
+\iteme[{\tt baseval}]
+Base value for all array indexings.
+\iteme[{\tt velmglbnbr}]
+Overall number of element vertices in the distributed mesh.
+\iteme[{\tt eelmglbnbr}]
+Overall number of element-to-node arcs in the distributed mesh, which
+is also the overall number of node-to-element arcs.
+\iteme[{\tt vnodglbnbr}]
+Overall number of node vertices in the distributed mesh.
+\iteme[{\tt procglbnbr}]
+Overall number of processes that share distributed mesh data.
+\iteme[{\tt prelvrttab}]
+Array holding the global indices from which the element vertices of
+every process are numbered. For optimization purposes, this array has
+an extra slot, to record the after-last based number of
+elements. Since, to date, distributed meshes are compact data
+structures, $\mbox{\tt prel\lbt vrt\lbt tab[0]} = \mbox{\tt baseval}$,
+$\mbox{\tt prel\lbt vrt\lbt tab[proc\lbt glb\lbt nbr]} =
+(\mbox{\tt velm\lbt glb\lbt nbr} + \mbox{\tt baseval})$, and,
+for each process index $p$, and with respect to its local
+variable \texttt{velm\lbt loc\lbt nbr},
+$\mbox{\tt prel\lbt vrt\lbt tab[}p + 1\mbox{\tt]} =
+(\mbox{\tt prel\lbt vrt\lbt tab[}p\mbox{\tt]} +
+\mbox{\tt velm\lbt loc\lbt nbr})$ holds.
+\end{itemize}
+Local data have the following meaning:
+\begin{itemize}
+\iteme[{\tt velmlocnbr}]
+Number of local element vertices borne by the given process.
+\iteme[{\tt eelmlocnbr}]
+Number of local element-to-node arcs borne by the given process.
+\iteme[{\tt velmloctab}]
+Array of start indices in {\tt eelmloctab} of
+vertex adjacency sub-arrays. Since distributed mesh numbering is
+compact, this array possesses and extra slot, to record the after-last
+based number of local element-to-node arcs, that is,
+$\mbox{\tt velm\lbt loc\lbt tab[velm\lbt loc\lbt nbr]} =
+(\mbox{\tt eelm\lbt loc\lbt nbr[} +
+\mbox{\tt base\lbt val})$ holds.
+\iteme[{\tt eelmloctab}]
+Array, of a size equal to \texttt{eelm\lbt loc\lbt nbr}, holding
+the adjacency array of every local element vertex, in the form of a
+set of based, global node vertex indices. For any local element vertex
+$i$, with $\mbox{\tt baseval} \leq i < (\mbox{\tt baseval} + \mbox{\tt
+velm\lbt loc\lbt nbr})$, the global indices of the node neighbors
+of $i$ are stored in \texttt{eelm\lbt loc\lbt tab}
+from \texttt{eelm\lbt loc\lbt tab\lbt [velm\lbt loc\lbt tab[$i$]]} to
+$\mbox{\tt eelm\lbt loc\lbt tab[velm\lbt loc\lbt tab[}i + 1\mbox{\tt ]} -
+1\mbox{\tt ]}$, inclusive.
+\end{itemize}
+
+\begin{figure}
+\centering\includegraphics[scale=0.47]{p_f_adm.eps}
+\caption{Sample distributed mesh and its description by
+\libscotch\ arrays. Numbers within vertices are element and node
+vertex indices. Top mesh is a global view of the distributed mesh,
+labeled with global, continuous, indices. Bottom graphs are local
+views. Since the element edge array is compact, all
+\texttt{velmloctab} arrays are of size $\mbox{\texttt{velmlocnbr}} +
+1$. \texttt{eelmloctab} edge arrays hold global indices
+of end node vertices. \texttt{eelmlocnbr} is the local number of
+element-to-node arcs.}
+\label{fig-lib-dmesh-one}
+\end{figure}
+
+\subsubsection{\texttt{SCOTCH\_Dordering} distributed block ordering type}
+\label{sec-lib-type-dordering}
 
 Block orderings associated with distributed graphs are described by
-means of block and permutation arrays, made of {\tt SCOTCH\_Num}s.  In
-order for all orderings to have the same structure, irrespective of
-whether they are centralized or distributed, or whether they are
-created from graphs or meshes, all ordering data indices start from
-{\tt baseval}. Consequently, row indices are related to vertex
-indices in memory in the following way: row $i$ is associated with
-vertex $i$ of the {\tt SCOTCH\_\lbt Dgraph} structure as if the vertex
-numbering used for the graph was continuous.
+means of block and permutation arrays, made of
+\texttt{SCOTCH\_Num}s. In order for all orderings to have the same
+structure, irrespective of whether they are centralized or
+distributed, or whether they are created from graphs or meshes, all
+ordering data indices start from \texttt{baseval}. Consequently, row
+indices are related to vertex indices in memory in the following way:
+row $i$ is associated with vertex $i$ of the
+\texttt{SCOTCH\_\lbt Dgraph} structure as if the vertex numbering used
+for the graph was continuous.
 
 Block orderings are made of the following data:
 \begin{itemize}
@@ -772,7 +880,7 @@ Order nested dissection separators as cheaply as possible.
 \end{itemize}
 
 \subsubsection{Parallel mapping strategy strings}
-\label{sec-lib-format-pmap}
+\label{sec-lib-format-strat-pmap}
 
 A parallel mapping strategy is made of one or several parallel
 mapping methods, which can be combined by means of strategy
@@ -852,12 +960,12 @@ some subgraph is restricted to one.
 \iteme[{\tt sep=}{\it strat}]
 Set the parallel graph bipartitioning strategy that is used on every
 current job of the recursion tree. Parallel graph bipartitioning
-strategies are described below, in section~\ref{sec-lib-format-pbipart}.
+strategies are described below, in section~\ref{sec-lib-format-strat-pbipart}.
 \end{itemize}
 \end{itemize}
 
 \subsubsection{Parallel graph bipartitioning strategy strings}
-\label{sec-lib-format-pbipart}
+\label{sec-lib-format-strat-pbipart}
 
 A parallel graph bipartitioning strategy is made of one or several
 parallel graph bipartitioning methods, which can be combined by means
@@ -1061,7 +1169,7 @@ bipartitioning process whenever some condition is true.
 \end{itemize}
 
 \subsubsection{Parallel ordering strategy strings}
-\label{sec-lib-format-pord}
+\label{sec-lib-format-strat-pord}
 
 A parallel ordering strategy is made of one or several parallel
 ordering methods, which can be combined by means of strategy
@@ -1149,7 +1257,7 @@ subgraph is restricted to one.
 Set the parallel node separation strategy that is used on every
 current leaf of the separators tree to make it grow. Parallel
 node separation strategies are described below, in
-section~\ref{sec-lib-format-pnsep}.
+section~\ref{sec-lib-format-strat-pnsep}.
 \end{itemize}
 \iteme[{\tt q}]
 Sequential ordering method. The distributed graph is gathered onto a
@@ -1169,7 +1277,7 @@ of extra-diagonal blocks is not relevant
 \end{itemize}
 
 \subsubsection{Parallel node separation strategy strings}
-\label{sec-lib-format-pnsep}
+\label{sec-lib-format-strat-pnsep}
 
 A parallel node separation strategy is made of one or several parallel
 node separation methods, which can be combined by means of strategy
@@ -1326,7 +1434,7 @@ separation process whenever some condition is true.
 \end{itemize}
 
 \subsection{Distributed graph handling routines}
-\label{sec-lib-dgraph}
+\label{sec-lib-func-dgraph}
 
 \subsubsection{{\tt SCOTCH\_dgraphAlloc}}
 
@@ -1818,7 +1926,7 @@ void SCOTCH\_dgraphData ( & const SCOTCH\_Dgraph * & grafptr,    \\
                           & SCOTCH\_Num **         & edgeloctab, \\
                           & SCOTCH\_Num **         & edgegsttab, \\
                           & SCOTCH\_Num **         & edloloctab, \\
-                          & MPI\_Comm *            & comm)
+                          & MPI\_Comm *            & commptr)
 \end{tabular}}
 
 {\tt\begin{tabular}{l@{}ll}
@@ -1862,8 +1970,8 @@ $(\mbox{\tt proc\lbt vrt\lbt tab[}p + 1\mbox{\tt]} -
 rank of the local process.
 {\tt vertgstptr} is the pointer to a location that will hold the
 number of local and ghost vertices if it has already been computed
-by a prior call to {\tt SCOTCH\_\lbt dgraph\lbo Ghst}, and $-1$ else.
-{\tt vertloctab} is the pointer to a location that will hold the
+by a prior call to {\tt SCOTCH\_\lbt dgraph\lbo Ghst}, and $-1$
+else. {\tt vertloctab} is the pointer to a location that will hold the
 reference to the adjacency index array, of size
 $\mbox{\tt *vertlocptr} + 1$ if the adjacency array is compact,
 or of size {\tt *vertlocptr} else.
@@ -1890,7 +1998,7 @@ reference to the ghost adjacency array, of size at least
 {\tt vertgstnbr} is non-negative.
 {\tt edloloctab} is the pointer to a location that will hold the
 reference to the arc load array, of size {\tt *edgelocptz}.
-{\tt comm} is the pointer to a location that will hold the MPI
+{\tt commptr} is the pointer to a location that will hold the MPI
 communicator of the distributed graph.
 
 Any of these pointers can be set to {\tt NULL} on input if the
@@ -2161,7 +2269,7 @@ structure has been successfully created, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphInit}}
-\label{sec-lib-dgraphinit}
+\label{sec-lib-func-dgraphinit}
 
 \begin{itemize}
 \progsyn
@@ -2214,7 +2322,7 @@ successfully initialized, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphRedist}}
-\label{sec-lib-dgraphredist}
+\label{sec-lib-func-dgraphredist}
 
 \begin{itemize}
 \progsyn
@@ -2254,7 +2362,7 @@ numbered from $0$ to the number of parts minus $1$.
 Whenever provided, the permutation array {\tt perm\lbt gst\lbt tab}
 must be of a size equal to the number of local and ghost vertices of
 the source graph (that is, {\tt vert\lbt gst\lbt nbr}, see
-Section~\ref{sec-lib-format-dgraph}). Its contents must be based, that
+Section~\ref{sec-lib-type-dgraph}). Its contents must be based, that
 is, permutation global indices start at {\tt baseval}. Both its local
 and ghost contents must be valid. Consequently, it is the user's
 responsibility to call {\tt SCOTCH\_dgraph\lbt Halo} whenever
@@ -2468,7 +2576,7 @@ successfully produced, and $1$ else.
 \subsection{Distributed graph I/O routines}
 
 \subsubsection{{\tt SCOTCH\_dgraphLoad}}
-\label{sec-lib-dgraphload}
+\label{sec-lib-func-dgraphload}
 
 \begin{itemize}
 \progsyn
@@ -2561,7 +2669,7 @@ scotchfdgraphsave ( & doubleprecision (*) & grafdat, \\
 The {\tt SCOTCH\_dgraphSave} routine saves the contents of the {\tt
 SCOTCH\_\lbt Dgraph} structure pointed to by {\tt grafptr} to streams
 {\tt stream}, in the \scotch\ distributed graph format (see
-section~\ref{sec-file-dsgraph}).
+Section~\ref{sec-file-dsgraph}).
 
 Fortran users must use the {\tt PXFFILENO} or {\tt FNUM} functions to
 obtain the number of the Unix file descriptor {\tt fildes} associated
@@ -2598,7 +2706,7 @@ tab} arrays of the distributed graph structure pointed to by {\tt
 grafptr} with the local and ghost vertex indices corresponding to the
 global vertex indices contained in its {\tt edge\lbt loc\lbt tab}
 arrays, according to the semantics described in
-Section~\ref{sec-lib-format-dgraph}.
+Section~\ref{sec-lib-type-dgraph}.
 
 If memory areas had not been previously reserved by the user for the
 {\tt edge\lbt gst\lbt tab} arrays and linked to the distributed graph
@@ -2615,7 +2723,7 @@ successfully computed, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphHalo}}
-\label{sec-lib-dgraphhalo}
+\label{sec-lib-func-dgraphhalo}
 
 \begin{itemize}
 \progsyn
@@ -2675,7 +2783,7 @@ successfully exchanged, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphHaloAsync}}
-\label{sec-lib-dgraphhaloasync}
+\label{sec-lib-func-dgraphhaloasync}
 
 \begin{itemize}
 \progsyn
@@ -2709,7 +2817,7 @@ $({\tt vert\lbt gst\lbt nbr} - {\tt vert\lbt loc\lbt nbr})$ remaining
 slots are filled with copies of the corresponding remote data obtained
 from the local parts of the data arrays of neighboring processes.
 
-The semantics of {\tt SCOTCH\_dgraphHaloAsync} is similar to the one
+The semantics of {\tt SCOTCH\_dgraphHaloAsync} is similar to that
 of {\tt SCOTCH\_dgraph\lbt Halo}, except that it returns as soon as
 possible, while effective communication may not have started nor
 completed. Also, it possesses an additional parameter, {\tt requptr},
@@ -2742,7 +2850,7 @@ has been successfully started, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphHaloWait}}
-\label{sec-lib-dgraphhalowait}
+\label{sec-lib-func-dgraphhalowait}
 
 \begin{itemize}
 \progsyn
@@ -2855,10 +2963,10 @@ scotchfdgraphmapcompute ( & doubleprecision (*) & grafdat, \\
 The {\tt SCOTCH\_dgraphMapCompute} routine computes a mapping
 on the given {\tt SCOTCH\_\lbt Dmapping} structure pointed
 to by {\tt mappptr} using the parallel mapping strategy pointed to
-by {\tt stratptr}.
+by {\tt straptr}.
 
 On return, every cell of the distributed mapping array (see
-section~\ref{sec-lib-dgraph-map-init}) holds the number of the target
+Section~\ref{sec-lib-func-dgraphmapinit}) holds the number of the target
 vertex to which the corresponding source vertex is mapped. The
 numbering of target values is {\em not\/} based: target vertices are
 numbered from $0$ to the number of target vertices, minus $1$.
@@ -2901,7 +3009,7 @@ as parameter, may yield unpredictable results.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphMapInit}}
-\label{sec-lib-dgraph-map-init}
+\label{sec-lib-func-dgraphmapinit}
 
 \begin{itemize}
 \progsyn
@@ -3149,7 +3257,7 @@ scotchfdgraphpart ( & doubleprecision (*)   & grafdat,    \\
 The {\tt SCOTCH\_dgraphPart} routine computes a partition into {\tt
 partnbr} parts of the distributed source graph structure pointed to
 by {\tt grafptr}, using the graph partitioning strategy pointed to by
-{\tt stratptr}, and returns distributed fragments of the partition
+{\tt straptr}, and returns distributed fragments of the partition
 data in the array pointed to by {\tt partloctab}.
 
 The {\tt partloctab} array should have been previously allocated, of a
@@ -3213,9 +3321,9 @@ computed, and a negative value else.
 \progsyn
 
 {\tt\begin{tabular}{l@{}ll}
-int SCOTCH\_dgraphOrderCompute ( & const SCOTCH\_Dgraph * & grafptr, \\
-                                 & SCOTCH\_Dordering *    & ordeptr, \\
-                                 & const SCOTCH\_Strat *  & straptr)
+int SCOTCH\_dgraphOrderCompute ( & SCOTCH\_Dgraph * const    & grafptr, \\
+                                 & SCOTCH\_Dordering * const & ordeptr, \\
+                                 & SCOTCH\_Strat * const     & straptr)
 \end{tabular}}
 
 {\tt\begin{tabular}{l@{}ll}
@@ -3230,7 +3338,7 @@ scotchfdgraphordercompute ( & doubleprecision (*) & grafdat, \\
 The {\tt SCOTCH\_dgraphOrderCompute} routine computes in parallel a
 distributed block ordering of the distributed graph structure pointed
 to by {\tt grafptr}, using the distributed ordering strategy pointed to
-by {\tt stratptr}, and stores its result in the distributed ordering
+by {\tt straptr}, and stores its result in the distributed ordering
 structure pointed to by {\tt ordeptr}.
 
 \progret
@@ -3239,6 +3347,67 @@ structure pointed to by {\tt ordeptr}.
 successfully computed, and $1$ else. In this latter case, the ordering
 arrays may however have been partially or completely filled, but their
 contents are not significant.
+\end{itemize}
+
+\subsubsection{{\tt SCOTCH\_dgraphOrderComputeList}}
+\label{sec-lib-func-dgraphordercomputelist}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+int SCOTCH\_dgraphOrderComputeList ( & SCOTCH\_Dgraph *    & grafptr, \\
+                                     & SCOTCH\_Dordering * & ordeptr, \\
+                                     & SCOTCH\_Num         & listnbr, \\
+                                     & const SCOTCH\_Num * & listtab, \\
+                                     & SCOTCH\_Strat *     & straptr)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdgraphordercomputelist ( & doubleprecision (*)   & grafdat, \\
+                                & doubleprecision (*)   & ordedat, \\
+                                & integer*{\it num}     & listnbr, \\
+                                & integer*{\it num} (*) & listtab, \\
+                                & doubleprecision (*)   & stradat, \\
+                                & integer               & ierr)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dgraphOrderComputeList} routine computes in parallel
+a distributed block ordering of a subgraph of the graph structure
+pointed to by \texttt{grafptr}, using the distributed ordering strategy
+pointed to by \texttt{straptr}, and stores its result in the distributed
+ordering structure pointed to by \texttt{ordeptr}. The induced subgraph
+is described by means of local vertex lists, one for each process:
+\texttt{listnbr} holds the number of local vertices to keep in the
+induced subgraph, the local indices of which are given, in any order, in
+the \texttt{listtab} array. Note that \texttt{listtab} must contain local
+vertex numbers, i.e ranging from \texttt{baseval} to $\mathtt{vertlocnbr}
++ \mathtt{baseval}$.
+
+Because an ordering always refers to the full graph, the ordering
+computed by \texttt{SCOTCH\_\lbt dgraph\lbt Order\lbt Compute\lbt List}
+is divided into two disconnected components: the induced graph
+vertices are ordered by applying the strategy provided by the
+\texttt{straptr} parameter, while vertices excluded from the list are
+ordered consecutively with the highest available indices. Consequently,
+the permuted indices of induced vertices range from \texttt{baseval}
+to $(\mathtt{listnbr} + \mathtt{baseval} - 1)$, while the permuted
+indices of the remaining vertices range from $(\mathtt{listnbr} +
+\mathtt{baseval})$ to $(\mathtt{vertnbr} + \mathtt{baseval} - 1)$,
+inclusive. Accordingly, the separation tree yielded by
+\texttt{SCOTCH\_\lbt dgraph\lbt Order\lbt Compute\lbt List} starts
+from a root with two children, the first one corresponding to the
+induced subgraph, and the second one to the vertices excluded from the
+list.
+
+\progret
+
+\texttt{SCOTCH\_dgraphOrderComputeList} returns $0$ if the ordering
+has been successfully computed, and $1$ else. In this latter case, the
+ordering arrays may have been partially or completely filled, but
+their contents are not significant.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphOrderExit}}
@@ -3267,7 +3436,7 @@ as parameter, may yield unpredictable results.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphOrderInit}}
-\label{sec-lib-dgraphorderinit}
+\label{sec-lib-func-dgraphorderinit}
 
 \begin{itemize}
 \progsyn
@@ -3416,7 +3585,7 @@ The {\tt SCOTCH\_dgraphOrderSaveTree} routine saves the tree
 hierarchy information associated with the {\tt SCOTCH\_\lbt Dordering}
 structure pointed to by {\tt ordeptr} to stream {\tt stream}.
 
-The format of the tree output file resembles the one of a mapping or
+The format of the tree output file resembles that of a mapping or
 ordering file: it is made up of as many lines as there are vertices in
 the ordering. Each of these lines holds two integer numbers. The first
 one is the index or the label of the vertex, and the second one is the
@@ -3501,14 +3670,16 @@ nested dissection, before the ordering process goes sequential.
 Sequential nodes generated locally on individual processes are not
 represented in this structure.
 
-A node can either be a leaf column block, which has no
-descendants, or a nested dissection node, which has most often
-three sons: its two separated sub-parts and the separator. A
-nested dissection node may have two sons only if the separator is
-empty; it cannot have only one son. Sons are indexed such that the
-separator of a block, if any, is always the son of highest index.
-Hence, the order of the indices of the two sub-parts matches the one
-of the direct permutation of the unknowns.
+A node can either be a leaf column block, which has no descendants, a
+disconnected components node with two sons as computed by
+\texttt{SCOTCH\_\lbt dgraph\lbt Order\lbt Compute\lbt List} (see
+Section~\ref{sec-lib-func-dgraphordercomputelist}), or a nested
+dissection node, which has most often three sons: its two separated
+sub-parts and the separator. A nested dissection node may have two
+sons only if the separator is empty; it cannot have only one son.
+Sons are indexed such that the separator of a block, if any, is always
+the son of highest index. Hence, the order of the indices of the two
+sub-parts matches that of the direct permutation of the unknowns.
 
 For any column block $i$, {\tt treeglbtab[}$i${\tt ]} holds the index
 of the father of node $i$ in the elimination tree, or $-1$ if $i$ is
@@ -3533,7 +3704,7 @@ successfully filled, and $1$ else.
 \end{itemize}
 
 \subsection{Centralized ordering handling routines}
-\label{sec-lib-corder}
+\label{sec-lib-func-corder}
 
 Since distributed ordering structures maintain scattered information
 which cannot be easily collated, the only practical way to access this
@@ -3571,7 +3742,7 @@ initialized by {\tt SCOTCH\_\lbt dgraph\lbt Corder\lbt Init}.
 
 
 \subsubsection{{\tt SCOTCH\_dgraphCorderInit}}
-\label{sec-lib-graph-corder-init}
+\label{sec-lib-func-dgraphcorderinit}
 
 \begin{itemize}
 \progsyn
@@ -3618,7 +3789,7 @@ column blocks, {\tt rangtab} is the array that holds the column block
 span information, of size $\mbox{\tt vert\lbt glb\lbt nbr} + 1$, and {\tt treetab}
 is the array holding the structure of the separators tree, of size
 ${\tt vert\lbt glb\lbt nbr}$. Please refer to
-Section~\ref{sec-lib-format-order} for an explanation of their semantics.
+Section~\ref{sec-lib-type-dordering} for an explanation of their semantics.
 Any of these five output fields can be set to {\tt NULL} if the
 corresponding information is not needed. Since, in Fortran, there is
 no null reference, passing a reference to {\tt grafptr} will have the
@@ -3638,7 +3809,7 @@ been successfully initialized, and $1$ else.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_dgraphOrderGather}}
-\label{sec-lib-dgraph-order-gather}
+\label{sec-lib-func-dgraphordergather}
 
 \begin{itemize}
 \progsyn
@@ -3675,8 +3846,480 @@ as the \texttt{corddat} parameter in Fortran.
 ordering structure has been successfully updated, and $1$ else.
 \end{itemize}
 
+\subsection{Distributed mesh handling routines}
+\label{sec-lib-dmesh}
+
+\subsubsection{\texttt{SCOTCH\_dmeshAlloc}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}l}
+SCOTCH\_Dmesh * SCOTCH\_dmeshAlloc ( & void)
+\end{tabular}}
+
+\progdes
+
+The {\tt SCOTCH\_dmeshAlloc} function allocates a memory area of a
+size sufficient to store a {\tt SCOTCH\_\lbt Dmesh} structure. It is
+the user's responsibility to free this memory when it is no longer
+needed. The allocated space must be initialized before use, by means
+of the {\tt SCOTCH\_\lbt dmesh\lbt Init} routine.
+
+\progret
+
+{\tt SCOTCH\_dmeshAlloc} returns the pointer to the memory area if it
+has been successfully allocated, and {\tt NULL} else.
+\end{itemize}
+
+\subsubsection{{\tt SCOTCH\_dmeshBuildAdm}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+int SCOTCH\_dmeshBuildAdm ( & SCOTCH\_Dmesh *     & meshptr,    \\
+                            & const SCOTCH\_Num   & baseval,    \\
+                            & const SCOTCH\_Num   & vertlocnbr, \\
+                            & const SCOTCH\_Num   & vertlocmax, \\
+                            & const SCOTCH\_Num * & vertloctab, \\
+                            & const SCOTCH\_Num * & vendloctab, \\
+                            & const SCOTCH\_Num * & veloloctab, \\
+                            & const SCOTCH\_Num * & vlblocltab, \\
+                            & const SCOTCH\_Num   & edgelocnbr, \\
+                            & const SCOTCH\_Num   & edgelocsiz, \\
+                            & const SCOTCH\_Num * & edgeloctab, \\
+                            & const SCOTCH\_Num * & edgegsttab, \\
+                            & const SCOTCH\_Num * & edloloctab)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshbuildadm ( & doubleprecision (*)   & meshdat,    \\
+                       & integer*{\it num}     & baseval,    \\
+                       & integer*{\it num}     & vertlocnbr, \\
+                       & integer*{\it num}     & vertlocmax, \\
+                       & integer*{\it num} (*) & vertloctab, \\
+                       & integer*{\it num} (*) & vendloctab, \\
+                       & integer*{\it num} (*) & veloloctab, \\
+                       & integer*{\it num} (*) & vlblloctab, \\
+                       & integer*{\it num}     & edgelocnbr, \\
+                       & integer*{\it num}     & edgelocsiz, \\
+                       & integer*{\it num} (*) & edgeloctab, \\
+                       & integer*{\it num} (*) & edgegsttab, \\
+                       & integer*{\it num} (*) & edloloctab, \\
+                       & integer               & ierr)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshBuildAdm} routine fills the distributed source
+mesh structure pointed to by \texttt{meshptr} with all of the data that
+are passed to it in the auxiliary distributed mesh format (see
+Section~\ref{sec-file-admesh} for more information on this format).
+
+\texttt{baseval} is the mesh base value for index arrays (typically
+$0$ for structures built from C and $1$ for structures built from
+Fortran). \texttt{velmlocnbr} is the number of local element vertices
+on the calling process.
+\texttt{velmloctab} is the local element-to-node adjacency index
+array, of size $(\texttt{velm\lbt loc\lbt nbr} + 1)$.
+\texttt{eelmlocnbr} is the local number of element-to-node arcs.
+\texttt{eelmloctab} is the local adjacency array, of size
+\texttt{eelmlocnbr}, which stores the global indices of end node
+vertices.
+\texttt{vnodglbnbr} is the global number of node vertices.
+All these data must be provided on all processes.
+
+To limit memory consumption,
+\texttt{SCOTCH\_\lbt dmesh\lbo Build\lbo Adm} does not copy array
+data, but instead references them in the \texttt{SCOTCH\_\lbt Dmesh}
+structure. Therefore, great care should be taken not to modify the
+contents of the arrays passed to
+\texttt{SCOTCH\_\lbt dmesh\lbt Build\lbo Adm} as long as the mesh
+structure is in use. Every update of the arrays should be preceded by
+a call to \texttt{SCOTCH\_\lbt dmesh\lbo Free}, to free internal mesh
+structures, and eventually followed by a new call to
+\texttt{SCOTCH\_\lbt dmesh\lbo Build\lbo Adm} to
+re-build these internal structures so as to be able to use the new
+distributed mesh.
+
+%% To ensure that inconsistencies in user data do not result in an
+%% erroneous behavior of the \libscotch\ routines, it is recommended, at
+%% least in the development stage of your application code, to call the
+%% {\tt SCOTCH\_\lbt dmesh\lbt Check} routine on the newly created
+%% {\tt SCOTCH\_\lbt Dmesh} structure before calling any other
+%% \libscotch\ routine.
+
+\progret
+
+{\tt SCOTCH\_dmeshBuildAdm} returns $0$ if the mesh structure has been
+successfully set with all of the input data, and $1$ else.
+\end{itemize}
+
+\subsubsection{\texttt{SCOTCH\_dmeshData}}
+\label{sec-lib-func-dmeshdata}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+void SCOTCH\_dmeshData ( & const SCOTCH\_Dmesh * & meshptr,    \\
+                         & SCOTCH\_Num *         & baseptr,    \\
+                         & SCOTCH\_Num *         & velmglbptr, \\
+                         & SCOTCH\_Num *         & velmlocptr, \\
+                         & SCOTCH\_Num **        & velmloctab, \\
+                         & SCOTCH\_Num *         & eelmglbnbr, \\
+                         & SCOTCH\_Num *         & eelmlocptr, \\
+                         & SCOTCH\_Num **        & eelmloctab, \\
+                         & SCOTCH\_Num *         & vnodglbptr, \\
+                         & MPI\_Comm *           & commptr)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshdata ( & doubleprecision (*)   & meshdat,    \\
+                   & integer*{\it num} (*) & indxtab,    \\
+                   & integer*{\it num}     & baseval,    \\
+                   & integer*{\it num}     & velmglbnbr, \\
+                   & integer*{\it num}     & velmlocnbr, \\
+                   & integer*{\it idx}     & velmlocidx, \\
+                   & integer*{\it num}     & eelmglbnbr, \\
+                   & integer*{\it num}     & eelmlocnbr, \\
+                   & integer*{\it idx}     & eelmlocidx, \\
+                   & integer*{\it num}     & vnodglbnbr, \\
+                   & integer               & comm)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshData} routine is the dual of the
+\texttt{SCOTCH\_\lbt dmesh\lbo Build\lbo Adm} routine. It is a
+multiple accessor that returns scalar values and array references.
+
+\texttt{baseptr} is the pointer to a location that will hold the mesh
+base value for index arrays (typically $0$ for structures built from C
+and $1$ for structures built from Fortran).
+\texttt{velmglbptr} is the pointer to a location that will hold the
+global number of element vertices.
+\texttt{velmlocptr} is the pointer to a location that will hold the
+number of local element vertices.
+\texttt{vertloctab} is the pointer to a location that will hold the
+reference to the adjacency index array, of size
+$\mbox{\tt *velmlocptr} + 1$.
+\texttt{eelmglbptr} is the pointer to a location that will hold the
+global number of element-to-node arcs, which is also the global number
+of node-to-element arcs.
+\texttt{eelmlocptr} is the pointer to a location that will hold the
+number of local element-to-node arcs.
+\texttt{eelmloctab} is the pointer to a location that will hold the
+reference to the local element-to-node adjacency array of global
+indices, of size \texttt{*eelmlocptr}.
+\texttt{vnodglbptr} is the pointer to a location that will hold the
+global number of node vertices.
+{\tt commptr} is the pointer to a location that will hold the MPI
+communicator of the distributed mesh.
+
+Any of these pointers can be set to {\tt NULL} on input if the
+corresponding information is not needed. Else, the reference to a
+dummy area can be provided, where all unwanted data will be written.
+
+Since there are no pointers in Fortran, a specific mechanism is used
+to allow users to access mesh arrays. The \texttt{scotchf\lbt dmesh\lbt
+data} routine is passed an integer array, the first element of which
+is used as a base address from which all other array indices are
+computed. Therefore, instead of returning references, the routine
+returns integers, which represent the starting index of each of the
+relevant arrays with respect to the base input array, or \texttt{velm\lbt
+loc\lbt idx}, the index of \texttt{velm\lbt loc\lbt tab}, if they do not
+exist. For instance, if some base array \texttt{myarray\lbt (1)} is
+passed as parameter \texttt{indxtab}, then the first cell of array
+\texttt{velm\lbt loc\lbt tab} will be accessible as {\tt myarray\lbt
+(velm\lbt loc\lbt idx)}.
+In order for this feature to behave properly, the {\tt indxtab}
+array must be word-aligned with the mesh arrays. This is
+automatically enforced on most systems, but some care should be
+taken on systems that allow to access data that is not
+word-aligned. On such systems, declaring the array after a
+dummy {\tt double\lbt precision} array can coerce the compiler
+into enforcing the proper alignment. The integer value returned in
+{\tt comm} is the communicator itself, not its index with respect to
+{\tt indxtab}. Also, on 32\_64 architectures,
+such indices can be larger than the size of a regular
+{\tt INTEGER}. This is why the indices to be returned are defined by
+means of a specific integer type. See
+Section~\ref{sec-lib-inttypesize} for more information on this
+issue.
+\end{itemize}
+
+\subsubsection{\texttt{SCOTCH\_dmeshDgraphDual}}
+\label{sec-lib-func-dmeshdgraphdual}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+int SCOTCH\_dmeshDgraphDual ( & const SCOTCH\_Dmesh * & meshptr, \\
+                              & SCOTCH\_Dgraph *      & grafptr, \\
+                              & const SCOTCH\_Num     & nocoval)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshdgraphdual ( & doubleprecision (*) & meshdat, \\
+                         & doubleprecision (*) & grafdat, \\
+                         & integer             & nocoval, \\
+                         & integer             & ierr)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshDgraphDual} routine builds a distributed dual
+graph (\ie, an element graph) from a distributed mesh. It creates, in
+the \texttt{SCOTCH\_\lbt Dgraph} structure pointed to by
+\texttt{grafptr}, a distributed graph having as many vertices as there
+are elements in the \texttt{SCOTCH\_\lbt Dmesh} structure pointed to
+by \texttt{meshptr}, and such that there exists an edge between any
+two graph vertices if there are at least \texttt{nocoval} shared nodes
+between the two corresponding elements in the source mesh.
+
+\progret
+
+\texttt{SCOTCH\_dmeshDgraphDual} returns $0$ if the distributed graph
+structure has been successfully allocated and filled, and $1$ else.
+\end{itemize}
+
+\subsubsection{{\tt SCOTCH\_dmeshExit}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+void SCOTCH\_dmeshExit ( & SCOTCH\_Dmesh * & meshptr)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshexit ( & doubleprecision (*) & meshdat)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshExit} function frees the contents of a
+\texttt{SCOTCH\_\lbt Dmesh} structure previously initialized by
+\texttt{SCOTCH\_\lbt dmeshInit}. All subsequent calls to
+\texttt{SCOTCH\_\lbt mesh} routines other than
+\texttt{SCOTCH\_\lbt dmesh\lbo Init}, using this structure as
+parameter, may yield unpredictable results.
+
+If \texttt{SCOTCH\_\lbt dmesh\lbt Init} was called with a
+communicator that is not a predefined MPI communicator, it is
+the user's responsibility to free this communicator after
+all meshes that use it have been freed by means of the
+\texttt{SCOTCH\_\lbt dmesh\lbt Exit} routine.
+
+\end{itemize}
+
+\subsubsection{{\tt SCOTCH\_dmeshFree}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+void SCOTCH\_dmeshFree ( & SCOTCH\_Dmesh * & meshptr)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshfree ( & doubleprecision (*) & meshdat)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshFree} function frees the mesh data of a
+\texttt{SCOTCH\_\lbt Dmesh} structure previously initialized by
+\texttt{SCOTCH\_\lbt dmesh\lbt Init}, but preserves its internal
+communication data structures. This call is equivalent to
+a call to \texttt{SCOTCH\_\lbt dmesh\lbo Exit} immediately
+followed by a call to \texttt{SCOTCH\_\lbt dmesh\lbt Init} with the
+same communicator as in the previous
+\texttt{SCOTCH\_\lbt dmesh\lbt Init} call. Consequently, the given
+\texttt{SCOTCH\_\lbt Dmesh} structure remains ready for subsequent
+calls to any distributed mesh handling routine of the
+\libscotch\ library.
+\end{itemize}
+
+\subsubsection{\texttt{SCOTCH\_dmeshInit}}
+\label{sec-lib-func-dmeshinit}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+int SCOTCH\_dmeshInit ( & SCOTCH\_Dmesh * & meshptr, \\
+                        & MPI\_Comm       & comm)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshinit ( & doubleprecision (*) & meshdat, \\
+                   & integer             & comm, \\
+                   & integer             & ierr)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshInit} function initializes a
+\texttt{SCOTCH\_\lbt Dmesh} structure so as to make it suitable for
+future parallel operations. It should be the first function to be
+called upon a \texttt{SCOTCH\_\lbt Dmesh} structure. By accessing the
+communicator handle which is passed to it, \texttt{SCOTCH\_dmeshInit}
+can know how many processes will be used to manage the distributed
+mesh and can allocate its private structures accordingly.
+
+\texttt{SCOTCH\_dmeshInit} does not make a duplicate of the communicator
+which is passed to it, but instead keeps a reference to it, so that
+all future communications needed by \libscotch\ to process this mesh
+will be performed using this communicator. Therefore, it is the user's
+responsibility, whenever several \libscotch\ routines might be called
+in parallel, to create appropriate duplicates of communicators so as
+to avoid any potential interferences between concurrent
+communications.
+
+When the distributed mesh is no longer of use, the
+\texttt{SCOTCH\_\lbt dmesh\lbt Exit} function must be called, to free
+its internal data arrays.
+
+If \texttt{SCOTCH\_\lbt dmesh\lbt Init} was called with a
+communicator that is not a predefined MPI communicator (such as
+{\tt MPI\_\tt COMM\_\lbt WORLD} or {\tt MPI\_\tt COMM\_\lbt SELF}), it
+is the user's responsibility to free this communicator after
+all meshes that use it have been freed by means of the
+\texttt{SCOTCH\_\lbt dmesh\lbt Exit} routine.
+
+\progret
+
+{\tt SCOTCH\_dmeshInit} returns $0$ if the gmesh structure has been
+successfully initialized, and $1$ else.
+\end{itemize}
+
+\subsubsection{\texttt{SCOTCH\_dmeshSize}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+void SCOTCH\_dmeshSize ( & const SCOTCH\_Dmesh * & meshptr,    \\
+                         & SCOTCH\_Num *         & velmglbptr, \\
+                         & SCOTCH\_Num *         & velmlocptr, \\
+                         & SCOTCH\_Num *         & eelmglbnbr, \\
+                         & SCOTCH\_Num *         & eelmlocptr, \\
+                         & SCOTCH\_Num *         & vnodglbptr)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshsize ( & doubleprecision (*) & meshdat,    \\
+                   & integer*{\it num}   & velmglbnbr, \\
+                   & integer*{\it num}   & velmlocnbr, \\
+                   & integer*{\it num}   & eelmglbnbr, \\
+                   & integer*{\it num}   & eelmlocnbr, \\
+                   & integer*{\it num}   & vnodglbnbr)
+\end{tabular}}
+
+\progdes
+
+The \texttt{SCOTCH\_dmeshSize} routine fills the five areas of type
+\texttt{SCOTCH\_\lbt Num} pointed to by \texttt{velmglbptr},
+\texttt{velmlocptr}, \texttt{eelmglbptr}, \texttt{eelmlocptr} and
+\texttt{vnodglbptr} with the number of global element vertices and
+element-to-node arcs of the given mesh pointed to by {\tt meshptr}, as
+well as with the number of local element vertices and element-to-node
+arcs borne by each of the calling processes, and the global number of
+node vertices.
+
+Any of these pointers can be set to {\tt NULL} on input if the
+corresponding information is not needed. Else, the reference to a
+dummy area can be provided, where all unwanted data will be written.
+
+This routine is useful to get the size of a mesh read by means
+of the {\tt SCOTCH\_\lbt dmesh\lbo Load} routine, in order to allocate
+auxiliary arrays of proper sizes. If the whole structure of the
+mesh is wanted, function \texttt{SCOTCH\_dmesh\lbo Data} should be
+preferred.
+
+\end{itemize}
+
+\subsubsection{\texttt{SCOTCH\_dmeshSizeof}}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}l}
+int SCOTCH\_dmeshSizeof ( & void)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshsizeof ( & integer & size )
+\end{tabular}}
+
+\progdes
+
+The {\tt SCOTCH\_dmeshSizeof} routine returns the size, in bytes, of a
+{\tt SCOTCH\_\lbt Dmesh} structure. This information is useful to
+export the interface of the {\sc libPTScotch} to interpreted languages,
+without access to the ``{\tt scotch.h}'' include file.
+\end{itemize}
+
+\subsection{Distributed mesh I/O routines}
+
+\subsubsection{{\tt SCOTCH\_dmeshLoad}}
+\label{sec-lib-func-dmeshload}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+int SCOTCH\_dmeshLoad ( & SCOTCH\_Dmesh * & meshptr, \\
+                        & FILE *          & stream, \\
+                        & SCOTCH\_Num     & baseval, \\
+                        & SCOTCH\_Num     & flagval)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+scotchfdmeshload ( & doubleprecision (*) & meshdat, \\
+                   & integer             & fildes, \\
+                   & integer*{\it num}   & baseval, \\
+                   & integer*{\it num}   & flagval, \\
+                   & integer             & ierr)
+\end{tabular}}
+
+\progdes
+
+The {\tt SCOTCH\_dmeshLoad} routine fills the
+\texttt{SCOTCH\_\lbt Dmesh} structure pointed to by \texttt{meshptr}
+with the distributed source mesh description available from
+multiple streams \texttt{stream} in the \scotch\ distributed mesh
+format (please refer to Section~\ref{sec-file-admesh} for a description
+of the auxiliary distributed mesh format).
+
+To ease the handling of source mesh files by programs written in C as
+well as in Fortran, the base value of the mesh to read can be set
+to \texttt{0} or \texttt{1}, by setting the \texttt{baseval} parameter
+to the proper value. A value of \texttt{-1} indicates that the mesh
+base should be the same as the one provided in the mesh description
+that is read from \texttt{stream}.
+
+The \texttt{flagval} value is currently not used. This value should be
+set to \texttt{0}.
+
+Fortran users must use the \texttt{PXFFILENO} or \texttt{FNUM}
+functions to obtain the number of the Unix file descriptor
+\texttt{fildes} associated with the logical unit of the mesh
+file.
+
+\progret
+
+\texttt{SCOTCH\_dmeshLoad} returns $0$ if the distributed mesh
+structure has been successfully allocated and filled with the data
+read, and $1$ else.
+\end{itemize}
+
 \subsection{Strategy handling routines}
-\label{sec-lib-strat}
+\label{sec-lib-func-strat}
 
 This section presents basic strategy handling routines which are also
 described in the {\it\scotch\ User's Guide} but which are duplicated
@@ -3772,7 +4415,7 @@ successfully written to {\tt stream}, and $1$ else.
 \end{itemize}
 
 \subsection{Strategy creation routines}
-\label{sec-lib-strat-creation}
+\label{sec-lib-func-strat-creation}
 
 Strategy creation routines parse the user-provided strategy string and
 populate the given opaque strategy object with a tree-shaped structure
@@ -3862,7 +4505,7 @@ scotchfstratdgraphmap ( & doubleprecision (*) & stradat, \\
 The {\tt SCOTCH\_stratDgraphMap} routine fills the strategy
 structure pointed to by {\tt straptr} with the distributed graph
 mapping strategy string pointed to by {\tt string}. The format of this
-strategy string is described in Section~\ref{sec-lib-format-pmap}.
+strategy string is described in Section~\ref{sec-lib-format-strat-pmap}.
 From this point, strategy {\tt strat} can only be used as a
 distributed graph mapping strategy, to be used by functions {\tt
 SCOTCH\_\lbt dgraph\lbt Part}, {\tt SCOTCH\_\lbt dgraph\lbt Map} or
@@ -3939,7 +4582,7 @@ scotchfstratdgraphorder ( & doubleprecision (*) & stradat, \\
 The {\tt SCOTCH\_stratDgraphOrder} routine fills the strategy
 structure pointed to by {\tt straptr} with the distributed graph
 ordering strategy string pointed to by {\tt string}. The format of
-this strategy string is described in Section~\ref{sec-lib-format-pord}.
+this strategy string is described in Section~\ref{sec-lib-format-strat-pord}.
 From this point, strategy {\tt strat} can only be used as a
 distributed graph ordering strategy, to be used by function {\tt
 SCOTCH\_\lbt dgraph\lbt Order\lbt Compute}. This routine must be
@@ -3999,7 +4642,7 @@ has been successfully set, and $1$ else.
 \end{itemize}
 
 \subsection{Other data structure routines}
-\label{sec-lib-other}
+\label{sec-lib-func-other}
 
 \subsubsection{{\tt SCOTCH\_dmapAlloc}}
 
@@ -4088,7 +4731,7 @@ without access to the ``{\tt scotch.h}'' include file.
 \end{itemize}
 
 \subsection{Error handling routines}
-\label{sec-lib-error}
+\label{sec-lib-func-error}
 
 The handling of errors that occur within library routines is
 often difficult, because library routines should be able to issue
@@ -4113,7 +4756,7 @@ programmers who want to take advantage of them have to add
 the {\tt -lptscotch} argument.
 
 \subsubsection{{\tt SCOTCH\_errorPrint}}
-\label{sec-lib-errorprint}
+\label{sec-lib-func-errorprint}
 
 \begin{itemize}
 \progsyn
@@ -4163,7 +4806,7 @@ standalone programs of the \scotch\ distribution.
 \end{itemize}
 
 \subsection{Random generator handling}
-\label{sec-lib-random}
+\label{sec-lib-func-random}
 
 In order not to be influenced by the concurrent execution of third-party
 software and/or library routines, the \libscotch\ library embeds its
@@ -4203,7 +4846,7 @@ race conditions, calling it concurrently from several threads may
 yield unpredictable results. Hence, in this case, users should use a
 different \texttt{SCOTCH\_\lbt Context} for each master thread, that
 will contain its own pseudo-random generator (see
-Section~\ref{sec-lib-context}).
+Section~\ref{sec-lib-func-context}).
 
 \subsubsection{\texttt{SCOTCH\_randomProc}}
 
@@ -4240,7 +4883,7 @@ context by routine \texttt{SCOTCH\_\lbt context\lbt Random\lbt Clone}.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_randomReset}}
-\label{sec-lib-random-reset}
+\label{sec-lib-func-randomreset}
 
 \begin{itemize}
 \progsyn
@@ -4270,7 +4913,7 @@ at different times will yield the same result.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_randomSeed}}
-\label{sec-lib-random-seed}
+\label{sec-lib-func-randomseed}
 
 \begin{itemize}
 \progsyn
@@ -4319,7 +4962,7 @@ $[0;\mbox{textsc{randmax}}[$.
 \end{itemize}
 
 \subsection{Context handling routines}
-\label{sec-lib-context}
+\label{sec-lib-func-context}
 
 By default, \scotch\ uses a global pseudo-random number generator and
 takes advantage of as many threads as it can discover on the
@@ -4381,7 +5024,7 @@ graph structure has been successfully initialized, and $1$ else.
 \end{itemize}
 
 \subsection{Memory management}
-\label{sec-lib-mem}
+\label{sec-lib-func-mem}
 
 \subsubsection{{\tt SCOTCH\_memCur}}
 
@@ -4424,7 +5067,7 @@ While memory occupation is internally recorded in a variable of type
 sake of interface homogeneity, especially for Fortran. It is therefore
 the installer's responsibility to make sure that the support integer
 type of {\tt SCOTCH\_\lbt Idx} is large enough to not overflow. See
-section~\ref{sec-lib-inttypesize} for more information.
+Section~\ref{sec-lib-inttypesize} for more information.
 \end{itemize}
 
 \subsubsection{{\tt SCOTCH\_memMax}}
@@ -4468,11 +5111,11 @@ While memory occupation is internally recorded in a variable of type
 sake of interface homogeneity, especially for Fortran. It is therefore
 the installer's responsibility to make sure that the support integer
 type of {\tt SCOTCH\_\lbt Idx} is large enough to not overflow. See
-section~\ref{sec-lib-inttypesize} for more information.
+Section~\ref{sec-lib-inttypesize} for more information.
 \end{itemize}
 
 \subsection{\parmetis\ compatibility library}
-\label{sec-lib-parmetis}
+\label{sec-lib-func-parmetis}
 
 The \parmetis\ compatibility library provides stubs which redirect some
 calls to \parmetis\ routines to the corresponding \ptscotch\ counterparts.
@@ -4490,6 +5133,46 @@ that the sequential \metis\ library be linked too. When no other
 \parmetis\ routines than the ones redefined by \ptscotch\ are used,
 the ``{\tt -lparmetis}'' argument can be omitted. See
 Section~\ref{sec-examples} for an example.
+
+\subsubsection{\texttt{ParMETIS\_V3\_Mesh2Dual}}
+\label{sec-lib-func-parmetis-meshtodual}
+
+\begin{itemize}
+\progsyn
+
+{\tt\begin{tabular}{l@{}ll}
+void ParMETIS\_V3\_Mesh2Dual ( & const SCOTCH\_Num * const & elmdist, \\
+                               & const SCOTCH\_Num * const & eptr, \\
+                               & const SCOTCH\_Num * const & eind, \\
+                               & const SCOTCH\_Num * const & numflag, \\
+                               & const SCOTCH\_Num * const & ncommonnodes, \\
+                               & SCOTCH\_Num ** const      & xadj, \\
+                               & SCOTCH\_Num ** const      & adjncy \\
+                               & MPI\_Comm *               & comm)
+\end{tabular}}
+
+{\tt\begin{tabular}{l@{}ll}
+parmetis\_v3\_mesh2dual ( & integer*{\it num} (*)  & elmdist, \\
+                          & integer*{\it num} (*)  & eptr, \\
+                          & integer*{\it num} (*)  & eind, \\
+                          & integer*{\it num}      & numflag, \\
+                          & integer*{\it num}      & ncommonnodes, \\
+                          & integer*{\it num} (**) & xadj, \\
+                          & integer*{\it num} (**) & adjncy, \\
+                          & integer                & comm)
+\end{tabular}}
+
+\progdes
+
+The \texttt{ParMETIS\_V3\_Mesh2Dual} function computes in parallel the
+distributed element graph, also called dual mesh graph, from the given
+element mesh adjacency data. The input mesh is given through the three
+arrays \texttt{elmdist}, \texttt{eptr} and \texttt{eind}. The arrays
+which describe the adjacency of the dual graph are returned in the
+pointers pointed to by \texttt{xadj} and \texttt{adjncy}. It is the
+user's responsibility to free these two arrays after use, by way of
+plain \texttt{free} calls.
+\end{itemize}
 
 \subsubsection{{\tt ParMETIS\_V3\_NodeND}}
 

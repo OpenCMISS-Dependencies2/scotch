@@ -313,7 +313,7 @@ to compile with flag ``\texttt{-DCOMMON\_\lbt PTHREAD\_\lbt
 AFFINITY\_\lbt LINUX}'' set whenever possible, to benefit from these
 features.
 
-\subsection{Data formats}
+\subsection{Data types}
 
 All of the data used in the \libscotch\ interface are of integer type
 {\tt SCOTCH\_Num}. To hide the internals of \scotch\ to callers, all
@@ -331,15 +331,15 @@ always labeled as {\tt baseval}, whether {\tt baseval} is set to $0$
 internally manages with base values and array pointers so as to
 process these arrays accordingly.
 
-\subsubsection{Architecture format}
+\subsubsection{\texttt{SCOTCH\_\lbt Arch} architecture type}
 
 Target architecture structures are completely opaque. The only way
 to describe an architecture is by means of a graph passed to the
 {\tt SCOTCH\_\lbt arch\lbt Build} or {\tt SCOTCH\_\lbt arch\lbt
 Build2} routines.
 
-\subsubsection{Graph format}
-\label{sec-lib-format-graph}
+\subsubsection{\texttt{SCOTCH\_\lbt Graph} graph type}
+\label{sec-lib-type-graph}
 
 Source graphs are described by means of adjacency lists. These data
 are stored in arrays and scalars of type \texttt{SCOTCH\_Num}, as
@@ -453,8 +453,8 @@ $\mathtt{vendtab[}i\mathtt{]}$ must be updated accordingly. With
 simple housekeeping of free areas of the edge array, dynamic arrays
 can be updated with as little data movement as possible.
 
-\subsubsection{Mesh format}
-\label{sec-lib-format-mesh}
+\subsubsection{\texttt{SCOTCH\_\lbt Mesh} mesh type}
+\label{sec-lib-type-mesh}
 
 Since meshes are basically bipartite graphs, source meshes are also
 described by means of adjacency lists. The description of a mesh
@@ -563,8 +563,8 @@ all of the elements have the name number of nodes.}
 \label{fig-lib-mesh-three}
 \end{figure}
 
-\subsubsection{Geometry format}
-\label{sec-lib-format-geom}
+\subsubsection{\texttt{SCOTCH\_\lbt Geom} geometry type}
+\label{sec-lib-type-geom}
 
 Geometry data is always associated with a graph or a mesh. It is
 simply made of a single array of double-precision values which
@@ -600,8 +600,8 @@ $\mathtt{geomtab}\mbox{\tt [}(i - \mathtt{vnodbas}) * \mathtt{dimnnbr}
 + \mathtt{baseval} + 2\mbox{\tt ]}$ if $\mbox{\tt dimnnbr} = 3$.
 \end{itemize}
 
-\subsubsection{Block ordering format}
-\label{sec-lib-format-order}
+\subsubsection{\texttt{SCOTCH\_\lbt Ordering} block ordering format}
+\label{sec-lib-type-ordering}
 
 Block orderings associated with graphs and meshes are described by
 means of block and permutation arrays, made of {\tt SCOTCH\_Num}s, as
@@ -762,7 +762,7 @@ Order nested dissection separators as cheaply as possible.
 \end{itemize}
 
 \subsubsection{Mapping strategy strings}
-\label{sec-lib-format-map}
+\label{sec-lib-format-strat-map}
 
 At the time being, mapping methods only apply to graphs, as there is
 not yet a mesh mapping tool in the \scotch\ package.
@@ -947,7 +947,7 @@ vertex loads.
 \end{itemize}
 
 \subsubsection{Graph bipartitioning strategy strings}
-\label{sec-lib-format-bipart}
+\label{sec-lib-format-strat-bipart}
 
 A graph bipartitioning strategy is made of one or several graph
 bipartitioning methods, which can be combined by means of strategy
@@ -1102,6 +1102,14 @@ maximum number of passes has been reached. Value $-1$ stands for an
 infinite number of passes, that is, as many as needed by the algorithm
 to converge.
 \end{itemize}
+\iteme[{\tt a}]
+Genetic algorithm method. This method has two parameters.
+\begin{itemize}
+\iteme[{\tt pass=}{\it nbr}]
+Set the number of generations bred by the algorithm.
+\iteme[{\tt pop=}{\it nbr}]
+Set the population count.
+\end{itemize}
 \iteme[{\tt g}]
 Gibbs-Poole-Stockmeyer method. This method has only one parameter.
 \begin{itemize}
@@ -1149,12 +1157,12 @@ section~\ref{sec-algo-variable}).
 \end{itemize}
 
 \subsubsection{Vertex partitioning (with overlap) strategy strings}
-\label{sec-lib-format-part-ovl}
+\label{sec-lib-format-strat-part-ovl}
 
 Vertex partitioning is a special form of graph partitioning, in which
 graphs are partitioned into a prescribed number of parts by means of
 vertex separators rather than of edge separators like in
-Section~\ref{sec-lib-format-map}. The load balance criterion also
+Section~\ref{sec-lib-format-strat-map}. The load balance criterion also
 differs from common practice: the load to be balanced across all parts
 comprises not only the load of the vertices which belong to the part,
 but also the load of all the separator vertices which are their
@@ -1175,8 +1183,7 @@ are listed below.
 K-way partitioning strategy to be performed. It is in fact a k-way
 mapping strategy, that is applied to a complete target graph of as
 many vertices as the prescribed number of parts. The syntax of mapping
-strategy strings is defined within section~\ref{sec-lib-format-map},
-at page~\pageref{sec-lib-format-map}.
+strategy strings is defined in Section~\ref{sec-lib-format-strat-map}.
 \end{itemize}
 \iteme[{\tt f}]
 Fiduccia-Mattheyses method. The parameters of the Fiduccia-Mattheyses method
@@ -1248,12 +1255,12 @@ Apply vertex (node) separation strategy {\it strat\/} to each
 bipartitioning job. A node separation strategy is made of one or
 several node separation methods, which can be combined by means of
 strategy operators. Node separation strategies are described in
-Section~\ref{sec-lib-format-nsep}.
+Section~\ref{sec-lib-format-strat-nsep}.
 \end{itemize}
 \end{itemize}
 
 \subsubsection{Ordering strategy strings}
-\label{sec-lib-format-ord}
+\label{sec-lib-format-strat-ord}
 
 Ordering strategies are available both for graphs and for meshes.
 An ordering strategy is made of one or several ordering methods, which
@@ -1428,7 +1435,7 @@ tree.
 \iteme[{\tt sep=}{\it strat}]
 Set the node separation strategy that is used on every leaf of the
 separators tree to make it grow. Node separation strategies are
-described below, in section~\ref{sec-lib-format-nsep}.
+described below, in section~\ref{sec-lib-format-strat-nsep}.
 \end{itemize}
 \iteme[{\tt o}]
 Disconnected subgraph detection method. This method is used at the
@@ -1460,7 +1467,7 @@ Graph ordering strategy to apply to the associated graph.
 \end{itemize}
 
 \subsubsection{Node separation strategy strings}
-\label{sec-lib-format-nsep}
+\label{sec-lib-format-strat-nsep}
 
 A node separation strategy is made of one or several node separation
 methods, which can be combined by means of strategy
@@ -1574,8 +1581,7 @@ ratio expressed with respect to the ideal load of the partitions.
 \iteme[{\tt strat=}{\it strat}]
 Set the graph bipartitioning strategy that is used to compute the edge
 bipartition. The syntax of bipartitioning
-strategy strings is defined within section~\ref{sec-lib-format-bipart},
-at page~\pageref{sec-lib-format-bipart}.
+strategy strings is defined in Section~\ref{sec-lib-format-strat-bipart}.
 \iteme[{\tt width=}{\it type}]
 Select the width of the vertex separators built from edge separators.
 When {\it type\/} is set to {\tt f}, fat vertex separators are built,
@@ -1980,8 +1986,8 @@ $0$, and from $1$ to $\mathtt{vertnbr}$ if the graph base is $1$.
 Graph bipartitioning strategies are declared by means of the
 {\tt SCOTCH\_\lbt strat\lbt Graph\lbt Bipart} function, described in
 page~\pageref{sec-lib-strat-graph-bipart}. The syntax of bipartitioning
-strategy strings is defined in section~\ref{sec-lib-format-map},
-page~\pageref{sec-lib-format-bipart}.
+strategy strings is defined in section~\ref{sec-lib-format-strat-map},
+page~\pageref{sec-lib-format-strat-map}.
 Additional information may be obtained from the manual page of
 {\tt amk\_\lbt grf}, the stand-alone executable that builds
 decomposition-defined target architecture files from source graph
@@ -3388,7 +3394,7 @@ The \texttt{SCOTCH\_graphDump} routine outputs the contents of the
 \texttt{SCOTCH\_\lbt Graph} structure pointed to by \texttt{grafptr}
 to stream \texttt{stream}, in the form of a C source code. The names
 of the data arrays that encode the various graph arrays (see
-Section~\ref{sec-lib-format-graph}), as well as the
+Section~\ref{sec-lib-type-graph}), as well as the
 ``\texttt{GraphBuild}'' stem of the graph building function name, are
 prefixed and suffixed by the \texttt{prefptr} and \texttt{suffptr}
 strings, respectively.
@@ -3796,8 +3802,8 @@ The {\tt SCOTCH\_graphMap} routine computes a mapping of the source
 graph structure pointed to by {\tt grafptr} onto the target
 architecture pointed to by {\tt archptr}, using the mapping strategy
 pointed to by {\tt straptr} (as defined in
-Section~\ref{sec-lib-format-map}), and returns the mapping data in the
-array pointed to by {\tt parttab}.
+Section~\ref{sec-lib-format-strat-map}), and returns the mapping data
+in the array pointed to by {\tt parttab}.
 
 The {\tt parttab} array should have been previously allocated, of a
 size sufficient to hold as many {\tt SCOTCH\_\lbt Num} integers as
@@ -3866,9 +3872,9 @@ The {\tt SCOTCH\_graphMapFixed} routine computes a mapping of the
 source graph structure pointed to by {\tt grafptr} onto the target
 architecture pointed to by {\tt archptr}, using the mapping strategy
 pointed to by {\tt straptr} (as defined in
-Section~\ref{sec-lib-format-map}), and fills the array pointed to by
-{\tt parttab} with the mapping data regarding vertices which have not
-been pre-assigned by the user.
+Section~\ref{sec-lib-format-strat-map}), and fills the array pointed
+to by {\tt parttab} with the mapping data regarding vertices which
+have not been pre-assigned by the user.
 
 The {\tt parttab} array should have been previously allocated, of a
 size sufficient to hold as many {\tt SCOTCH\_\lbt Num} integers as
@@ -3921,8 +3927,8 @@ The {\tt SCOTCH\_graphPart} routine computes an edge-separated
 partition, into {\tt partnbr} parts, of the source graph structure
 pointed to by {\tt grafptr}, using the graph edge partitioning
 strategy pointed to by {\tt stratptr} (as defined in
-Section~\ref{sec-lib-format-map}), and returns the partition data in
-the array pointed to by {\tt parttab}.
+Section~\ref{sec-lib-format-strat-map}), and returns the partition
+data in the array pointed to by {\tt parttab}.
 
 The {\tt parttab} array should have been previously allocated, of a
 size sufficient to hold as many {\tt SCOTCH\_\lbt Num} integers as
@@ -3970,9 +3976,9 @@ The {\tt SCOTCH\_graphPartFixed} routine computes an edge-separated
 partition, into {\tt partnbr} parts, of the source graph structure
 pointed to by {\tt grafptr}, using the graph edge partitioning
 strategy pointed to by {\tt stratptr} (as defined in
-Section~\ref{sec-lib-format-map}), and fills the array pointed to by
-{\tt parttab} with the partitioning data regarding vertices which have
-not been pre-assigned by the user.
+Section~\ref{sec-lib-format-strat-map}), and fills the array pointed
+to by {\tt parttab} with the partitioning data regarding vertices
+which have not been pre-assigned by the user.
 
 The {\tt parttab} array should have been previously allocated, of a
 size sufficient to hold as many {\tt SCOTCH\_\lbt Num} integers as
@@ -4026,8 +4032,8 @@ The {\tt SCOTCH\_graphPartOvl} routine computes an overlapped
 vertex-separated partition, into {\tt partnbr} parts, of the source
 graph structure pointed to by {\tt grafptr}, using the graph vertex
 partitioning with overlap strategy pointed to by {\tt stratptr} (as
-defined in Section~\ref{sec-lib-format-part-ovl}), and returns the
-partition data in the array pointed to by {\tt parttab}.
+defined in Section~\ref{sec-lib-format-strat-part-ovl}), and returns
+the partition data in the array pointed to by {\tt parttab}.
 
 The {\tt parttab} array should have been previously allocated, of a
 size sufficient to hold as many {\tt SCOTCH\_\lbt Num} integers as
@@ -4088,7 +4094,7 @@ The {\tt SCOTCH\_graphRemap} routine computes a remapping of the
 source graph structure pointed to by {\tt grafptr} onto the target
 architecture pointed to by {\tt archptr}, based on the old partition
 array pointed to by {\tt parotab}, using the mapping strategy pointed
-to by {\tt straptr} (as defined in Section~\ref{sec-lib-format-map}),
+to by {\tt straptr} (as defined in Section~\ref{sec-lib-format-strat-map}),
 and returns the mapping data in the array pointed to by {\tt parttab}.
 
 The {\tt parotab} array stores the old partition that is used to
@@ -4158,7 +4164,7 @@ The {\tt SCOTCH\_graphRemapFixed} routine computes a remapping of the
 source graph structure pointed to by {\tt grafptr} onto the target
 architecture pointed to by {\tt archptr}, based on the old partition
 array pointed to by {\tt parotab}, using the mapping strategy pointed
-to by {\tt straptr} (as defined in Section~\ref{sec-lib-format-map}),
+to by {\tt straptr} (as defined in Section~\ref{sec-lib-format-strat-map}),
 and fills the array pointed to by {\tt parttab} with the mapping data
 regarding vertices which have not been pre-assigned by the user.
 
@@ -4234,7 +4240,7 @@ The {\tt SCOTCH\_graphRepart} routine computes an edge-separated
 repartition, into {\tt partnbr} parts, of the source graph structure
 pointed to by {\tt grafptr}, based on the old partition array pointed
 to by {\tt parotab}, using the partitioning strategy pointed to by
-{\tt straptr} (as defined in Section~\ref{sec-lib-format-map}), and
+{\tt straptr} (as defined in Section~\ref{sec-lib-format-strat-map}), and
 returns the partition data in the array pointed to by {\tt parttab}.
 
 The {\tt parotab} array stores the old partition that is used to
@@ -4304,7 +4310,7 @@ The {\tt SCOTCH\_graphRepartFixed} routine computes an edge-separated
 repartition, into {\tt partnbr} parts, of the source graph structure
 pointed to by {\tt grafptr}, based on the old partition array pointed
 to by {\tt parotab}, using the partitioning strategy pointed to by
-{\tt straptr} (as defined in Section~\ref{sec-lib-format-map}),
+{\tt straptr} (as defined in Section~\ref{sec-lib-format-strat-map}),
 and fills the array pointed to by {\tt parttab} with the mapping data
 regarding vertices which have not been pre-assigned by the user.
 
@@ -4916,7 +4922,7 @@ rangtab}\lbt\mathtt{[}i + 1\mathtt{]} - 1)$, inclusive, in the new
 ordering. {\tt treetab} holds the separators tree structure, that is,
 {\tt treetab[$i$]} is the index of the father of column block $i$ in
 the separators tree, or $-1$ if column block $i$ is the root of the
-separators tree. Please refer to Section~\ref{sec-lib-format-order}
+separators tree. Please refer to Section~\ref{sec-lib-type-ordering}
 for more information.
 
 \progret
@@ -5033,7 +5039,7 @@ induced subgraph, the indices of which are given, in any order,
 in the {\tt listtab} array.
 
 On return, the ordering structure holds a block ordering of the
-induced subgraph (see section~\ref{sec-lib-format-order} for a
+induced subgraph (see section~\ref{sec-lib-type-ordering} for a
 description of the ordering fields). To compute this ordering, graph
 ordering methods such as the minimum degree and minimum fill methods
 will base on the original degree of the induced graph vertices, their
@@ -5138,7 +5144,7 @@ span information, of size $\mathtt{vertnbr} + 1$, and {\tt treetab}
 is the array holding the structure of the separators tree, of size
 ${\tt vertnbr}$. See the above manual page of
 {\tt SCOTCH\_graph\lbt Order}, as well as
-section~\ref{sec-lib-format-order}, for an explanation of the
+section~\ref{sec-lib-type-ordering}, for an explanation of the
 semantics of all of these fields.
 
 The {\tt SCOTCH\_\lbt graph\lbt Order\lbt Init} routine should be the
@@ -5632,13 +5638,13 @@ successfully allocated and filled, and $1$ else.
 {\tt\begin{tabular}{l@{}ll}
 int SCOTCH\_meshGraphDual ( & const SCOTCH\_Mesh * & meshptr, \\
                             & SCOTCH\_Graph *      & grafptr, \\
-                            & const SCOTCH\_Num    & ncomval)
+                            & const SCOTCH\_Num    & nocoval)
 \end{tabular}}
 
 {\tt\begin{tabular}{l@{}ll}
 scotchfmeshgraphdual ( & doubleprecision (*) & meshdat, \\
                        & doubleprecision (*) & grafdat, \\
-                       & integer             & ncomval, \\
+                       & integer             & nocoval, \\
                        & integer             & ierr)
 \end{tabular}}
 
@@ -5650,9 +5656,9 @@ element graph) from a mesh. It creates, in the {\tt SCOTCH\_\lbt
 vertices as there are elements in the {\tt SCOTCH\_\lbt Mesh}
 structure pointed to by {\tt meshptr}, and such that there exists an
 edge between any two graph vertices if there are at least
-{\tt ncomval} shared nodes between the two corresponding elements in the
-source mesh, or if an element shares all of its nodes, minus one, with
-another element.
+{\tt nocoval} nodes in common between the two corresponding elements
+in the source mesh, or if an element shares all of its nodes, minus
+one, with another element.
 
 \progret
 
@@ -5960,7 +5966,7 @@ rangtab}\lbt\mathtt{[}i + 1\mathtt{]} - 1)$, inclusive, in the new
 ordering. {\tt treetab} holds the separators tree structure, that is,
 {\tt treetab[$i$]} is the index of the father of column block $i$ in
 the separators tree, or $-1$ if column block $i$ is the root of the
-separators tree. Please refer to Section~\ref{sec-lib-format-order}
+separators tree. Please refer to Section~\ref{sec-lib-type-ordering}
 for more information.
 
 \progret
@@ -6113,7 +6119,7 @@ span information, of size $\mathtt{vnodnbr} + 1$, and {\tt treetab}
 is the array holding the structure of the separators tree, of size
 ${\tt vnodnbr}$. See the above manual page of
 {\tt SCOTCH\_mesh\lbt Order}, as well as
-section~\ref{sec-lib-format-order}, for an explanation of the
+section~\ref{sec-lib-type-ordering}, for an explanation of the
 semantics of all of these fields.
 
 The {\tt SCOTCH\_\lbt mesh\lbt Order\lbt Init} routine should be the
@@ -6851,7 +6857,7 @@ number of dimensions of the graph vertex or mesh node vertex
 coordinates, and will therefore be equal to $1$, $2$ or $3$.
 {\tt geomtab} is the pointer to a location that will hold the
 reference to the geometry coordinates, as defined in
-section~\ref{sec-lib-format-geom}.
+section~\ref{sec-lib-type-geom}.
 
 Any of these pointers can be set to {\tt NULL} on input if the
 corresponding information is not needed. Else, the reference to a
@@ -8739,7 +8745,7 @@ returned by this routine is exactly the one which would be returned
 by \metis\ with respect to the output partition. Users interested
 in minimizing the exact communication volume should consider using
 hypergraphs, implemented in \scotch\ as
-meshes (see Section~\ref{sec-lib-format-mesh}).
+meshes (see Section~\ref{sec-lib-type-mesh}).
 
 All of the three \metis\ stubs
 {\tt METIS\_\lbo Part\lbo Graph\lbo Kway}, {\tt

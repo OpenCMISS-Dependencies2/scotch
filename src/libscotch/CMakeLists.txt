@@ -1,4 +1,4 @@
-## Copyright 2014-2016,2021-2024 IPB, Universite de Bordeaux, INRIA & CNRS
+## Copyright 2014-2016,2021-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,
 ## graph partitioning and sparse matrix ordering.
@@ -41,7 +41,7 @@
 ##   DATES      : # Version 6.0  : from : 01 sep 2014     ##
 ##                                 to     01 sep 2021     ##
 ##                # Version 7.0  : from : 01 sep 2021     ##
-##                                 to     19 sep 2024     ##
+##                                 to     11 aug 2025     ##
 ##                                                        ##
 ############################################################
 
@@ -52,10 +52,6 @@
 add_executable(dummysizes dummysizes.c)
 set_target_properties(dummysizes PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 if(BUILD_PTSCOTCH)
-  find_package(MPI COMPONENTS C)
-  if(NOT MPI_C_FOUND)
-    message(FATAL_ERROR "MPI required to compile PT-Scotch")
-  endif()
   add_executable(ptdummysizes dummysizes.c)
   set_target_properties(ptdummysizes PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   target_link_libraries(ptdummysizes PRIVATE MPI::MPI_C)
@@ -70,8 +66,8 @@ endif()
 
 # Generate scotch.h
 add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/scotch.h
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/library.h ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND $<TARGET_FILE:dummysizes> ${CMAKE_CURRENT_BINARY_DIR}/library.h ${GENERATED_INCLUDE_DIR}/scotch.h DEPENDS dummysizes
+  COMMAND $<TARGET_FILE:dummysizes> "-s${SCOTCH_NAME_SUFFIX}"
+  ${CMAKE_CURRENT_SOURCE_DIR}/library.h ${GENERATED_INCLUDE_DIR}/scotch.h DEPENDS dummysizes
   DEPENDS library.h
   COMMENT "Generate scotch.h")
 add_custom_target(scotch_h
@@ -79,8 +75,8 @@ add_custom_target(scotch_h
 
 # Generate scotchf.h
 add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/scotchf.h
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/library_f.h ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND $<TARGET_FILE:dummysizes> ${CMAKE_CURRENT_BINARY_DIR}/library_f.h ${GENERATED_INCLUDE_DIR}/scotchf.h DEPENDS dummysizes
+  COMMAND $<TARGET_FILE:dummysizes>  "-s${SCOTCH_NAME_SUFFIX}"
+  ${CMAKE_CURRENT_SOURCE_DIR}/library_f.h ${GENERATED_INCLUDE_DIR}/scotchf.h DEPENDS dummysizes
   DEPENDS library.h
   COMMENT "Generate scotchf.h")
 add_custom_target(scotchf_h
@@ -90,63 +86,63 @@ add_custom_target(scotchf_h
 #  ptscotch.h  #
 ################
 
-# Generate ptscotch.h
 if(BUILD_PTSCOTCH)
+  # Generate ptscotch.h
   add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/ptscotch.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/library_pt.h ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND $<TARGET_FILE:ptdummysizes> ${CMAKE_CURRENT_BINARY_DIR}/library_pt.h ${GENERATED_INCLUDE_DIR}/ptscotch.h DEPENDS ptdummysizes
+    COMMAND $<TARGET_FILE:ptdummysizes> "-s${SCOTCH_NAME_SUFFIX}"
+    ${CMAKE_CURRENT_SOURCE_DIR}/library_pt.h ${GENERATED_INCLUDE_DIR}/ptscotch.h DEPENDS ptdummysizes
     DEPENDS library_pt.h scotch_h
     COMMENT "Generate ptscotch.h")
   add_custom_target(ptscotch_h
     DEPENDS ${GENERATED_INCLUDE_DIR}/ptscotch.h)
 
-# Generate ptscotchf.h
-add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/ptscotchf.h
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/library_pt_f.h ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND $<TARGET_FILE:ptdummysizes> ${CMAKE_CURRENT_BINARY_DIR}/library_pt_f.h ${GENERATED_INCLUDE_DIR}/ptscotchf.h DEPENDS ptdummysizes
-  DEPENDS library.h
-  COMMENT "Generate ptscotchf.h")
-add_custom_target(ptscotchf_h
-  DEPENDS "${GENERATED_INCLUDE_DIR}/ptscotchf.h")
+  # Generate ptscotchf.h
+  add_custom_command(OUTPUT ${GENERATED_INCLUDE_DIR}/ptscotchf.h
+    COMMAND $<TARGET_FILE:ptdummysizes> "-s${SCOTCH_NAME_SUFFIX}"
+    ${CMAKE_CURRENT_SOURCE_DIR}/library_pt_f.h ${GENERATED_INCLUDE_DIR}/ptscotchf.h DEPENDS ptdummysizes
+    DEPENDS library.h
+    COMMENT "Generate ptscotchf.h")
+  add_custom_target(ptscotchf_h
+    DEPENDS "${GENERATED_INCLUDE_DIR}/ptscotchf.h")
 endif()
 
 #################
 #  parser_yy.c  #
 #################
 
-# Copy parser_yy.y to binary dir
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.y
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/parser_yy.y ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS parser_yy.y
-  COMMENT "Copy parser_yy.y to CMake binary directory")
-add_custom_target(parser_yy_y DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser_yy.y)
-
-# Generate parser_yy.c using Bison
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${CMAKE_CURRENT_BINARY_DIR}/parser_ly.h
-  COMMAND ${BISON_EXECUTABLE} "-pscotchyy${SCOTCH_NAME_SUFFIX}" --defines="parser_ly.h" --output="parser_yy.c" parser_yy.y
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.y module.h common.h parser.h parser_yy.h
-  COMMENT "Generate parser_yy.c and parser_ly.h using Bison")
+if (BISON_FOUND)
+  # Generate parser_yy.c using Bison
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${CMAKE_CURRENT_BINARY_DIR}/parser_ly.h
+    COMMAND ${BISON_EXECUTABLE} "-p_SCOTCHyy${SCOTCH_NAME_SUFFIX}" --defines="parser_ly.h" --output="parser_yy.c" ${CMAKE_CURRENT_SOURCE_DIR}/parser_yy.y
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser_yy.y module.h common.h parser.h parser_yy.h
+    COMMENT "Generate parser_yy.c and parser_ly.h using Bison")
+else()
+  # use fallback
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${CMAKE_CURRENT_BINARY_DIR}/parser_ly.h
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_yy.c" "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_ly.h" "${CMAKE_CURRENT_BINARY_DIR}/.")
+endif(BISON_FOUND)
 add_custom_target(parser_yy_c DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_yy.c ${CMAKE_CURRENT_BINARY_DIR}/parser_ly.h)
-add_dependencies(parser_yy_c parser_yy_y)
 
 #################
 #  parser_ll.c  #
 #################
 
-# Copy parser_ll.l to binary dir
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.l
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS parser_ll.l
-  COMMENT "Copy parser_ll.l to CMake binary directory")
-add_custom_target(parser_ll_l DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.l)
-
-# Generate parser_ll.c using Flex
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c
-  COMMAND ${FLEX_EXECUTABLE} "-Pscotchyy${SCOTCH_NAME_SUFFIX}"  "-oparser_ll.c" parser_ll.l
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.l module.h common.h parser.h parser_ll.h parser_ly.h
-  COMMENT "Generate parser_ll.c using Flex")
-add_custom_target(parser_ll_c DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c)
-add_dependencies(parser_ll_c parser_ll_l)
+if (FLEX_FOUND)
+  # Generate parser_ll.c using Flex
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c
+    ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h
+    COMMAND ${FLEX_EXECUTABLE} "-P_SCOTCHyy${SCOTCH_NAME_SUFFIX}"  "-oparser_ll.c"
+    "--header-file=parser_lh.h"
+    ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser_ll.l
+    module.h common.h parser.h parser_ll.h parser_ly.h
+    COMMENT "Generate parser_ll.c using Flex")
+else()
+  # use fallback
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_ll.c" "${CMAKE_CURRENT_SOURCE_DIR}/last_resort/parser_lh.h" "${CMAKE_CURRENT_BINARY_DIR}/.")
+endif(FLEX_FOUND)
+add_custom_target(parser_ll_c DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/parser_ll.c ${CMAKE_CURRENT_BINARY_DIR}/parser_lh.h)
 
 ###############
 #  libScotch  #
@@ -193,6 +189,8 @@ set(SCOTCH_C_SOURCES
   bgraph_bipart_ex.h
   bgraph_bipart_fm.c
   bgraph_bipart_fm.h
+  bgraph_bipart_ga.c
+  bgraph_bipart_ga.h
   bgraph_bipart_gg.c
   bgraph_bipart_gg.h
   bgraph_bipart_gp.c
@@ -244,6 +242,8 @@ set(SCOTCH_C_SOURCES
   graph_coarsen.c
   graph_coarsen.h
   graph_diam.c
+  graph_dump.c
+  graph_dump.h
   graph_ielo.c
   library_graph_induce.c
   graph_induce.c
@@ -325,6 +325,7 @@ set(SCOTCH_C_SOURCES
   kgraph.h
   kgraph_band.c
   kgraph_check.c
+  kgraph_cost.c
   kgraph_map_bd.c
   kgraph_map_bd.h
   kgraph_map_cp.c
@@ -376,6 +377,7 @@ set(SCOTCH_C_SOURCES
   library_graph_color_f.c
   library_graph_diam.c
   library_graph_diam_f.c
+  library_graph_dump.c
   library_graph_f.c
   library_graph_io_chac.c
   library_graph_io_chac_f.c
@@ -512,6 +514,7 @@ set(SCOTCH_C_SOURCES
 
 add_library(scotch
   ${SCOTCH_C_SOURCES})
+add_library(SCOTCH::scotch ALIAS scotch)
 set_target_properties(scotch PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
   SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
 add_dependencies(scotch parser_yy_c parser_ll_c)
@@ -537,6 +540,17 @@ endif()
 
 if(OS_IS_FREEBSD)
   target_compile_definitions(scotch PUBLIC cpu_set_t=cpuset_t __BSD_VISIBLE)
+endif()
+
+if(SCOTCH_DETERMINISTIC STREQUAL FULL)
+  target_compile_definitions(scotch PUBLIC COMMON_RANDOM_FIXED_SEED)
+  target_compile_definitions(scotch PUBLIC SCOTCH_DETERMINISTIC)
+  message(STATUS "Determinism: full")
+elseif(SCOTCH_DETERMINISTIC STREQUAL FIXED_SEED)
+  target_compile_definitions(scotch PUBLIC COMMON_RANDOM_FIXED_SEED)
+  message(STATUS "Determinism: fixed random seed")
+else()
+  message(STATUS "Determinism: none")
 endif()
 
 # Add (de)compression libraries
@@ -578,6 +592,7 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
 endif()
 
 add_library(scotcherr library_error.c)
+add_library(SCOTCH::scotcherr ALIAS scotcherr)
 set_target_properties(scotcherr PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
   SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
 target_include_directories(scotcherr PUBLIC
@@ -588,6 +603,7 @@ target_include_directories(scotcherr PUBLIC
 add_dependencies(scotcherr scotch_h)
 
 add_library(scotcherrexit library_error_exit.c)
+add_library(SCOTCH::scotcherrexit ALIAS scotcherrexit)
 set_target_properties(scotcherrexit PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
   SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
 target_include_directories(scotcherrexit PUBLIC
@@ -691,6 +707,13 @@ set(PTSCOTCH_C_SOURCES
   dmapping.c
   dmapping.h
   dmapping_io.c
+  dmesh.c
+  dmesh.h
+  dmesh_build_adm.c
+  dmesh_dgraph.c
+  dmesh_dgraph.h
+  dmesh_io_load.c
+  dmesh_io_load.h
   dorder.c
   dorder.h
   dorder_gather.c
@@ -779,6 +802,14 @@ set(PTSCOTCH_C_SOURCES
   library_dgraph_stat_f.c
   library_dmapping.c
   library_dmapping.h
+  library_dmesh.c
+  library_dmesh_f.c
+  library_dmesh_build_adm.c
+  library_dmesh_build_adm_f.c
+  library_dmesh_dgraph.c
+  library_dmesh_dgraph_f.c
+  library_dmesh_io_load.c
+  library_dmesh_io_load_f.c
   library_dorder.c
   ${GENERATED_INCLUDE_DIR}/scotch.h
   ${GENERATED_INCLUDE_DIR}/ptscotch.h
@@ -803,6 +834,7 @@ set(PTSCOTCH_C_SOURCES
 if(BUILD_PTSCOTCH)
   add_library(ptscotch
     ${PTSCOTCH_C_SOURCES})
+  add_library(SCOTCH::ptscotch ALIAS ptscotch)
 
   set_target_properties(ptscotch PROPERTIES
     VERSION ${SCOTCH_VERSION_LONG}
@@ -829,6 +861,8 @@ if(BUILD_PTSCOTCH)
   endif()
 
   add_library(ptscotcherr library_error.c)
+  add_library(SCOTCH::ptscotcherr ALIAS ptscotcherr)
+
   set_target_properties(ptscotcherr PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
     SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
   target_include_directories(ptscotcherr PUBLIC
@@ -840,6 +874,7 @@ if(BUILD_PTSCOTCH)
   add_dependencies(ptscotcherr ptscotch_h scotch_h)
 
   add_library(ptscotcherrexit library_error_exit.c)
+  add_library(SCOTCH::ptscotcherrexit ALIAS ptscotcherrexit)
   set_target_properties(ptscotcherrexit PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
     SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
   target_include_directories(ptscotcherrexit PUBLIC

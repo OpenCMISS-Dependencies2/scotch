@@ -1,4 +1,4 @@
-/* Copyright 2007-2011,2019,2021,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007-2011,2019,2021,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -45,7 +45,7 @@
 /**                # Version 6.1  : from : 02 apr 2021     **/
 /**                                 to   : 19 jun 2021     **/
 /**                # Version 7.0  : from : 28 aug 2019     **/
-/**                                 to   : 19 jan 2023     **/
+/**                                 to   : 29 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -177,7 +177,7 @@ MPI_Comm                        fldproccomm)      /*+ Pre-computed communicator 
     fldgrafptr->s.proccomm   = fldproccomm;
     fldgrafptr->s.procglbnbr = fldprocglbnbr;
     fldgrafptr->s.proclocnum = fldproclocnum;
-    fldgrafptr->s.flagval    = DGRAPHFREEALL | DGRAPHVERTGROUP | DGRAPHEDGEGROUP; /* For premature freeing on error; do not free vhndloctab as it is grouped with vertloctab */
+    fldgrafptr->s.flagval    = DGRAPHFREEALL | DGRAPHVERTGROUP | DGRAPHEDGEGROUP | DGRAPHHASVENDLOC; /* For premature freeing on error; do not free vhndloctab as it is grouped with vertloctab */
 
     if (memAllocGroup ((void **) (void *)         /* Allocate distributed graph private data */
                        &fldgrafptr->s.procdsptab, (size_t) ((fldprocglbnbr + 1) * sizeof (Gnum)),

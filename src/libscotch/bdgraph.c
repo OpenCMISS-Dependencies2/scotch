@@ -1,4 +1,4 @@
-/* Copyright 2007,2008,2011,2014 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2008,2011,2014,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -44,6 +44,8 @@
 /**                                 to   : 14 apr 2011     **/
 /**                # Version 6.0  : from : 11 sep 2011     **/
 /**                                 to   : 31 aug 2014     **/
+/**                # Version 7.0  : from : 11 sep 2011     **/
+/**                                 to   : 02 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -133,7 +135,9 @@ const Anum                      domnwght1)
   actgrafptr->commglbloadextn0 = 0;
   actgrafptr->commglbgainextn  = 0;
   actgrafptr->commglbgainextn0 = 0;
-  actgrafptr->bbalglbval       = (double) actgrafptr->compglbload0dlt / (double) actgrafptr->compglbload0avg;
+  actgrafptr->bbalglbval       = (actgrafptr->compglbload0avg != 0)
+                                 ? ((double) actgrafptr->compglbload0dlt / (double) actgrafptr->compglbload0avg)
+                                 : 0;
   actgrafptr->domndist         = domndist;
   actgrafptr->domnwght[0]      = domnwght0;
   actgrafptr->domnwght[1]      = domnwght1;

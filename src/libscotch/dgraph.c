@@ -1,4 +1,4 @@
-/* Copyright 2007,2010,2012,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2007,2010,2012,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -57,7 +57,7 @@
 /**                # Version 6.1  : from : 24 sep 2021     **/
 /**                                 to   : 24 sep 2021     **/
 /**                # Version 7.0  : from : 17 jan 2023     **/
-/**                                 to   : 17 jan 2023     **/
+/**                                 to   : 29 sep 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -127,20 +127,20 @@ Dgraph * restrict const     grafptr)
     if (grafptr->vertloctax != NULL)
       memFree (grafptr->vertloctax + grafptr->baseval);
     if ((grafptr->flagval & DGRAPHVERTGROUP) == 0) { /* If vertex arrays not grouped */
-      if (grafptr->vendloctax != (grafptr->vertloctax + 1))
-	memFree (grafptr->vendloctax + grafptr->baseval);
+      if ((grafptr->flagval & DGRAPHHASVENDLOC) != 0) /* If graph is not compact     */
+        memFree (grafptr->vendloctax + grafptr->baseval);
       if (grafptr->veloloctax != NULL)
-	memFree (grafptr->veloloctax + grafptr->baseval);
+        memFree (grafptr->veloloctax + grafptr->baseval);
       if (grafptr->vnumloctax != NULL)
         memFree (grafptr->vnumloctax + grafptr->baseval);
       if (grafptr->vlblloctax != NULL)
-	memFree (grafptr->vlblloctax + grafptr->baseval);
+        memFree (grafptr->vlblloctax + grafptr->baseval);
     }
     if (grafptr->edgeloctax != NULL)
       memFree (grafptr->edgeloctax + grafptr->baseval);
     if ((grafptr->flagval & DGRAPHEDGEGROUP) == 0) { /* If edge arrays not grouped */
       if (grafptr->edloloctax != NULL)
-	memFree (grafptr->edloloctax + grafptr->baseval);
+        memFree (grafptr->edloloctax + grafptr->baseval);
     }
   }
   if ((grafptr->flagval & DGRAPHFREEPSID) != 0) { /* If process send arrays must be freed */

@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2008,2010,2018,2019,2021,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2008,2010,2018,2019,2021,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -54,7 +54,7 @@
 /**                # Version 6.1  : from : 15 mar 2021     **/
 /**                                 to   : 31 may 2021     **/
 /**                # Version 7.0  : from : 07 may 2019     **/
-/**                                 to   : 21 jan 2023     **/
+/**                                 to   : 11 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -174,7 +174,7 @@ FILE * const                stream,
 const SCOTCH_Num            baseval,
 const SCOTCH_Num            flagval)
 {
-  GraphFlag           srcgrafflag;                /* Graph flags */
+  GraphLoadFlag       flagtmp;                    /* Graph load flags */
 
   if ((flagval < 0) || (flagval > 3)) {
     errorPrint (STRINGIFY (SCOTCH_graphLoad) ": invalid flag parameter");
@@ -189,10 +189,10 @@ const SCOTCH_Num            flagval)
     errorPrintW (STRINGIFY (SCOTCH_graphLoad) ": unusual base parameter");
 #endif /* SCOTCH_DEBUG_GRAPH1 */
 
-  srcgrafflag = (((flagval & 1) != 0) ? GRAPHIONOLOADVERT : 0) +
-                (((flagval & 2) != 0) ? GRAPHIONOLOADEDGE : 0);
+  flagtmp = (((flagval & 1) != 0) ? GRAPHIONOLOADVERT : 0) +
+            (((flagval & 2) != 0) ? GRAPHIONOLOADEDGE : 0);
 
-  return (graphLoad ((Graph * const) CONTEXTOBJECT (grafptr), stream, (Gnum) baseval, srcgrafflag));
+  return (graphLoad ((Graph * const) CONTEXTOBJECT (grafptr), stream, (Gnum) baseval, flagtmp));
 }
 
 /*+ This routine saves the contents of the given

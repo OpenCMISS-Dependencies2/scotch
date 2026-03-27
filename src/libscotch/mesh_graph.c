@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2009,2016,2018,2020,2021,2023 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2009,2016,2018,2020,2021,2023,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -48,7 +48,7 @@
 /**                # Version 6.1  : from : 20 nov 2020     **/
 /**                                 to   : 07 jun 2021     **/
 /**                # Version 7.0  : from : 20 jan 2023     **/
-/**                                 to   : 20 jan 2023     **/
+/**                                 to   : 30 aug 2025     **/
 /**                                                        **/
 /**   NOTES      : # From a given mesh is created a graph, **/
 /**                  such that all vertices of the graph   **/
@@ -75,21 +75,22 @@
 #include "mesh.h"
 #include "mesh_graph.h"
 
-/*******************************/
-/*                             */
-/* The graph building routine. */
-/*                             */
-/*******************************/
+/********************************/
+/*                              */
+/* The graph building routines. */
+/*                              */
+/********************************/
 
-/* This routine builds a graph from the
-** given mesh.
-** It returns:
-** - 0  : if the graph has been successfully built.
-** - 1  : on error.
-*/
+/*+ This routine builds an opaque nodal graph structure
+*** from an opaque mesh structure. The nodal graph
+*** adjacency is defined such that two nodes are adjacent
+*** if both share at least one element.
+*** - 0   : if building has succeeded.
+*** - !0  : on error.
++*/
 
 int
-meshGraph (
+meshGraphNodal (
 const Mesh * restrict const   meshptr,            /*+ Original mesh  +*/
 Graph * restrict const        grafptr)            /*+ Graph to build +*/
 {
@@ -114,7 +115,7 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
 
   if (((grafptr->verttax = memAlloc ((meshptr->vnodnbr + 1) * sizeof (Gnum)))          == NULL) ||
       ((hashtab          = memAlloc (hashsiz                * sizeof (MeshGraphHash))) == NULL)) {
-    errorPrint ("meshGraph: out of memory (1)");
+    errorPrint ("meshGraphNodal: out of memory (1)");
     if (grafptr->verttax != NULL)
       memFree (grafptr->verttax);
     return (1);
@@ -127,6 +128,8 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
                      : NULL;
 
   grafptr->velosum = meshptr->vnlosum;
+  grafptr->vnumtax =
+  grafptr->vlbltax = NULL;
 
   edgemax = 2 * meshptr->edgenbr;                 /* Compute lower bound on number of edges in graph */
 #ifdef SCOTCH_DEBUG_MESH2
@@ -134,11 +137,12 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
 #endif /* SCOTCH_DEBUG_MESH2 */
 
   if ((grafptr->edgetax = memAlloc (edgemax * sizeof (Gnum))) == NULL) {
-    errorPrint ("meshGraph: out of memory (2)");
+    errorPrint ("meshGraphNodal: out of memory (2)");
     graphFree  (grafptr);
     return (1);
   }
   grafptr->edgetax -= grafptr->baseval;
+  grafptr->edlotax  = NULL;
 
   memSet (hashtab, ~0, hashsiz * sizeof (MeshGraphHash)); /* Initialize hash table */
 
@@ -177,7 +181,7 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
               edgemax = edgemax + (edgemax >> 2);
 
               if ((edgetmp = memRealloc (grafptr->edgetax + grafptr->baseval, edgemax * sizeof (Gnum))) == NULL) {
-                errorPrint ("meshGraph: out of memory (3)");
+                errorPrint ("meshGraphNodal: out of memory (3)");
                 graphFree  (grafptr);
                 memFree    (hashtab);
                 return (1);
@@ -211,7 +215,7 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
 
 #ifdef SCOTCH_DEBUG_MESH2
   if (graphCheck (grafptr) != 0) {
-    errorPrint ("meshGraph: internal error");
+    errorPrint ("meshGraphNodal: internal error");
     return (1);
   }
 #endif /* SCOTCH_DEBUG_MESH2 */
@@ -220,7 +224,7 @@ Graph * restrict const        grafptr)            /*+ Graph to build +*/
 }
 
 /* This routine builds a dual graph (that is, an
-** elements graph) from the given mesh. An edge is
+** element graph) from the given mesh. An edge is
 ** built between two element vertices if these two
 ** elements e1 and e2 have at least min (noconbr,
 ** degr (e1) - 1, degr (e2) - 1) nodes in common.
@@ -265,6 +269,8 @@ const Gnum                  noconbr)              /*+ number of common points to
   grafptr->vendtax  = grafptr->verttax + 1;
   grafptr->velotax  = NULL;                       /* TODO: not implemented */
   grafptr->velosum  = meshptr->velosum;
+  grafptr->vnumtax  =
+  grafptr->vlbltax  = NULL;
 
   edgemax = 2 * meshptr->edgenbr;                 /* Compute lower bound on number of edges in graph */
 
@@ -274,6 +280,7 @@ const Gnum                  noconbr)              /*+ number of common points to
     return (1);
   }
   grafptr->edgetax -= grafptr->baseval;
+  grafptr->edlotax  = NULL;
 
   memSet (hashtab, ~0, hashsiz * sizeof (MeshGraphDualHash)); /* Initialize hash table */
 

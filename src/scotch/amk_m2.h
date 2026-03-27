@@ -1,4 +1,4 @@
-/* Copyright 2004,2007,2008,2014,2019,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007,2008,2014,2019,2024,2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -55,7 +55,7 @@
 /**                # Version 6.0  : from : 12 nov 2014     **/
 /**                                 to   : 16 apr 2019     **/
 /**                # Version 7.0  : from : 10 sep 2024     **/
-/**                                 to   : 10 sep 2024     **/
+/**                                 to   : 29 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -85,13 +85,13 @@ typedef enum C_MethType_ {
 
 /** The bipartitioning routine type. **/
 
-typedef int (* DomnBipartFunc) (const ArchMesh2 * const, const ArchMesh2Dom * const, ArchMesh2Dom * const, ArchMesh2Dom * const);
+typedef int (* DomnBipartFunc) (const ArchMesh2 * const, const ArchMesh2Dom * const, ArchMesh2Dom * restrict const, ArchMesh2Dom * restrict const);
 
 /*
 **  The function prototypes.
 */
 
-void                        C_domnBipart        (ArchMesh2 *, ArchMesh2Dom *, Anum, Anum *, Anum *, int (*) ());
+void                        C_domnBipart        (ArchMesh2 *, ArchMesh2Dom *, Anum, Anum *, Anum *, DomnBipartFunc);
 int                         C_domnBipartOne     (const ArchMesh2 * const, const ArchMesh2Dom * const, ArchMesh2Dom * restrict const, ArchMesh2Dom * restrict const);
 
 /*

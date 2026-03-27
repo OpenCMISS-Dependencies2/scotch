@@ -1,4 +1,4 @@
-/* Copyright 2004,2007-2012,2019,2021,2023,2024 IPB, Universite de Bordeaux, INRIA & CNRS
+/* Copyright 2004,2007-2012,2019,2021,2023-2025 IPB, Universite de Bordeaux, INRIA & CNRS
 **
 ** This file is part of the Scotch software package for static mapping,
 ** graph partitioning and sparse matrix ordering.
@@ -58,7 +58,7 @@
 /**                # Version 6.1  : from : 15 mar 2021     **/
 /**                                 to   : 15 mar 2021     **/
 /**                # Version 7.0  : from : 27 aug 2019     **/
-/**                                 to   : 09 nov 2024     **/
+/**                                 to   : 14 aug 2025     **/
 /**                                                        **/
 /************************************************************/
 
@@ -69,9 +69,9 @@
 **  The defines and includes.
 */
 
-#ifndef SCOTCH_H
+#ifndef LIB_SCOTCH_H
 #include "scotch.h"
-#endif /* SCOTCH_H */
+#endif /* LIB_SCOTCH_H */
 
 /*
 **  The type and structure definitions.
@@ -102,7 +102,7 @@
 #define SCOTCH_DGRAPHBUILDGRID3DNGB26 1
 #define SCOTCH_DGRAPHBUILDGRID3DVERTLOAD 4
 #define SCOTCH_DGRAPHBUILDGRID3DEDGELOAD 8
-#endif /* SCOTCH_DGRAPHBUILDGRID3DMESH */
+#endif /* SCOTCH_DGRAPHBUILDGRID3DGRID */
 
 /*+ Integer type. +*/
 
@@ -124,6 +124,10 @@ typedef struct {
 typedef struct {
   double                    dummy[DUMMYSIZEDMAP];
 } SCOTCH_Dmapping;
+
+typedef struct {
+  double                    dummy[DUMMYSIZEDMESH];
+} SCOTCH_Dmesh;
 
 typedef struct {
   double                    dummy[DUMMYSIZEDORDER];
@@ -192,6 +196,17 @@ int                         SCOTCH_dgraphOrderGather (const SCOTCH_Dgraph * cons
 
 SCOTCH_Dmapping *           SCOTCH_dmapAlloc    (void);
 int                         SCOTCH_dmapSizeof   (void);
+
+SCOTCH_Dmesh *              SCOTCH_dmeshAlloc   (void);
+int                         SCOTCH_dmeshSizeof  (void);
+int                         SCOTCH_dmeshInit    (SCOTCH_Dmesh * const, MPI_Comm);
+void                        SCOTCH_dmeshExit    (SCOTCH_Dmesh * const);
+void                        SCOTCH_dmeshFree    (SCOTCH_Dmesh * const);
+void                        SCOTCH_dmeshSize    (const SCOTCH_Dmesh * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const);
+void                        SCOTCH_dmeshData    (const SCOTCH_Dmesh * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num ** const, SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num ** const, SCOTCH_Num * const, MPI_Comm * const);
+int                         SCOTCH_dmeshBuildAdm (SCOTCH_Dmesh * const, const SCOTCH_Num, const SCOTCH_Num, SCOTCH_Num * const, const SCOTCH_Num, SCOTCH_Num * const, const SCOTCH_Num);
+int                         SCOTCH_dmeshDgraphDual (const SCOTCH_Dmesh * const, SCOTCH_Dgraph * const, const SCOTCH_Num);
+int                         SCOTCH_dmeshLoad    (SCOTCH_Dmesh * const, FILE * const, const SCOTCH_Num, const SCOTCH_Num);
 
 SCOTCH_Dordering *          SCOTCH_dorderAlloc  (void);
 int                         SCOTCH_dorderSizeof (void);
